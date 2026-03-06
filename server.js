@@ -42,6 +42,16 @@ async function initDB() {
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
+
+    // Safe migration: add columns that may be missing from older DB instances
+    await pool.query(`
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS base_score NUMERIC DEFAULT 0;
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS final_score NUMERIC DEFAULT 0;
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'low';
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS missing_services TEXT;
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS sales_pitch TEXT;
+    `);
+
     console.log('✅ Connected to PostgreSQL —', process.env.DATABASE_URL.split('/').pop());
     console.log('✅ Tables ready!');
   } catch (err) {
@@ -50,6 +60,7 @@ async function initDB() {
 }
 
 initDB();
+
 
 // ── LEADS ──
 app.get('/api/leads', async (req, res) => {
@@ -65,7 +76,7 @@ app.post('/api/leads', async (req, res) => {
     const result = await pool.query(
       `INSERT INTO leads (school_name, address, phone, website, rating, reviews, source, status, assigned_id, notes)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-      [school_name, address, phone, website, rating||null, reviews||null, source||'n8n', status||'new', assigned_id||null, notes||'']
+      [school_name, address, phone, website, rating || null, reviews || null, source || 'n8n', status || 'new', assigned_id || null, notes || '']
     );
     res.json(result.rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -78,7 +89,7 @@ app.patch('/api/leads/:id', async (req, res) => {
     const result = await pool.query(
       `UPDATE leads SET school_name=$1, address=$2, phone=$3, website=$4, rating=$5,
        reviews=$6, source=$7, status=$8, assigned_id=$9, notes=$10 WHERE id=$11 RETURNING *`,
-      [school_name, address, phone, website, rating||null, reviews||null, source, status, assigned_id||null, notes, id]
+      [school_name, address, phone, website, rating || null, reviews || null, source, status, assigned_id || null, notes, id]
     );
     res.json(result.rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -104,7 +115,7 @@ app.post('/api/team', async (req, res) => {
   try {
     const result = await pool.query(
       `INSERT INTO team (name, role, email, phone, color, status) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-      [name, role, email||'', phone||'', color||'#5b6af7', status||'online']
+      [name, role, email || '', phone || '', color || '#5b6af7', status || 'online']
     );
     res.json(result.rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -124,7 +135,7 @@ app.post('/webhook/leads', async (req, res) => {
     const result = await pool.query(
       `INSERT INTO leads (school_name, address, phone, website, rating, reviews, source, status)
        VALUES ($1,$2,$3,$4,$5,$6,'n8n','new') RETURNING *`,
-      [school_name||'Unknown', address||'', phone||'', website||'', rating||null, reviews||null]
+      [school_name || 'Unknown', address || '', phone || '', website || '', rating || null, reviews || null]
     );
     console.log('⚡ New lead from n8n:', school_name);
     res.json({ success: true, lead: result.rows[0] });
@@ -142,7 +153,7 @@ app.post('/api/trigger-n8n', async (req, res) => {
     const data = await response.text();
     console.log('⚡ n8n workflow triggered:', data);
     res.json({ success: true, message: 'n8n workflow triggered!' });
-  } catch(err) {
+  } catch (err) {
     console.error('n8n trigger error:', err.message);
     res.status(500).json({ error: err.message });
   }
