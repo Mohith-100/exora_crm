@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadFlow CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060610;--s1:#0d0d1f;--s2:#13132a;--s3:#1a1a35;--s4:#21213f;--acc:#5b6af7;--a2:#f25b7e;--a3:#1de9a0;--a4:#f5a623;--a5:#3ecfff;--tx:#e8e8ff;--tx2:#7878a8;--tx3:#3a3a5c;--bd:#1a1a35;--r:12px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Cabinet Grotesk',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;top:-20%;left:60%;width:50vw;height:50vw;background:radial-gradient(circle,rgba(91,106,247,0.07) 0%,transparent 65%);pointer-events:none;z-index:0;}
+
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:215px;background:var(--s1);border-right:1px solid var(--bd);display:flex;flex-direction:column;padding:24px 12px;z-index:100;}
+.logo{font-family:'Clash Display',sans-serif;font-size:20px;font-weight:700;margin-bottom:32px;display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--acc),var(--a5));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.logo span{color:var(--acc);}
+.nl{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--tx3);text-transform:uppercase;margin:14px 10px 5px;}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;color:var(--tx2);font-size:13px;font-weight:500;transition:all 0.15s;margin-bottom:1px;}
+.ni:hover{background:var(--s2);color:var(--tx);}
+.ni.active{background:rgba(91,106,247,0.12);color:var(--acc);}
+.ni-ic{font-size:15px;width:18px;text-align:center;}
+.sb-foot{margin-top:auto;}
+.live-pill{display:flex;align-items:center;gap:7px;background:rgba(29,233,160,0.07);border:1px solid rgba(29,233,160,0.15);border-radius:8px;padding:8px 11px;font-size:11px;color:var(--a3);font-weight:700;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--a3);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(1.5)}}
+
+/* MAIN */
+.main{margin-left:215px;padding:28px 32px;position:relative;z-index:1;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.page-title{font-family:'Clash Display',sans-serif;font-size:26px;font-weight:700;letter-spacing:-0.5px;}
+.tb-right{display:flex;align-items:center;gap:10px;}
+.search{background:var(--s1);border:1.5px solid var(--bd);border-radius:9px;padding:8px 13px;color:var(--tx);font-size:13px;outline:none;font-family:'Cabinet Grotesk',sans-serif;width:210px;transition:border-color 0.2s;}
+.search:focus{border-color:var(--acc);}
+.search::placeholder{color:var(--tx3);}
+.btn{padding:8px 16px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;font-family:'Cabinet Grotesk',sans-serif;}
+.bp{background:var(--acc);color:#fff;}.bp:hover{background:#6e7df8;transform:translateY(-1px);}
+.bg{background:var(--s2);color:var(--tx);border:1.5px solid var(--bd);}.bg:hover{background:var(--s3);}
+.bsm{padding:5px 11px;font-size:12px;}
+
+/* WEBHOOK BAR */
+.wbar{background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);padding:13px 18px;margin-bottom:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.wbar-lbl{font-family:'Clash Display',sans-serif;font-size:13px;font-weight:600;white-space:nowrap;}
+.wurl{flex:1;display:flex;align-items:center;gap:8px;background:var(--s2);border:1.5px solid var(--bd);border-radius:8px;padding:7px 12px;min-width:240px;}
+.wurl input{background:none;border:none;outline:none;color:var(--a3);font-size:12px;font-family:monospace;flex:1;min-width:0;}
+.cpbtn{background:none;border:none;color:var(--tx3);cursor:pointer;padding:2px 5px;border-radius:5px;font-size:13px;transition:all 0.15s;}
+.cpbtn:hover{background:var(--s3);color:var(--tx);}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:20px;}
+.sc{background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden;transition:transform 0.2s;}
+.sc:hover{transform:translateY(-2px);}
+.sc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:12px 12px 0 0;}
+.sc.c1::after{background:linear-gradient(90deg,var(--acc),var(--a5));}
+.sc.c2::after{background:linear-gradient(90deg,var(--a2),#ff9a8b);}
+.sc.c3::after{background:linear-gradient(90deg,var(--a3),#52e8b8);}
+.sc.c4::after{background:linear-gradient(90deg,var(--a4),#f7c948);}
+.sc-ic{position:absolute;right:15px;top:15px;font-size:20px;opacity:0.15;}
+.sc-lbl{font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--tx2);text-transform:uppercase;margin-bottom:9px;}
+.sc-val{font-family:'Clash Display',sans-serif;font-size:34px;font-weight:700;letter-spacing:-1.5px;line-height:1;margin-bottom:5px;}
+.sc-sub{font-size:11px;color:var(--tx3);}
+.sc-sub.up{color:var(--a3);}
+
+/* GRID */
+.cgrid{display:grid;grid-template-columns:1fr 300px;gap:16px;margin-bottom:20px;}
+
+/* TABLE */
+.card{background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);overflow:hidden;}
+.ch{padding:14px 18px;border-bottom:1.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.ct{font-family:'Clash Display',sans-serif;font-size:15px;font-weight:600;}
+.ftabs{display:flex;gap:5px;}
+.ft{padding:4px 11px;border-radius:20px;font-size:11.5px;font-weight:700;cursor:pointer;border:1.5px solid var(--bd);background:var(--s2);color:var(--tx2);transition:all 0.15s;}
+.ft:hover{color:var(--tx);}
+.ft.active{background:rgba(91,106,247,0.12);color:var(--acc);border-color:rgba(91,106,247,0.3);}
+table{width:100%;border-collapse:collapse;}
+th{padding:9px 14px;text-align:left;font-size:9.5px;font-weight:700;letter-spacing:1.3px;color:var(--tx3);text-transform:uppercase;background:var(--s2);border-bottom:1.5px solid var(--bd);}
+td{padding:11px 14px;font-size:13px;border-bottom:1px solid rgba(26,26,53,0.7);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(91,106,247,0.03);}
+.sn{font-weight:700;font-size:13px;}
+.sa{color:var(--tx2);font-size:11.5px;margin-top:2px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wb-link{color:var(--a5);font-size:11.5px;text-decoration:none;}
+.wb-link:hover{text-decoration:underline;}
+.ph{font-size:12px;font-family:monospace;color:var(--tx2);}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.bn{background:rgba(91,106,247,0.12);color:var(--acc);}
+.bc{background:rgba(245,166,35,0.12);color:var(--a4);}
+.bq{background:rgba(29,233,160,0.12);color:var(--a3);}
+.bx{background:rgba(242,91,126,0.12);color:var(--a2);}
+.ssel{background:none;border:none;cursor:pointer;font-size:11px;font-weight:700;outline:none;font-family:'Cabinet Grotesk',sans-serif;color:inherit;}
+.abts{display:flex;gap:5px;}
+.ib{width:26px;height:26px;border-radius:6px;border:1.5px solid var(--bd);background:var(--s2);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all 0.15s;}
+.ib:hover{background:var(--s3);color:var(--tx);}
+.ib.del:hover{border-color:var(--a2);color:var(--a2);}
+.empty td{padding:36px;text-align:center;color:var(--tx3);font-size:13px;}
+
+/* PIPELINE */
+.ps{padding:14px 16px;border-bottom:1.5px solid var(--bd);}
+.ps:last-child{border-bottom:none;}
+.ps-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.ps-name{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.ps-dot{width:7px;height:7px;border-radius:50%;}
+.ps-cnt{background:var(--s3);padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;color:var(--tx2);}
+.pb{height:4px;background:var(--s3);border-radius:10px;overflow:hidden;}
+.pbf{height:100%;border-radius:10px;transition:width 0.7s cubic-bezier(0.4,0,0.2,1);}
+.pv{font-size:11px;color:var(--tx3);margin-top:5px;}
+
+/* TEAM */
+.tsec{margin-bottom:20px;}
+.shdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;}
+.stitle{font-family:'Clash Display',sans-serif;font-size:18px;font-weight:700;}
+.tgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+.tcard{background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);padding:18px 14px;text-align:center;cursor:pointer;transition:all 0.22s;}
+.tcard:hover{border-color:var(--acc);transform:translateY(-3px);box-shadow:0 10px 30px rgba(91,106,247,0.1);}
+.tc-add{border-style:dashed!important;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:150px;gap:7px;}
+.tc-add:hover{border-color:var(--acc)!important;}
+.av{width:48px;height:48px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:15px;position:relative;}
+.avo::after{content:'';position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;background:var(--a3);border:2px solid var(--s1);}
+.avf::after{content:'';position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;background:var(--tx3);border:2px solid var(--s1);}
+.tc-name{font-weight:700;font-size:13px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tc-role{font-size:11px;color:var(--tx3);margin-bottom:9px;}
+.tc-num{font-family:'Clash Display',sans-serif;font-size:24px;font-weight:700;}
+.tc-lbl{font-size:10px;color:var(--tx3);margin-top:1px;}
+
+/* MODALS */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center;}
+.ov.open{display:flex;}
+.modal{background:var(--s1);border:1.5px solid var(--bd);border-radius:18px;width:500px;max-height:88vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,0.6);animation:mup 0.28s cubic-bezier(0.34,1.56,0.64,1);}
+.modal.wide{width:540px;}
+@keyframes mup{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mh{padding:18px 22px 14px;border-bottom:1.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
+.mt{font-family:'Clash Display',sans-serif;font-size:17px;font-weight:700;}
+.mc{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--bd);background:var(--s2);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.15s;}
+.mc:hover{background:var(--s3);color:var(--tx);}
+.mb{padding:18px 22px;}
+.mf{padding:13px 22px;border-top:1.5px solid var(--bd);display:flex;justify-content:flex-end;gap:9px;}
+.fg{margin-bottom:13px;}
+.fl{font-size:11px;font-weight:700;letter-spacing:0.5px;color:var(--tx2);margin-bottom:6px;display:block;}
+.fi{width:100%;background:var(--s2);border:1.5px solid var(--bd);border-radius:9px;padding:10px 13px;color:var(--tx);font-size:13.5px;outline:none;font-family:'Cabinet Grotesk',sans-serif;transition:border-color 0.2s;}
+.fi:focus{border-color:var(--acc);}
+.fs{width:100%;background:var(--s2);border:1.5px solid var(--bd);border-radius:9px;padding:10px 13px;color:var(--tx);font-size:13.5px;outline:none;font-family:'Cabinet Grotesk',sans-serif;}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* TEAM DETAIL */
+.td-top{display:flex;align-items:center;gap:15px;padding:18px 22px;border-bottom:1.5px solid var(--bd);}
+.td-av{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:22px;flex-shrink:0;}
+.td-info h2{font-family:'Clash Display',sans-serif;font-weight:700;font-size:20px;}
+.td-info p{font-size:13px;color:var(--tx2);margin-top:3px;}
+.td-ct{font-size:11.5px;color:var(--tx3);margin-top:4px;}
+.td-stats{display:flex;gap:20px;margin-top:12px;}
+.td-sv{font-family:'Clash Display',sans-serif;font-weight:700;font-size:22px;}
+.td-sl{font-size:10.5px;color:var(--tx3);}
+.ml{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(26,26,53,0.7);font-size:13px;}
+.ml:last-child{border:none;}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s2);border:1.5px solid var(--bd);border-radius:10px;padding:11px 16px;font-size:13px;z-index:9999;display:flex;align-items:center;gap:9px;transform:translateY(70px);opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);max-width:300px;box-shadow:0 20px 50px rgba(0,0,0,0.4);}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-color:rgba(29,233,160,0.25);}
+.toast.error{border-color:rgba(242,91,126,0.3);}
+
+/* SERVER STATUS */
+.srv-status{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:5px 10px;border-radius:20px;border:1px solid;}
+.srv-ok{color:var(--a3);border-color:rgba(29,233,160,0.2);background:rgba(29,233,160,0.07);}
+.srv-err{color:var(--a2);border-color:rgba(242,91,126,0.2);background:rgba(242,91,126,0.07);}
+
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(91,106,247,0.2);border-top-color:var(--acc);border-radius:50%;animation:sp 0.7s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg)}}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:10px;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo"><div class="logo-mark">⚡</div>Lead<span>Flow</span></div>
+  <div class="nl">Main</div>
+  <div class="ni active" onclick="setPage('Dashboard',this)"><span class="ni-ic">📊</span>Dashboard</div>
+  <div class="ni" onclick="setPage('All Schools',this)"><span class="ni-ic">🏫</span>All Schools</div>
+  <div class="nl">Workspace</div>
+  <div class="ni" onclick="setPage('Team',this)"><span class="ni-ic">🧑‍💼</span>Team</div>
+  <div class="ni" onclick="openM('wh-modal')"><span class="ni-ic">🔗</span>n8n Webhook</div>
+  <div class="sb-foot">
+    <div class="live-pill"><div class="dot"></div>PostgreSQL live</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="ptitle">Dashboard</div>
+      <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Backend: <span style="font-family:monospace;color:var(--a3)">http://localhost:3001</span></div>
+    </div>
+    <div class="tb-right">
+      <div class="srv-status srv-ok" id="srv-badge">● Server OK</div>
+      <input class="search" type="text" placeholder="🔍  Search schools..." oninput="doSearch(this.value)">
+      <button class="btn bg" id="run-btn" onclick="runN8nWorkflow()">⚡ Run n8n Workflow</button>
+      <button class="btn bp" onclick="openAddLead()">+ Add School</button>
+    </div>
+  </div>
+
+  <!-- WEBHOOK BAR -->
+  <div class="wbar">
+    <div class="wbar-lbl">🔗 n8n Webhook Endpoint</div>
+    <div class="wurl"><input type="text" value="http://localhost:3001/webhook/leads" readonly id="wh-url"><button class="cpbtn" onclick="cpEl('wh-url')">📋</button></div>
+    <div style="font-size:11.5px;color:var(--tx3);">POST this URL from n8n HTTP Request node</div>
+    <button class="btn bg bsm" onclick="openM('wh-modal')">⚙ Setup Guide</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="sc c1"><div class="sc-ic">🏫</div><div class="sc-lbl">Total Schools</div><div class="sc-val" id="s1">—</div><div class="sc-sub up">all leads</div></div>
+    <div class="sc c2"><div class="sc-ic">🔥</div><div class="sc-lbl">New Leads</div><div class="sc-val" id="s2">—</div><div class="sc-sub">awaiting contact</div></div>
+    <div class="sc c3"><div class="sc-ic">⭐</div><div class="sc-lbl">Avg Rating</div><div class="sc-val" id="s3">—</div><div class="sc-sub">across all schools</div></div>
+    <div class="sc c4"><div class="sc-ic">💰</div><div class="sc-lbl">Conversion</div><div class="sc-val" id="s4">—</div><div class="sc-sub">closed / total</div></div>
+  </div>
+
+  <!-- CONTENT GRID -->
+  <div class="cgrid">
+    <div class="card">
+      <div class="ch">
+        <div class="ct">School Leads</div>
+        <div class="ftabs">
+          <div class="ft active" onclick="setF('all',this)">All</div>
+          <div class="ft" onclick="setF('new',this)">New</div>
+          <div class="ft" onclick="setF('contacted',this)">Contacted</div>
+          <div class="ft" onclick="setF('qualified',this)">Qualified</div>
+          <div class="ft" onclick="setF('closed',this)">Closed</div>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>School</th><th>Phone</th><th>Rating</th><th>Website</th><th>Status</th><th>Assigned</th><th>Added On</th><th>Actions</th></tr></thead>
+        <tbody id="leads-body"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">Pipeline</div></div>
+      <div id="pipe-wrap"></div>
+    </div>
+  </div>
+
+  <!-- TEAM -->
+  <div class="tsec">
+    <div class="shdr">
+      <div class="stitle">Team</div>
+      <button class="btn bg bsm" onclick="openAddTeam()">+ Add Member</button>
+    </div>
+    <div class="tgrid" id="team-grid"></div>
+  </div>
+</main>
+
+<!-- ADD/EDIT LEAD MODAL -->
+<div class="ov" id="lead-modal">
+  <div class="modal">
+    <div class="mh"><div class="mt" id="lm-title">Add School Lead</div><button class="mc" onclick="closeM('lead-modal')">✕</button></div>
+    <div class="mb">
+      <div class="fr2">
+        <div class="fg"><label class="fl">School Name *</label><input class="fi" id="f-sname" placeholder="ABC Preschool"></div>
+        <div class="fg"><label class="fl">Phone</label><input class="fi" id="f-phone" placeholder="+91 98765 43210"></div>
+      </div>
+      <div class="fg"><label class="fl">Address</label><input class="fi" id="f-addr" placeholder="123, MG Road, Bengaluru"></div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Website</label><input class="fi" id="f-web" placeholder="https://school.com"></div>
+        <div class="fg"><label class="fl">Rating (0–5)</label><input class="fi" id="f-rating" type="number" step="0.1" min="0" max="5" placeholder="4.8"></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Reviews Count</label><input class="fi" id="f-reviews" type="number" placeholder="120"></div>
+        <div class="fg"><label class="fl">Source</label><select class="fs" id="f-source"><option value="n8n">n8n Workflow</option><option value="manual">Manual</option><option value="google">Google Maps</option><option value="referral">Referral</option></select></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Status</label><select class="fs" id="f-status"><option value="new">New</option><option value="contacted">Contacted</option><option value="qualified">Qualified</option><option value="closed">Closed</option></select></div>
+        <div class="fg"><label class="fl">Assign To</label><select class="fs" id="f-assign"></select></div>
+      </div>
+      <div class="fg"><label class="fl">Notes</label><input class="fi" id="f-notes" placeholder="Any notes..."></div>
+    </div>
+    <div class="mf"><button class="btn bg" onclick="closeM('lead-modal')">Cancel</button><button class="btn bp" id="lm-save" onclick="saveLead()">Save Lead</button></div>
+  </div>
+</div>
+
+<!-- ADD TEAM MODAL -->
+<div class="ov" id="team-modal">
+  <div class="modal">
+    <div class="mh"><div class="mt">Add Team Member</div><button class="mc" onclick="closeM('team-modal')">✕</button></div>
+    <div class="mb">
+      <div class="fr2"><div class="fg"><label class="fl">Full Name *</label><input class="fi" id="t-name" placeholder="Priya Sharma"></div><div class="fg"><label class="fl">Role *</label><input class="fi" id="t-role" placeholder="Sales Executive"></div></div>
+      <div class="fr2"><div class="fg"><label class="fl">Email</label><input class="fi" id="t-email" placeholder="priya@company.com"></div><div class="fg"><label class="fl">Phone</label><input class="fi" id="t-phone" placeholder="+91 98765 43210"></div></div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Color</label><select class="fs" id="t-color"><option value="#5b6af7">Blue</option><option value="#f25b7e">Pink</option><option value="#1de9a0">Green</option><option value="#f5a623">Orange</option><option value="#3ecfff">Cyan</option></select></div>
+        <div class="fg"><label class="fl">Status</label><select class="fs" id="t-status"><option value="online">Online</option><option value="offline">Offline</option></select></div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn bg" onclick="closeM('team-modal')">Cancel</button><button class="btn bp" onclick="saveTeam()">Add Member</button></div>
+  </div>
+</div>
+
+<!-- TEAM DETAIL MODAL -->
+<div class="ov" id="td-modal">
+  <div class="modal wide">
+    <div class="td-top">
+      <div class="td-av" id="tda"></div>
+      <div class="td-info" style="flex:1">
+        <h2 id="tdn"></h2><p id="tdr"></p>
+        <div class="td-ct" id="tdc"></div>
+        <div class="td-stats">
+          <div><div class="td-sv" id="tds1">0</div><div class="td-sl">Total</div></div>
+          <div><div class="td-sv" id="tds2">0</div><div class="td-sl">New</div></div>
+          <div><div class="td-sv" id="tds3">0</div><div class="td-sl">Qualified</div></div>
+          <div><div class="td-sv" id="tds4">0</div><div class="td-sl">Closed</div></div>
+        </div>
+      </div>
+      <button class="mc" style="align-self:flex-start" onclick="closeM('td-modal')">✕</button>
+    </div>
+    <div class="mb">
+      <div style="font-size:10.5px;font-weight:700;letter-spacing:1.2px;color:var(--tx2);margin-bottom:12px;text-transform:uppercase;">Assigned Schools</div>
+      <div id="td-leads"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WEBHOOK MODAL -->
+<div class="ov" id="wh-modal">
+  <div class="modal">
+    <div class="mh"><div class="mt">🔗 n8n Webhook Setup</div><button class="mc" onclick="closeM('wh-modal')">✕</button></div>
+    <div class="mb">
+      <div class="fg">
+        <label class="fl">Webhook URL (paste in n8n HTTP Request node)</label>
+        <div class="wurl" style="border-radius:9px;padding:10px 13px;border:1.5px solid var(--bd);">
+          <input type="text" value="http://localhost:3001/webhook/leads" readonly style="font-size:12px;" id="wh-ep">
+          <button class="cpbtn" onclick="cpEl('wh-ep')">📋</button>
+        </div>
+      </div>
+      <div style="background:var(--s2);border-radius:10px;padding:14px 16px;font-size:12.5px;color:var(--tx2);line-height:2;">
+        <strong style="color:var(--tx);display:block;margin-bottom:6px;">n8n HTTP Request Node Config:</strong>
+        Method: <code style="color:var(--a3);background:var(--s3);padding:1px 6px;border-radius:4px;">POST</code><br>
+        URL: <code style="color:var(--a3);background:var(--s3);padding:1px 6px;border-radius:4px;">http://localhost:3001/webhook/leads</code><br>
+        Body (JSON):<br>
+        <code style="color:var(--a3);background:var(--s3);padding:4px 8px;border-radius:4px;display:block;margin-top:4px;font-size:11px;">{"school_name":"{{$json.school_name}}","address":"{{$json.address}}","phone":"{{$json.phone}}","website":"{{$json.website}}","rating":"{{$json.rating}}","reviews":"{{$json.reviews}}"}</code>
+      </div>
+    </div>
+    <div class="mf"><button class="btn bp" onclick="closeM('wh-modal')">Got it ✓</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'http://localhost:3001/api';
+let leads=[], team=[], editId=null, filt='all', sq='';
+
+// ── API CALLS ──
+async function get(path){const r=await fetch(API+path);if(!r.ok)throw new Error(await r.text());return r.json();}
+async function post(path,data){const r=await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function patch(path,data){const r=await fetch(API+path,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function del(path){const r=await fetch(API+path,{method:'DELETE'});if(!r.ok)throw new Error(await r.text());return r.json();}
+
+// ── INIT ──
+async function init(){
+  try{
+    await fetch('http://localhost:3001/');
+    document.getElementById('srv-badge').className='srv-status srv-ok';
+    document.getElementById('srv-badge').textContent='● Server OK';
+    [leads,team]=await Promise.all([get('/leads'),get('/team')]);
+    renderAll();
+  }catch(e){
+    document.getElementById('srv-badge').className='srv-status srv-err';
+    document.getElementById('srv-badge').textContent='● Server Offline';
+    toast('⚠️ Backend offline — run: node server.js','error');
+  }
+}
+
+function renderAll(){rStats();rLeads();rPipe();rTeam();popAssign();}
+
+// ── STATS ──
+function rStats(){
+  const tot=leads.length,nw=leads.filter(l=>l.status==='new').length;
+  const closed=leads.filter(l=>l.status==='closed').length;
+  const ratings=leads.filter(l=>l.rating);
+  const avgR=ratings.length?(ratings.reduce((a,l)=>a+Number(l.rating),0)/ratings.length).toFixed(1):'—';
+  document.getElementById('s1').textContent=tot;
+  document.getElementById('s2').textContent=nw;
+  document.getElementById('s3').textContent=avgR;
+  document.getElementById('s4').textContent=tot?Math.round(closed/tot*100)+'%':'0%';
+}
+
+// ── LEADS ──
+function getFiltered(){
+  return leads.filter(l=>{
+    const fm=filt==='all'||l.status===filt;
+    const q=sq.toLowerCase();
+    const sm=!q||(l.school_name||'').toLowerCase().includes(q)||(l.address||'').toLowerCase().includes(q)||(l.phone||'').toLowerCase().includes(q);
+    return fm&&sm;
+  });
+}
+
+function rLeads(){
+  const tb=document.getElementById('leads-body');
+  const fl=getFiltered();
+  if(!fl.length){tb.innerHTML=`<tr class="empty"><td colspan="7">No leads found. Run your n8n workflow or add manually!</td></tr>`;return;}
+  const bc={new:'bn',contacted:'bc',qualified:'bq',closed:'bx'};
+  tb.innerHTML=fl.map(l=>{
+    const m=team.find(t=>t.id===l.assigned_id);
+    const init=m?m.name.split(' ').map(n=>n[0]).join('').slice(0,2):'?';
+    return `<tr>
+      <td><div class="sn">${l.school_name||'—'}</div><div class="sa">${l.address||''}</div></td>
+      <td><span class="ph">${l.phone||'—'}</span></td>
+      <td><div style="color:var(--a4);font-size:12px;">${l.rating||'—'} ⭐</div><div style="font-size:11px;color:var(--tx3);">${l.reviews?l.reviews+' reviews':''}</div></td>
+      <td>${l.website?`<a class="wb-link" href="${l.website}" target="_blank">🌐 Visit</a>`:'—'}</td>
+      <td>
+        <select class="badge ${bc[l.status]||'bn'}" onchange="updStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;">
+          <option value="new" ${l.status==='new'?'selected':''}>🔵 New</option>
+          <option value="contacted" ${l.status==='contacted'?'selected':''}>🟠 Contacted</option>
+          <option value="qualified" ${l.status==='qualified'?'selected':''}>🟢 Qualified</option>
+          <option value="closed" ${l.status==='closed'?'selected':''}>🔴 Closed</option>
+        </select>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:${m?.color||'#333'}22;color:${m?.color||'#888'};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;">${init}</div>
+          <span style="font-size:12px;">${m?.name?.split(' ')[0]||'—'}</span>
+        </div>
+      </td>
+      <td><div style="font-size:11px;color:var(--tx3);">${l.created_at ? new Date(l.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—'}</div><div style="font-size:10.5px;color:var(--tx3);margin-top:2px;">${l.created_at ? new Date(l.created_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : ''}</div></td>
+      <td><div class="abts"><button class="ib" onclick="editLead(${l.id})" title="Edit">✏️</button><button class="ib del" onclick="delLead(${l.id})" title="Delete">🗑️</button></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function rPipe(){
+  const stages=[{k:'new',l:'New',c:'#5b6af7'},{k:'contacted',l:'Contacted',c:'#f5a623'},{k:'qualified',l:'Qualified',c:'#1de9a0'},{k:'closed',l:'Closed',c:'#f25b7e'}];
+  const tot=leads.length||1;
+  document.getElementById('pipe-wrap').innerHTML=stages.map(s=>{
+    const cnt=leads.filter(l=>l.status===s.k).length;
+    const pct=Math.round(cnt/tot*100);
+    return `<div class="ps"><div class="ps-top"><div class="ps-name"><div class="ps-dot" style="background:${s.c}"></div>${s.l}</div><span class="ps-cnt">${cnt}</span></div><div class="pb"><div class="pbf" style="width:${pct}%;background:${s.c}"></div></div><div class="pv">${pct}% of total</div></div>`;
+  }).join('');
+}
+
+function rTeam(){
+  const g=document.getElementById('team-grid');
+  g.innerHTML=team.map(m=>{
+    const cnt=leads.filter(l=>l.assigned_id===m.id).length;
+    const init=m.name.split(' ').map(n=>n[0]).join('').slice(0,2);
+    return `<div class="tcard" onclick="openTD(${m.id})">
+      <div class="av ${m.status==='online'?'avo':'avf'}" style="background:${m.color}18;color:${m.color};border:2px solid ${m.color}30;">${init}</div>
+      <div class="tc-name">${m.name}</div><div class="tc-role">${m.role}</div>
+      <div class="tc-num" style="color:${m.color}">${cnt}</div>
+      <div class="tc-lbl">schools assigned</div>
+    </div>`;
+  }).join('')+`<div class="tcard tc-add" onclick="openAddTeam()"><div style="font-size:26px;opacity:0.2">+</div><div style="font-size:12px;color:var(--tx3)">Add Member</div></div>`;
+}
+
+function popAssign(){
+  const s=document.getElementById('f-assign');
+  if(!s)return;
+  s.innerHTML=`<option value="">Unassigned</option>`+team.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+}
+
+// ── LEAD CRUD ──
+function openAddLead(){
+  editId=null;
+  document.getElementById('lm-title').textContent='Add School Lead';
+  document.getElementById('lm-save').textContent='Save Lead';
+  ['f-sname','f-phone','f-addr','f-web','f-notes'].forEach(id=>document.getElementById(id).value='');
+  ['f-rating','f-reviews'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-source').value='n8n';
+  document.getElementById('f-status').value='new';
+  popAssign();openM('lead-modal');
+}
+
+function editLead(id){
+  const l=leads.find(l=>l.id===id);if(!l)return;
+  editId=id;
+  document.getElementById('lm-title').textContent='Edit School Lead';
+  document.getElementById('lm-save').textContent='Update Lead';
+  document.getElementById('f-sname').value=l.school_name||'';
+  document.getElementById('f-phone').value=l.phone||'';
+  document.getElementById('f-addr').value=l.address||'';
+  document.getElementById('f-web').value=l.website||'';
+  document.getElementById('f-rating').value=l.rating||'';
+  document.getElementById('f-reviews').value=l.reviews||'';
+  document.getElementById('f-source').value=l.source||'n8n';
+  document.getElementById('f-status').value=l.status||'new';
+  document.getElementById('f-notes').value=l.notes||'';
+  popAssign();document.getElementById('f-assign').value=l.assigned_id||'';
+  openM('lead-modal');
+}
+
+async function saveLead(){
+  const sn=document.getElementById('f-sname').value.trim();
+  if(!sn){toast('School name is required','error');return;}
+  const data={school_name:sn,phone:document.getElementById('f-phone').value.trim(),address:document.getElementById('f-addr').value.trim(),website:document.getElementById('f-web').value.trim(),rating:parseFloat(document.getElementById('f-rating').value)||null,reviews:parseInt(document.getElementById('f-reviews').value)||null,source:document.getElementById('f-source').value,status:document.getElementById('f-status').value,assigned_id:parseInt(document.getElementById('f-assign').value)||null,notes:document.getElementById('f-notes').value.trim()};
+  const btn=document.getElementById('lm-save');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  try{
+    if(editId){await patch(`/leads/${editId}`,data);const i=leads.findIndex(l=>l.id===editId);if(i>=0)leads[i]={...leads[i],...data};toast('✅ Lead updated!','success');}
+    else{const c=await post('/leads',data);leads.unshift(c);toast('✅ School lead added!','success');}
+    renderAll();closeM('lead-modal');
+  }catch(e){toast('Error: '+e.message,'error');}
+  btn.disabled=false;btn.textContent=editId?'Update Lead':'Save Lead';
+}
+
+async function delLead(id){
+  if(!confirm('Delete this school lead?'))return;
+  try{await del(`/leads/${id}`);leads=leads.filter(l=>l.id!==id);renderAll();toast('Lead deleted','');}
+  catch(e){toast('Error: '+e.message,'error');}
+}
+
+async function updStatus(id,status,sel){
+  const bc={new:'bn',contacted:'bc',qualified:'bq',closed:'bx'};
+  sel.className=`badge ${bc[status]||'bn'}`;sel.style.color='inherit';
+  try{await patch(`/leads/${id}`,{status});const l=leads.find(l=>l.id===id);if(l)l.status=status;rStats();rPipe();toast('Status updated','success');}
+  catch(e){toast('Error: '+e.message,'error');}
+}
+
+// ── TEAM CRUD ──
+function openAddTeam(){['t-name','t-role','t-email','t-phone'].forEach(id=>document.getElementById(id).value='');openM('team-modal');}
+async function saveTeam(){
+  const n=document.getElementById('t-name').value.trim(),r=document.getElementById('t-role').value.trim();
+  if(!n||!r){toast('Name and Role required','error');return;}
+  const data={name:n,role:r,email:document.getElementById('t-email').value.trim(),phone:document.getElementById('t-phone').value.trim(),color:document.getElementById('t-color').value,status:document.getElementById('t-status').value};
+  try{const c=await post('/team',data);team.push(c);renderAll();closeM('team-modal');toast('✅ Team member added!','success');}
+  catch(e){toast('Error: '+e.message,'error');}
+}
+
+function openTD(id){
+  const m=team.find(t=>t.id===id);if(!m)return;
+  const ml=leads.filter(l=>l.assigned_id===id);
+  const init=m.name.split(' ').map(n=>n[0]).join('').slice(0,2);
+  const av=document.getElementById('tda');
+  av.textContent=init;av.style.background=m.color+'18';av.style.color=m.color;av.style.border=`2px solid ${m.color}30`;
+  document.getElementById('tdn').textContent=m.name;document.getElementById('tdr').textContent=m.role;
+  document.getElementById('tdc').textContent=[m.email,m.phone].filter(Boolean).join(' · ');
+  document.getElementById('tds1').textContent=ml.length;
+  document.getElementById('tds2').textContent=ml.filter(l=>l.status==='new').length;
+  document.getElementById('tds3').textContent=ml.filter(l=>l.status==='qualified').length;
+  document.getElementById('tds4').textContent=ml.filter(l=>l.status==='closed').length;
+  document.getElementById('td-leads').innerHTML=ml.length
+    ?ml.map(l=>`<div class="ml"><div><div style="font-weight:700">${l.school_name}</div><div style="font-size:11.5px;color:var(--tx3)">${l.address||l.phone||''}</div></div><span class="badge b${l.status[0]}">${l.status}</span></div>`).join('')
+    :'<div style="color:var(--tx3);font-size:13px;padding:10px 0;">No schools assigned yet.</div>';
+  openM('td-modal');
+}
+
+// ── REAL N8N WORKFLOW TRIGGER (via backend proxy) ──
+async function runN8nWorkflow(){
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Running...';
+  toast('⚡ Triggering n8n workflow...', 'success');
+  try {
+    const res = await post('/trigger-n8n', {});
+    toast('✅ Workflow triggered! Loading new leads in 10s...', 'success');
+    setTimeout(async () => {
+      leads = await get('/leads');
+      renderAll();
+      toast('🎉 New leads loaded from n8n!', 'success');
+      btn.disabled = false;
+      btn.innerHTML = '⚡ Run n8n Workflow';
+    }, 10000);
+  } catch(e) {
+    toast('⚠️ Error: ' + e.message, 'error');
+    btn.disabled = false;
+    btn.innerHTML = '⚡ Run n8n Workflow';
+  }
+}
+
+// ── UTILS ──
+function setF(f,el){filt=f;document.querySelectorAll('.ft').forEach(t=>t.classList.remove('active'));el.classList.add('active');rLeads();}
+function doSearch(q){sq=q;rLeads();}
+function setPage(p,el){document.getElementById('ptitle').textContent=p;document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));el.classList.add('active');}
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+function cpEl(id){const el=document.getElementById(id);navigator.clipboard.writeText(el.value).then(()=>toast('📋 Copied!','success'));}
+document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+let tT;
+function toast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;clearTimeout(tT);tT=setTimeout(()=>{t.className='toast';},3200);}
+
+init();
+</script>
+</body>
+</html>
