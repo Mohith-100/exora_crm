@@ -139,6 +139,40 @@ app.get('/api/auth/me', requireAuth(), (req, res) => {
   res.json({ user: req.user });
 });
 
+// PUT /api/auth/update
+app.put('/api/auth/update', requireAuth(), async (req, res) => {
+  const { name, email, password } = req.body;
+  if (!name || !email) return res.status(400).json({ error: 'Name and email are required' });
+  try {
+    const userId = req.user.id;
+    let query, params;
+
+    if (password) {
+      const hash = await bcrypt.hash(password, 10);
+      query = `UPDATE users SET name=$1, email=$2, password_hash=$3 WHERE id=$4 RETURNING id, name, email, role, team_id, territory`;
+      params = [name, email.toLowerCase().trim(), hash, userId];
+    } else {
+      query = `UPDATE users SET name=$1, email=$2 WHERE id=$3 RETURNING id, name, email, role, team_id, territory`;
+      params = [name, email.toLowerCase().trim(), userId];
+    }
+
+    const result = await pool.query(query, params);
+    if (!result.rows.length) return res.status(404).json({ error: 'User not found' });
+
+    const updatedUser = result.rows[0];
+    // Re-sign the token with updated info
+    const token = jwt.sign(
+      { id: updatedUser.id, name: updatedUser.name, email: updatedUser.email, role: updatedUser.role, team_id: updatedUser.team_id },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+    res.json({ success: true, user: updatedUser, token });
+  } catch (err) {
+    if (err.message.includes('unique')) return res.status(409).json({ error: 'Email already in use' });
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/auth/register (admin only — create salesperson)
 app.post('/api/auth/register', requireAuth(['admin']), async (req, res) => {
   const { name, email, password, phone, territory, color } = req.body;

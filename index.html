@@ -1429,6 +1429,8 @@
       <div class="ni" id="nav-team" onclick="showAdminPage('team',this)"><span class="ni-ic">🧑‍💼</span>Team</div>
       <div class="ni" id="nav-addsp" onclick="showAdminPage('addsp',this)"><span class="ni-ic">👤</span>Add Sales Person
       </div>
+      <div class="ni" id="nav-adminuser" onclick="showAdminPage('adminuser',this)"><span class="ni-ic">⚙️</span>Admin
+        User</div>
       <div class="ni" onclick="openM('wh-modal')"><span class="ni-ic">🔗</span>n8n Webhook</div>
     </div>
 
@@ -1770,6 +1772,31 @@
     <div id="alp-leads-list"></div>
   </div>
 
+  <!-- ADMIN USER SETTINGS PAGE -->
+  <div class="page-section" id="adminuser-page">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Admin Settings</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Update your credentials</div>
+      </div>
+    </div>
+    <div class="asp-card">
+      <div class="asp-title">Profile Settings</div>
+      <div class="fg"><label class="fl">FULL NAME</label><input class="fi" id="au-name" placeholder="Admin User"></div>
+      <div class="fg"><label class="fl">EMAIL ADDRESS</label><input class="fi" id="au-email" type="email"
+          placeholder="admin@leadflow.com"></div>
+      <div class="fg"><label class="fl">NEW PASSWORD</label><input class="fi" id="au-pass" type="password"
+          placeholder="Leave blank to keep unchanged"></div>
+      <div id="au-err"
+        style="display:none;background:rgba(242,91,126,0.1);border:1px solid rgba(242,91,126,0.25);border-radius:8px;padding:9px 13px;font-size:12.5px;color:var(--a2);margin-bottom:12px;">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn bg" onclick="showAdminPage('dashboard',document.getElementById('nav-dash'))">Cancel</button>
+        <button class="btn bp" id="au-btn" onclick="updateAdminCredentials()">Save Changes →</button>
+      </div>
+    </div>
+  </div>
+
   <!-- SALESPERSON — MY DASHBOARD -->
   <div class="page-section" id="spdash-page">
     <div class="topbar">
@@ -1963,7 +1990,7 @@
     }
 
     // ── ADMIN PAGE ROUTING ──
-    const adminPages = ['dashboard', 'schools', 'team', 'addsp'];
+    const adminPages = ['dashboard', 'schools', 'team', 'addsp', 'adminuser'];
     function showAdminPage(page, el) {
       // Show/hide admin main vs page sections
       const isMainPage = page === 'dashboard' || page === 'schools' || page === 'team';
@@ -1972,6 +1999,13 @@
 
       if (page === 'addsp') { document.getElementById('addsp-page').classList.add('visible'); }
       else if (page === 'assignleads') { document.getElementById('assignleads-page').classList.add('visible'); }
+      else if (page === 'adminuser') {
+        document.getElementById('adminuser-page').classList.add('visible');
+        document.getElementById('au-name').value = currentUser.name || '';
+        document.getElementById('au-email').value = currentUser.email || '';
+        document.getElementById('au-pass').value = '';
+        document.getElementById('au-err').style.display = 'none';
+      }
 
       // Update page title for admin main
       if (page === 'dashboard') document.getElementById('ptitle').textContent = 'Dashboard';
@@ -1991,6 +2025,64 @@
       if (cgrid) cgrid.style.display = (page === 'dashboard' || page === 'schools') ? '' : 'none';
       if (stats) stats.style.display = page === 'dashboard' ? '' : 'none';
       if (wbar) wbar.style.display = page === 'dashboard' ? '' : 'none';
+    }
+
+    // ── ADMIN CREDENTIALS UPDATE ──
+    async function updateAdminCredentials() {
+      const name = document.getElementById('au-name').value.trim();
+      const email = document.getElementById('au-email').value.trim();
+      const pass = document.getElementById('au-pass').value;
+      const err = document.getElementById('au-err');
+      err.style.display = 'none';
+
+      if (!name || !email) {
+        err.textContent = 'Name and email are required.';
+        err.style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('au-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span> Saving...';
+
+      try {
+        const payload = { name, email };
+        if (pass) payload.password = pass;
+
+        const res = await fetch(API + '/auth/update', {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to update credentials');
+        }
+
+        toast('✅ Credentials updated successfully!', 'success');
+
+        // Update local session
+        saveAuth(data.token, data.user);
+
+        // Update sidebar UI
+        const init = data.user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+        document.getElementById('u-av').textContent = init;
+        document.getElementById('u-name').textContent = data.user.name;
+
+        // Optionally redirect back to dashboard
+        showAdminPage('dashboard', document.getElementById('nav-dash'));
+
+      } catch (e) {
+        err.textContent = e.message.includes('409') || e.message.toLowerCase().includes('in use')
+          ? 'Email already in use.'
+          : 'Error: ' + e.message;
+        err.style.display = 'block';
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = 'Save Changes →';
     }
 
     // ── SALESPERSON DATA ──
