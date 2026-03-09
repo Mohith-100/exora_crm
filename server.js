@@ -333,7 +333,7 @@ app.get('/api/fix-status', async (req, res) => {
     `);
     const result = await pool.query('SELECT status, COUNT(*) FROM leads GROUP BY status');
     res.json({ success: true, message: 'All status fixed!', breakdown: result.rows });
-  } catch(err) {
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });

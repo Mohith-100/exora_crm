@@ -132,6 +132,34 @@
       text-align: center;
     }
 
+    .dropdown-btn {
+      justify-content: space-between;
+    }
+
+    .dropdown-content {
+      display: none;
+      flex-direction: column;
+      padding-left: 20px;
+      margin-bottom: 5px;
+    }
+
+    .dropdown-content.open {
+      display: flex;
+    }
+
+    .arrow {
+      border: solid var(--tx2);
+      border-width: 0 1.5px 1.5px 0;
+      display: inline-block;
+      padding: 3px;
+      transform: rotate(-45deg);
+      transition: transform 0.2s;
+    }
+
+    .dropdown-btn.open .arrow {
+      transform: rotate(45deg);
+    }
+
     .sb-foot {
       margin-top: auto;
     }
@@ -1421,28 +1449,42 @@
     <!-- ADMIN NAV -->
     <div class="adm-only" id="adm-nav">
       <div class="nl">Main</div>
-      <div class="ni active" id="nav-dash" onclick="showAdminPage('dashboard',this)"><span
-          class="ni-ic">📊</span>Dashboard</div>
-      <div class="ni" id="nav-schools" onclick="showAdminPage('schools',this)"><span class="ni-ic">🏫</span>All Schools
+      <div class="ni active" id="nav-dash" onclick="showAdminPage('dashboard',this)"><span class="ni-ic">📊</span>Dashboard</div>
+      <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
+        <div><span class="ni-ic">📈</span>Leads</div>
+        <i class="arrow"></i>
       </div>
+      <div class="dropdown-content" id="leads-domains-list"></div>
+
+      <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
+        <div><span class="ni-ic">🎯</span>Prospects</div>
+        <i class="arrow"></i>
+      </div>
+      <div class="dropdown-content" id="prospects-filter-list"></div>
+
       <div class="nl">Workspace</div>
       <div class="ni" id="nav-team" onclick="showAdminPage('team',this)"><span class="ni-ic">🧑‍💼</span>Team</div>
-      <div class="ni" id="nav-addsp" onclick="showAdminPage('addsp',this)"><span class="ni-ic">👤</span>Add Sales Person
-      </div>
-      <div class="ni" id="nav-adminuser" onclick="showAdminPage('adminuser',this)"><span class="ni-ic">⚙️</span>Admin
-        User</div>
+      <div class="ni" id="nav-addsp" onclick="showAdminPage('addsp',this)"><span class="ni-ic">👤</span>Add Sales Person</div>
+      <div class="ni" id="nav-adminuser" onclick="showAdminPage('adminuser',this)"><span class="ni-ic">⚙️</span>Admin User</div>
       <div class="ni" onclick="openM('wh-modal')"><span class="ni-ic">🔗</span>n8n Webhook</div>
     </div>
 
     <!-- SALESPERSON NAV -->
     <div class="sp-only" id="sp-nav">
       <div class="nl">My Work</div>
-      <div class="ni active" id="nav-spdash" onclick="showSPPage('spdash',this)"><span class="ni-ic">📊</span>My
-        Dashboard</div>
-      <div class="ni" id="nav-myleads" onclick="showSPPage('myleads',this)"><span class="ni-ic">📋</span>My Leads <span
-          id="my-leads-badge"
-          style="background:var(--a2);color:#fff;border-radius:20px;font-size:10px;padding:1px 6px;margin-left:4px;display:none"></span>
+      <div class="ni active" id="nav-spdash" onclick="showSPPage('spdash',this)"><span class="ni-ic">📊</span>My Dashboard</div>
+      
+      <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
+        <div><span class="ni-ic">📋</span>My Leads</div>
+        <i class="arrow"></i>
       </div>
+      <div class="dropdown-content" id="sp-leads-domains-list"></div>
+
+      <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
+        <div><span class="ni-ic">🎯</span>My Prospects</div>
+        <i class="arrow"></i>
+      </div>
+      <div class="dropdown-content" id="sp-prospects-filter-list"></div>
     </div>
 
     <div class="user-foot">
@@ -1513,23 +1555,36 @@
       </div>
     </div>
 
-    <!-- CONTENT GRID -->
-    <div class="cgrid">
-      <div class="card">
-        <div class="ch">
-          <div class="ct">School Leads</div>
-          <div class="ftabs">
-            <div class="ft active" onclick="setF('all',this)">All</div>
-            <div class="ft" onclick="setF('new',this)">New</div>
-            <div class="ft" onclick="setF('contacted',this)">Contacted</div>
-            <div class="ft" onclick="setF('qualified',this)">Qualified</div>
-            <div class="ft" onclick="setF('closed',this)">Closed</div>
-          </div>
-        </div>
-        <table>
+    <!-- TEAM -->
+    <div class="tsec">
+      <div class="shdr">
+        <div class="stitle">Team</div>
+        <button class="btn bg bsm" onclick="openAddTeam()">+ Add Member</button>
+      </div>
+      <div class="tgrid" id="team-grid"></div>
+    </div>
+  </main>
+
+  <!-- LEADS PAGE (ADMIN) -->
+  <div class="page-section" id="leads-page">
+    <div class="topbar">
+      <div>
+        <div class="page-title" id="leads-page-title">Leads</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">All domain specific leads</div>
+      </div>
+      <div class="tb-right">
+        <input class="search" type="text" placeholder="🔍 Search leads..." oninput="doSearch(this.value)">
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="ch">
+        <div class="ct" id="domain-table-title">Leads</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
           <thead>
             <tr>
-              <th>School</th>
+              <th>Lead Name</th>
               <th>Phone</th>
               <th>Rating</th>
               <th>Website</th>
@@ -1542,6 +1597,43 @@
           <tbody id="leads-body"></tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- PROSPECTS PAGE (ADMIN) -->
+  <div class="page-section" id="prospects-page">
+    <div class="topbar">
+      <div>
+        <div class="page-title" id="prospects-page-title">Prospects</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">All status specific leads</div>
+      </div>
+      <div class="tb-right">
+        <input class="search" type="text" placeholder="🔍 Search prospects..." oninput="doSearch(this.value)">
+      </div>
+    </div>
+    <div class="cgrid">
+      <div class="card">
+        <div class="ch">
+          <div class="ct" id="prospect-table-title">Prospects</div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th>Lead Name</th>
+                <th>Phone</th>
+                <th>Rating</th>
+                <th>Website</th>
+                <th>Status</th>
+                <th>Assigned</th>
+                <th>Added On</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="status-leads-body"></tbody>
+          </table>
+        </div>
+      </div>
       <div class="card">
         <div class="ch">
           <div class="ct">Pipeline</div>
@@ -1549,16 +1641,7 @@
         <div id="pipe-wrap"></div>
       </div>
     </div>
-
-    <!-- TEAM -->
-    <div class="tsec">
-      <div class="shdr">
-        <div class="stitle">Team</div>
-        <button class="btn bg bsm" onclick="openAddTeam()">+ Add Member</button>
-      </div>
-      <div class="tgrid" id="team-grid"></div>
-    </div>
-  </main>
+  </div>
 
   <!-- ADD/EDIT LEAD MODAL -->
   <div class="ov" id="lead-modal">
@@ -1843,12 +1926,12 @@
     </div>
   </div>
 
-  <!-- SALESPERSON — MY LEADS -->
-  <div class="page-section" id="myleads-page">
+  <!-- SALESPERSON — MY LEADS PAGE -->
+  <div class="page-section" id="sp-leads-page">
     <div class="topbar">
       <div>
-        <div class="page-title">My Leads</div>
-        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Your assigned school leads</div>
+        <div class="page-title" id="sp-leads-page-title">My Leads</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Your assigned leads in this domain</div>
       </div>
       <div class="tb-right">
         <div class="srv-status srv-ok sp-badge active">● Active</div>
@@ -1857,29 +1940,59 @@
     </div>
     <div class="card">
       <div class="ch">
-        <div class="ct">School Leads</div>
-        <div class="ftabs">
-          <div class="ft active" onclick="setSpF('all',this)">All</div>
-          <div class="ft" onclick="setSpF('new',this)">New</div>
-          <div class="ft" onclick="setSpF('contacted',this)">Contacted</div>
-          <div class="ft" onclick="setSpF('qualified',this)">Qualified</div>
-          <div class="ft" onclick="setSpF('closed',this)">Closed</div>
-        </div>
+        <div class="ct" id="sp-domain-table-title">School Leads</div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>School</th>
-            <th>Phone</th>
-            <th>Rating</th>
-            <th>Website</th>
-            <th>Status</th>
-            <th>Notes</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="sp-leads-body"></tbody>
-      </table>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th>School</th>
+              <th>Phone</th>
+              <th>Rating</th>
+              <th>Website</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="sp-leads-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SALESPERSON — MY PROSPECTS PAGE -->
+  <div class="page-section" id="sp-prospects-page">
+    <div class="topbar">
+      <div>
+        <div class="page-title" id="sp-prospects-page-title">My Prospects</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Your leads filtered by status</div>
+      </div>
+      <div class="tb-right">
+        <div class="srv-status srv-ok sp-badge active">● Active</div>
+        <input class="search" type="text" placeholder="🔍 Search prospects..." oninput="spSearch(this.value)">
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">
+        <div class="ct" id="sp-prospect-table-title">Prospects</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th>School</th>
+              <th>Phone</th>
+              <th>Rating</th>
+              <th>Website</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="sp-status-leads-body"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -1890,6 +2003,48 @@
     let leads = [], team = [], editId = null, filt = 'all', sq = '';
     let currentUser = null, authToken = null;
     let spLeads = [], spFilt = 'all', spSq = '', pendingNewSP = null;
+
+    const domains = [{ id: 'schools', label: 'Schools', icon: '🏫' }];
+    const statuses = ['new', 'contacted', 'qualified', 'closed'];
+
+    function toggleDropdown(el) {
+      el.classList.toggle('open');
+      if (el.nextElementSibling) {
+        el.nextElementSibling.classList.toggle('open');
+      }
+    }
+
+    function renderSidebarDomains() {
+      // Admin
+      const c1 = document.getElementById('leads-domains-list');
+      if (c1) c1.innerHTML = domains.map(d => `<div class="ni" onclick="showAdminPage('leads', this, '${d.id}')"><span class="ni-ic">${d.icon}</span>${d.label}</div>`).join('');
+      // Sales Person
+      const c2 = document.getElementById('sp-leads-domains-list');
+      if (c2) c2.innerHTML = domains.map(d => `<div class="ni" onclick="showSPPage('leads', this, '${d.id}')"><span class="ni-ic">${d.icon}</span>${d.label}</div>`).join('');
+    }
+
+    function renderStatusFilters() {
+      // Admin
+      const c1 = document.getElementById('prospects-filter-list');
+      if (c1) {
+        let h1 = `<div class="ni" onclick="showAdminPage('prospects', this, 'all')"><span class="ni-ic">📋</span>All</div>`;
+        statuses.forEach(s => {
+          const icon = s==='new'?'🔵':s==='contacted'?'🟠':s==='qualified'?'🟢':'🔴';
+          h1 += `<div class="ni" onclick="showAdminPage('prospects', this, '${s}')"><span class="ni-ic">${icon}</span>${s.charAt(0).toUpperCase() + s.slice(1)}</div>`;
+        });
+        c1.innerHTML = h1;
+      }
+      // Sales Person
+      const c2 = document.getElementById('sp-prospects-filter-list');
+      if (c2) {
+        let h2 = `<div class="ni" onclick="showSPPage('prospects', this, 'all')"><span class="ni-ic">📋</span>All</div>`;
+        statuses.forEach(s => {
+          const icon = s==='new'?'🔵':s==='contacted'?'🟠':s==='qualified'?'🟢':'🔴';
+          h2 += `<div class="ni" onclick="showSPPage('prospects', this, '${s}')"><span class="ni-ic">${icon}</span>${s.charAt(0).toUpperCase() + s.slice(1)}</div>`;
+        });
+        c2.innerHTML = h2;
+      }
+    }
 
     // ── AUTH HELPERS ──
     function getToken() { return localStorage.getItem('lf_token'); }
@@ -1945,6 +2100,9 @@
       document.getElementById('u-role').textContent = user.role === 'admin' ? 'Administrator' : 'Sales Person';
       document.getElementById('main-sidebar').style.display = 'flex';
 
+      renderSidebarDomains();
+      renderStatusFilters();
+
       if (user.role === 'admin') {
         document.getElementById('adm-nav').style.display = 'block';
         document.getElementById('sp-nav').style.display = 'none';
@@ -1990,15 +2148,18 @@
     }
 
     // ── ADMIN PAGE ROUTING ──
-    const adminPages = ['dashboard', 'schools', 'team', 'addsp', 'adminuser'];
-    function showAdminPage(page, el) {
-      // Show/hide admin main vs page sections
-      const isMainPage = page === 'dashboard' || page === 'schools' || page === 'team';
+    let currentDomain = 'schools';
+
+    function showAdminPage(page, el, param = null) {
+      if (page === 'leads') currentDomain = param;
+      if (page === 'prospects' && param) filt = param;
+
+      const isMainPage = page === 'dashboard' || page === 'team';
       document.getElementById('admin-main').style.display = isMainPage ? 'block' : 'none';
       document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
 
-      if (page === 'addsp') { document.getElementById('addsp-page').classList.add('visible'); }
-      else if (page === 'assignleads') { document.getElementById('assignleads-page').classList.add('visible'); }
+      if (page === 'addsp') document.getElementById('addsp-page').classList.add('visible');
+      else if (page === 'assignleads') document.getElementById('assignleads-page').classList.add('visible');
       else if (page === 'adminuser') {
         document.getElementById('adminuser-page').classList.add('visible');
         document.getElementById('au-name').value = currentUser.name || '';
@@ -2006,25 +2167,35 @@
         document.getElementById('au-pass').value = '';
         document.getElementById('au-err').style.display = 'none';
       }
+      else if (page === 'leads') {
+        document.getElementById('leads-page').classList.add('visible');
+        const ptitle = domains.find(d => d.id === param).label + ' Leads';
+        document.getElementById('leads-page-title').textContent = ptitle;
+        document.getElementById('domain-table-title').textContent = ptitle;
+      }
+      else if (page === 'prospects') {
+        document.getElementById('prospects-page').classList.add('visible');
+        const ptitle = param === 'all' ? 'All Prospects' : (param.charAt(0).toUpperCase() + param.slice(1) + ' Prospects');
+        document.getElementById('prospects-page-title').textContent = ptitle;
+        document.getElementById('prospect-table-title').textContent = ptitle;
+      }
 
-      // Update page title for admin main
       if (page === 'dashboard') document.getElementById('ptitle').textContent = 'Dashboard';
-      else if (page === 'schools') document.getElementById('ptitle').textContent = 'All Schools';
       else if (page === 'team') document.getElementById('ptitle').textContent = 'Sales Team';
 
-      // Nav highlight
-      document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.ni:not(.dropdown-btn)').forEach(n => n.classList.remove('active'));
       if (el) el.classList.add('active');
 
-      // Team section visibility
       const tsec = document.querySelector('.tsec');
-      if (tsec) tsec.style.display = (page === 'team' || page === 'dashboard') ? '' : 'none';
-      const cgrid = document.querySelector('.cgrid');
       const stats = document.querySelector('.stats');
       const wbar = document.querySelector('.wbar');
-      if (cgrid) cgrid.style.display = (page === 'dashboard' || page === 'schools') ? '' : 'none';
+      if (tsec) tsec.style.display = (page === 'team' || page === 'dashboard') ? '' : 'none';
       if (stats) stats.style.display = page === 'dashboard' ? '' : 'none';
       if (wbar) wbar.style.display = page === 'dashboard' ? '' : 'none';
+
+      if (page === 'leads' || page === 'prospects') {
+        rLeads();
+      }
     }
 
     // ── ADMIN CREDENTIALS UPDATE ──
@@ -2100,9 +2271,9 @@
 
     function rSPStats() {
       document.getElementById('sp-s1').textContent = spLeads.length;
-      document.getElementById('sp-s2').textContent = spLeads.filter(l => l.status === 'new' || l.status === 'contacted').length;
-      document.getElementById('sp-s3').textContent = spLeads.filter(l => l.status === 'qualified').length;
-      document.getElementById('sp-s4').textContent = spLeads.filter(l => l.status === 'closed').length;
+      document.getElementById('sp-s2').textContent = spLeads.filter(l => !l.status || l.status.trim().toLowerCase() === 'new' || l.status.trim().toLowerCase() === 'contacted').length;
+      document.getElementById('sp-s3').textContent = spLeads.filter(l => l.status && l.status.trim().toLowerCase() === 'qualified').length;
+      document.getElementById('sp-s4').textContent = spLeads.filter(l => l.status && l.status.trim().toLowerCase() === 'closed').length;
     }
 
     function rSPActivity() {
@@ -2121,12 +2292,12 @@
       });
     }
 
-    function rMyLeads() {
-      const tb = document.getElementById('sp-leads-body');
-      const fl = getSpFiltered();
+    function renderSPTable(tbodyId, leadsArray) {
+      const tb = document.getElementById(tbodyId);
+      if(!tb) return;
+      if (!leadsArray.length) { tb.innerHTML = '<tr class="empty"><td colspan="7">No leads found.</td></tr>'; return; }
       const bc = { new: 'bn', contacted: 'bc', qualified: 'bq', closed: 'bx' };
-      if (!fl.length) { tb.innerHTML = '<tr class="empty"><td colspan="7">No leads found.</td></tr>'; return; }
-      tb.innerHTML = fl.map(l => `<tr>
+      tb.innerHTML = leadsArray.map(l => `<tr>
     <td><div class="sn">${l.school_name || '—'}</div><div class="sa">${l.address || ''}</div></td>
     <td><span class="ph">${l.phone || '—'}</span></td>
     <td><div style="color:var(--a4);font-size:12px;">${l.rating || '—'} ⭐</div><div style="font-size:11px;color:var(--tx3);">${l.reviews ? l.reviews + ' reviews' : ''}</div></td>
@@ -2142,15 +2313,46 @@
   </tr>`).join('');
     }
 
-    function showSPPage(page, el) {
-      document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
-      if (page === 'spdash') document.getElementById('spdash-page').classList.add('visible');
-      else if (page === 'myleads') document.getElementById('myleads-page').classList.add('visible');
-      document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
-      if (el) el.classList.add('active');
+    function rMyLeads() {
+      const fl = getSpFiltered();
+      renderSPTable('sp-leads-body', fl);
+      
+      const statusLeads = spLeads.filter(l => {
+        const fm = spFilt === 'all' || l.status === spFilt;
+        const q = spSq.toLowerCase();
+        const sm = !q || (l.school_name || '').toLowerCase().includes(q) || (l.address || '').toLowerCase().includes(q);
+        return fm && sm;
+      });
+      renderSPTable('sp-status-leads-body', statusLeads);
     }
 
-    function setSpF(f, el) { spFilt = f; document.querySelectorAll('#myleads-page .ft').forEach(t => t.classList.remove('active')); el.classList.add('active'); rMyLeads(); }
+    function showSPPage(page, el, param = null) {
+      if (page === 'leads') currentDomain = param;
+      if (page === 'prospects' && param) spFilt = param;
+
+      document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
+      if (page === 'spdash') document.getElementById('spdash-page').classList.add('visible');
+      else if (page === 'leads') {
+        document.getElementById('sp-leads-page').classList.add('visible');
+        const ptitle = domains.find(d => d.id === param).label + ' Leads';
+        document.getElementById('sp-leads-page-title').textContent = ptitle;
+        document.getElementById('sp-domain-table-title').textContent = ptitle;
+      }
+      else if (page === 'prospects') {
+        document.getElementById('sp-prospects-page').classList.add('visible');
+        const ptitle = param === 'all' ? 'All Prospects' : (param.charAt(0).toUpperCase() + param.slice(1) + ' Prospects');
+        document.getElementById('sp-prospects-page-title').textContent = ptitle;
+        document.getElementById('sp-prospect-table-title').textContent = ptitle;
+      }
+
+      document.querySelectorAll('.ni:not(.dropdown-btn)').forEach(n => n.classList.remove('active'));
+      if (el) el.classList.add('active');
+
+      if (page === 'leads' || page === 'prospects') {
+        rMyLeads();
+      }
+    }
+
     function spSearch(q) { spSq = q; rMyLeads(); }
 
     async function spUpdStatus(id, status, sel) {
@@ -2229,13 +2431,13 @@
     // ── ADMIN RENDER ──
     function renderAll() { rStats(); rLeads(); rPipe(); rTeam(); popAssign(); }
     function rStats() {
-      const tot = leads.length, nw = leads.filter(l => l.status === 'new').length;
-      const closed = leads.filter(l => l.status === 'closed').length;
+      const tot = leads.length, nw = leads.filter(l => !l.status || l.status.trim().toLowerCase() === 'new').length;
+      const closed = leads.filter(l => l.status && l.status.trim().toLowerCase() === 'closed').length;
       const ratings = leads.filter(l => l.rating);
       const avgR = ratings.length ? (ratings.reduce((a, l) => a + Number(l.rating), 0) / ratings.length).toFixed(1) : '—';
       document.getElementById('s1').textContent = tot; document.getElementById('s2').textContent = nw; document.getElementById('s3').textContent = avgR; document.getElementById('s4').textContent = tot ? Math.round(closed / tot * 100) + '%' : '0%';
     }
-    function getFiltered() { return leads.filter(l => { const fm = filt === 'all' || l.status === filt; const q = sq.toLowerCase(); const sm = !q || (l.school_name || '').toLowerCase().includes(q) || (l.address || '').toLowerCase().includes(q) || (l.phone || '').toLowerCase().includes(q); return fm && sm; }); }
+    function getFiltered() { return leads.filter(l => { const fm = filt === 'all' || (l.status && l.status.trim().toLowerCase() === filt); const q = sq.toLowerCase(); const sm = !q || (l.school_name || '').toLowerCase().includes(q) || (l.address || '').toLowerCase().includes(q) || (l.phone || '').toLowerCase().includes(q); return fm && sm; }); }
     function rLeads() {
       const tb = document.getElementById('leads-body'); const fl = getFiltered();
       if (!fl.length) { tb.innerHTML = '<tr class="empty"><td colspan="8">No leads found. Run your n8n workflow or add manually!</td></tr>'; return; }
@@ -2246,7 +2448,7 @@
         return `<tr><td><div class="sn">${l.school_name || '—'}</div><div class="sa">${l.address || ''}</div></td><td><span class="ph">${l.phone || '—'}</span></td><td><div style="color:var(--a4);font-size:12px;">${l.rating || '—'} ⭐</div><div style="font-size:11px;color:var(--tx3);">${l.reviews ? l.reviews + ' reviews' : ''}</div></td><td>${l.website ? `<a class="wb-link" href="${l.website}" target="_blank">🌐 Visit</a>` : '—'}</td><td><select class="badge ${bc[l.status] || 'bn'}" onchange="updStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;"><option value="new" ${l.status === 'new' ? 'selected' : ''}>🔵 New</option><option value="contacted" ${l.status === 'contacted' ? 'selected' : ''}>🟠 Contacted</option><option value="qualified" ${l.status === 'qualified' ? 'selected' : ''}>🟢 Qualified</option><option value="closed" ${l.status === 'closed' ? 'selected' : ''}>🔴 Closed</option></select></td><td><div style="display:flex;align-items:center;gap:7px;"><select class="ssel" onchange="assignLead(${l.id},this.value)" style="background:var(--s2);border:1.5px solid var(--bd);border-radius:7px;padding:4px 8px;color:var(--tx);font-size:11.5px;">${'<option value="">—</option>' + team.map(t => `<option value="${t.id}" ${t.id === l.assigned_id ? 'selected' : ''}>${t.name}</option>`).join('')}</select></div></td><td><div style="font-size:11px;color:var(--tx3);">${l.created_at ? new Date(l.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</div></td><td><div class="abts"><button class="ib" onclick="editLead(${l.id})" title="Edit">✏️</button><button class="ib del" onclick="delLead(${l.id})" title="Delete">🗑️</button></div></td></tr>`;
       }).join('');
     }
-    function rPipe() { const stages = [{ k: 'new', l: 'New', c: '#5b6af7' }, { k: 'contacted', l: 'Contacted', c: '#f5a623' }, { k: 'qualified', l: 'Qualified', c: '#1de9a0' }, { k: 'closed', l: 'Closed', c: '#f25b7e' }]; const tot = leads.length || 1; document.getElementById('pipe-wrap').innerHTML = stages.map(s => { const cnt = leads.filter(l => l.status === s.k).length; const pct = Math.round(cnt / tot * 100); return `<div class="ps"><div class="ps-top"><div class="ps-name"><div class="ps-dot" style="background:${s.c}"></div>${s.l}</div><span class="ps-cnt">${cnt}</span></div><div class="pb"><div class="pbf" style="width:${pct}%;background:${s.c}"></div></div><div class="pv">${pct}% of total</div></div>`; }).join(''); }
+    function rPipe() { const stages = [{ k: 'new', l: 'New', c: '#5b6af7' }, { k: 'contacted', l: 'Contacted', c: '#f5a623' }, { k: 'qualified', l: 'Qualified', c: '#1de9a0' }, { k: 'closed', l: 'Closed', c: '#f25b7e' }]; const tot = leads.length || 1; document.getElementById('pipe-wrap').innerHTML = stages.map(s => { const cnt = leads.filter(l => l.status && l.status.trim().toLowerCase() === s.k).length; const pct = Math.round(cnt / tot * 100); return `<div class="ps"><div class="ps-top"><div class="ps-name"><div class="ps-dot" style="background:${s.c}"></div>${s.l}</div><span class="ps-cnt">${cnt}</span></div><div class="pb"><div class="pbf" style="width:${pct}%;background:${s.c}"></div></div><div class="pv">${pct}% of total</div></div>`; }).join(''); }
     function rTeam() {
       const g = document.getElementById('team-grid');
       g.innerHTML = team.map(m => {
