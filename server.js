@@ -6,6 +6,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 
+const { scrapeAndSave } = require('./lead-scraper');
+const { scoreAllPendingLeads, scoreLead } = require('./lead-scorer');
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -65,11 +68,17 @@ async function initDB() {
 
     // Safe migration: add columns that may be missing from older DB instances
     await pool.query(`
-      ALTER TABLE leads ADD COLUMN IF NOT EXISTS base_score NUMERIC DEFAULT 0;
-      ALTER TABLE leads ADD COLUMN IF NOT EXISTS final_score NUMERIC DEFAULT 0;
-      ALTER TABLE leads ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'low';
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS base_score     NUMERIC     DEFAULT 0;
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS final_score    NUMERIC     DEFAULT 0;
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS score          INTEGER     DEFAULT 0;
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS website_status TEXT;
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS gaps_found     JSONB;
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS priority       TEXT;
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS pitch          TEXT;
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS scored_at      TIMESTAMPTZ;
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS search_query   TEXT;
       ALTER TABLE leads ADD COLUMN IF NOT EXISTS missing_services TEXT;
-      ALTER TABLE leads ADD COLUMN IF NOT EXISTS sales_pitch TEXT;
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS sales_pitch    TEXT;
     `);
 
     // ── Safe migrations (add columns if missing) ──
@@ -196,6 +205,23 @@ app.post('/api/auth/register', requireAuth(['admin']), async (req, res) => {
   }
 });
 
+// ── Helpers ──────────────────────────────────────────────────
+function cleanPhone(raw) {
+  if (!raw) return '';
+  return String(raw).replace(/^['"\s]+/, '').trim();
+}
+function calcBaseScore({ rating, reviews, phone, website, address }) {
+  let score = 0;
+  const r = parseFloat(rating) || 0;
+  if (r >= 4.5) score += 25; else if (r >= 4.0) score += 20; else if (r >= 3.5) score += 14; else if (r >= 3.0) score += 8; else if (r > 0) score += 4;
+  const rv = parseInt(reviews) || 0;
+  if (rv >= 200) score += 20; else if (rv >= 100) score += 16; else if (rv >= 50) score += 12; else if (rv >= 20) score += 8; else if (rv >= 5) score += 4;
+  if (phone) score += 10;
+  if (website) score += 15;
+  if (address) score += 10;
+  return Math.min(score, 80);
+}
+
 // ── LEADS ──
 app.get('/api/leads', async (req, res) => {
   try {
@@ -218,10 +244,12 @@ app.get('/api/leads/mine', requireAuth(['salesperson']), async (req, res) => {
 app.post('/api/leads', async (req, res) => {
   const { school_name, address, phone, website, rating, reviews, source, status, assigned_id, notes } = req.body;
   try {
+    const cleanedPhone = cleanPhone(phone);
+    const base = calcBaseScore({ rating, reviews, phone: cleanedPhone, website, address });
     const result = await pool.query(
-      `INSERT INTO leads (school_name, address, phone, website, rating, reviews, source, status, assigned_id, notes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-      [school_name, address, phone, website, rating || null, reviews || null, source || 'n8n', status || 'new', assigned_id || null, notes || '']
+      `INSERT INTO leads (school_name, address, phone, website, rating, reviews, base_score, score, source, status, assigned_id, notes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
+      [school_name, address, cleanedPhone, website, rating || null, reviews || null, base, base, source || 'manual', status || 'new', assigned_id || null, notes || '']
     );
     res.json(result.rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -289,21 +317,94 @@ app.delete('/api/team/:id', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── n8n WEBHOOK ──
+// ── n8n WEBHOOK ──────────────────────────────────────────────
 app.post('/webhook/leads', async (req, res) => {
   const { school_name, address, phone, website, rating, reviews } = req.body;
   try {
+    const cleanedPhone = cleanPhone(phone);
+    const base = calcBaseScore({ rating, reviews, phone: cleanedPhone, website, address });
     const result = await pool.query(
-      `INSERT INTO leads (school_name, address, phone, website, rating, reviews, source, status)
-       VALUES ($1,$2,$3,$4,$5,$6,'n8n','new') RETURNING *`,
-      [school_name || 'Unknown', address || '', phone || '', website || '', rating || null, reviews || null]
+      `INSERT INTO leads (school_name, address, phone, website, rating, reviews, base_score, score, source, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'n8n','new')
+       ON CONFLICT DO NOTHING
+       RETURNING *`,
+      [school_name || 'Unknown', address || '', cleanedPhone, website || '', rating || null, reviews || null, base, base]
     );
-    console.log('⚡ New lead from n8n:', school_name);
+    if (!result.rows.length) {
+      return res.json({ success: true, skipped: true, message: 'Duplicate lead, skipped.' });
+    }
+    console.log('⚡ New lead from n8n:', school_name, '| base_score:', base);
     res.json({ success: true, lead: result.rows[0] });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── Trigger n8n (proxy) ──
+// ── Re-score a single lead on demand ─────────────────────────
+app.post('/api/leads/:id/score', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM leads WHERE id=$1', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Lead not found' });
+    const scored = await scoreLead(rows[0]);
+    res.json({ success: true, lead: scored });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Scrape trigger ────────────────────────────────────────────
+app.post('/api/trigger-scrape', async (req, res) => {
+  const query = req.body?.query || process.env.N8N_QUERY || 'preschools in Bengaluru';
+  try {
+    console.log(`\n⚡ Scrape triggered for: "${query}"`);
+    const results = await scrapeAndSave(query);
+    res.json({ success: true, query, saved: results.saved.length, skipped: results.skipped.length, errors: results.errors.length, leads: results.saved });
+  } catch (err) {
+    console.error('Scrape trigger error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Score trigger ─────────────────────────────────────────────
+app.post('/api/trigger-score', async (req, res) => {
+  try {
+    console.log('\n⚡ Score trigger received');
+    const scored = await scoreAllPendingLeads();
+    res.json({ success: true, scored: scored.length });
+  } catch (err) {
+    console.error('Score trigger error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Full pipeline: Scrape → Score ─────────────────────────────
+app.post('/api/trigger-all', async (req, res) => {
+  const query = req.body?.query || process.env.N8N_QUERY || 'preschools in Bengaluru';
+  try {
+    console.log(`\n🚀 FULL PIPELINE triggered for: "${query}"`);
+    const scrapeResults = await scrapeAndSave(query);
+    const scored = await scoreAllPendingLeads();
+    const { rows: allLeads } = await pool.query(
+      `SELECT id, school_name, score, priority, website_status, gaps_found FROM leads WHERE search_query=$1 ORDER BY score DESC`,
+      [query]
+    );
+    res.json({ success: true, query, pipeline: { scraped: scrapeResults.saved.length, skipped: scrapeResults.skipped.length, scored: scored.length }, leads: allLeads });
+  } catch (err) {
+    console.error('Pipeline error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Stats summary ─────────────────────────────────────────────
+app.get('/api/stats', async (req, res) => {
+  try {
+    const [total, byStatus, byPriority, avgScore] = await Promise.all([
+      pool.query('SELECT COUNT(*) FROM leads'),
+      pool.query('SELECT status, COUNT(*) FROM leads GROUP BY status'),
+      pool.query('SELECT priority, COUNT(*) FROM leads WHERE priority IS NOT NULL GROUP BY priority'),
+      pool.query('SELECT AVG(score)::numeric(5,1) as avg_score FROM leads WHERE score > 0'),
+    ]);
+    res.json({ total: parseInt(total.rows[0].count), by_status: byStatus.rows, by_priority: byPriority.rows, avg_score: avgScore.rows[0]?.avg_score || 0 });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Trigger n8n (proxy) ──────────────────────────────────────
 app.post('/api/trigger-n8n', async (req, res) => {
   try {
     const response = await fetch(process.env.N8N_WEBHOOK_URL, {
@@ -320,25 +421,16 @@ app.post('/api/trigger-n8n', async (req, res) => {
   }
 });
 
-// ── Fix status endpoint ──
+// ── Fix status endpoint ───────────────────────────────────────
 app.get('/api/fix-status', async (req, res) => {
   try {
-    await pool.query(`
-      UPDATE leads 
-      SET status = 'new' 
-      WHERE status IS NULL 
-         OR (TRIM(LOWER(status)) != 'contacted' 
-         AND TRIM(LOWER(status)) != 'qualified' 
-         AND TRIM(LOWER(status)) != 'closed');
-    `);
+    await pool.query(`UPDATE leads SET status = 'new' WHERE status IS NULL OR (TRIM(LOWER(status)) != 'contacted' AND TRIM(LOWER(status)) != 'qualified' AND TRIM(LOWER(status)) != 'closed' AND TRIM(LOWER(status)) != 'scored');`);
     const result = await pool.query('SELECT status, COUNT(*) FROM leads GROUP BY status');
     res.json({ success: true, message: 'All status fixed!', breakdown: result.rows });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── Health check ──
+// ── Health check ──────────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({ status: '✅ LeadFlow CRM Backend is running', db: 'PostgreSQL', port: process.env.PORT });
 });
@@ -347,8 +439,26 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// ── Start server ──────────────────────────────────────────────
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`🚀 LeadFlow backend running at http://localhost:${PORT}`);
-  console.log(`🔗 n8n webhook endpoint: http://localhost:${PORT}/webhook/leads`);
+const server = app.listen(PORT, () => {
+  console.log(`\n🚀 LeadFlow backend running at http://localhost:${PORT}`);
+  console.log(`🔗 n8n webhook     → POST http://localhost:${PORT}/webhook/leads`);
+  console.log(`📊 Trigger score   → POST http://localhost:${PORT}/api/trigger-score`);
+  console.log(`⚡ Full pipeline   → POST http://localhost:${PORT}/api/trigger-all`);
+  console.log(`📋 Leads API       → GET  http://localhost:${PORT}/api/leads`);
 });
+
+// ── Graceful EADDRINUSE handling ─────────────────────────────
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n❌ Port ${PORT} is already in use!`);
+    console.error(`   Run this to free it:`);
+    console.error(`   Stop-Process -Id (Get-NetTCPConnection -LocalPort ${PORT}).OwningProcess -Force\n`);
+    process.exit(1);
+  } else {
+    console.error('Server error:', err);
+    process.exit(1);
+  }
+});
+

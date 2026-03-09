@@ -1449,7 +1449,8 @@
     <!-- ADMIN NAV -->
     <div class="adm-only" id="adm-nav">
       <div class="nl">Main</div>
-      <div class="ni active" id="nav-dash" onclick="showAdminPage('dashboard',this)"><span class="ni-ic">📊</span>Dashboard</div>
+      <div class="ni active" id="nav-dash" onclick="showAdminPage('dashboard',this)"><span
+          class="ni-ic">📊</span>Dashboard</div>
       <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
         <div><span class="ni-ic">📈</span>Leads</div>
         <i class="arrow"></i>
@@ -1464,16 +1465,19 @@
 
       <div class="nl">Workspace</div>
       <div class="ni" id="nav-team" onclick="showAdminPage('team',this)"><span class="ni-ic">🧑‍💼</span>Team</div>
-      <div class="ni" id="nav-addsp" onclick="showAdminPage('addsp',this)"><span class="ni-ic">👤</span>Add Sales Person</div>
-      <div class="ni" id="nav-adminuser" onclick="showAdminPage('adminuser',this)"><span class="ni-ic">⚙️</span>Admin User</div>
+      <div class="ni" id="nav-addsp" onclick="showAdminPage('addsp',this)"><span class="ni-ic">👤</span>Add Sales Person
+      </div>
+      <div class="ni" id="nav-adminuser" onclick="showAdminPage('adminuser',this)"><span class="ni-ic">⚙️</span>Admin
+        User</div>
       <div class="ni" onclick="openM('wh-modal')"><span class="ni-ic">🔗</span>n8n Webhook</div>
     </div>
 
     <!-- SALESPERSON NAV -->
     <div class="sp-only" id="sp-nav">
       <div class="nl">My Work</div>
-      <div class="ni active" id="nav-spdash" onclick="showSPPage('spdash',this)"><span class="ni-ic">📊</span>My Dashboard</div>
-      
+      <div class="ni active" id="nav-spdash" onclick="showSPPage('spdash',this)"><span class="ni-ic">📊</span>My
+        Dashboard</div>
+
       <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
         <div><span class="ni-ic">📋</span>My Leads</div>
         <i class="arrow"></i>
@@ -1513,6 +1517,7 @@
       <div class="tb-right">
         <div class="srv-status srv-ok" id="srv-badge">● Server OK</div>
         <input class="search" type="text" placeholder="🔍  Search schools..." oninput="doSearch(this.value)">
+        <button class="btn bg" id="score-btn" onclick="runScoring()">📊 Score Leads</button>
         <button class="btn bg" id="run-btn" onclick="runN8nWorkflow()">⚡ Run n8n Workflow</button>
         <button class="btn bp" onclick="openAddLead()">+ Add School</button>
       </div>
@@ -1588,6 +1593,7 @@
               <th>Phone</th>
               <th>Rating</th>
               <th>Website</th>
+              <th>Score & Pitch</th>
               <th>Status</th>
               <th>Assigned</th>
               <th>Added On</th>
@@ -1624,6 +1630,7 @@
                 <th>Phone</th>
                 <th>Rating</th>
                 <th>Website</th>
+                <th>Score & Pitch</th>
                 <th>Status</th>
                 <th>Assigned</th>
                 <th>Added On</th>
@@ -1796,6 +1803,18 @@
     </div>
   </div>
 
+  <!-- PITCH MODAL -->
+  <div class="ov" id="pitch-modal">
+    <div class="modal">
+      <div class="mh">
+        <div class="mt">🤖 Exora Sales AI Report</div><button class="mc" onclick="closeM('pitch-modal')">✕</button>
+      </div>
+      <div class="mb"
+        style="max-height:60vh;overflow-y:auto;white-space:pre-wrap;font-family:monospace;font-size:12px;color:var(--tx2);background:var(--s2);padding:16px;border-radius:8px;line-height:1.6;"
+        id="pm-txt"></div>
+    </div>
+  </div>
+
   <!-- ADD SALES PERSON PAGE -->
   <div class="page-section" id="addsp-page">
     <div class="topbar">
@@ -1950,6 +1969,7 @@
               <th>Phone</th>
               <th>Rating</th>
               <th>Website</th>
+              <th>Score & Pitch</th>
               <th>Status</th>
               <th>Notes</th>
               <th>Actions</th>
@@ -1985,6 +2005,7 @@
               <th>Phone</th>
               <th>Rating</th>
               <th>Website</th>
+              <th>Score & Pitch</th>
               <th>Status</th>
               <th>Notes</th>
               <th>Actions</th>
@@ -2029,7 +2050,7 @@
       if (c1) {
         let h1 = `<div class="ni" onclick="showAdminPage('prospects', this, 'all')"><span class="ni-ic">📋</span>All</div>`;
         statuses.forEach(s => {
-          const icon = s==='new'?'🔵':s==='contacted'?'🟠':s==='qualified'?'🟢':'🔴';
+          const icon = s === 'new' ? '🔵' : s === 'contacted' ? '🟠' : s === 'qualified' ? '🟢' : '🔴';
           h1 += `<div class="ni" onclick="showAdminPage('prospects', this, '${s}')"><span class="ni-ic">${icon}</span>${s.charAt(0).toUpperCase() + s.slice(1)}</div>`;
         });
         c1.innerHTML = h1;
@@ -2039,7 +2060,7 @@
       if (c2) {
         let h2 = `<div class="ni" onclick="showSPPage('prospects', this, 'all')"><span class="ni-ic">📋</span>All</div>`;
         statuses.forEach(s => {
-          const icon = s==='new'?'🔵':s==='contacted'?'🟠':s==='qualified'?'🟢':'🔴';
+          const icon = s === 'new' ? '🔵' : s === 'contacted' ? '🟠' : s === 'qualified' ? '🟢' : '🔴';
           h2 += `<div class="ni" onclick="showSPPage('prospects', this, '${s}')"><span class="ni-ic">${icon}</span>${s.charAt(0).toUpperCase() + s.slice(1)}</div>`;
         });
         c2.innerHTML = h2;
@@ -2294,7 +2315,7 @@
 
     function renderSPTable(tbodyId, leadsArray) {
       const tb = document.getElementById(tbodyId);
-      if(!tb) return;
+      if (!tb) return;
       if (!leadsArray.length) { tb.innerHTML = '<tr class="empty"><td colspan="7">No leads found.</td></tr>'; return; }
       const bc = { new: 'bn', contacted: 'bc', qualified: 'bq', closed: 'bx' };
       tb.innerHTML = leadsArray.map(l => `<tr>
@@ -2302,9 +2323,10 @@
     <td><span class="ph">${l.phone || '—'}</span></td>
     <td><div style="color:var(--a4);font-size:12px;">${l.rating || '—'} ⭐</div><div style="font-size:11px;color:var(--tx3);">${l.reviews ? l.reviews + ' reviews' : ''}</div></td>
     <td>${l.website ? `<a class="wb-link" href="${l.website}" target="_blank">🌐 Visit</a>` : '—'}</td>
+    <td><div style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;font-weight:700;color:${l.score > 0 ? 'var(--acc)' : 'var(--tx3)'}">${l.score || 0}</span>${l.pitch ? `<button class="ib bg" onclick="showPitch(${l.id})" title="View AI Pitch" style="font-size:11px;padding:3px 6px;">🤖</button>` : ''}</div></td>
     <td><select class="badge ${bc[l.status] || 'bn'}" onchange="spUpdStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;">
       <option value="new" ${l.status === 'new' ? 'selected' : ''}>🔵 New</option>
-      <option value="contacted" ${l.status === 'contacted' ? 'selected' : ''}>🟠 Contacted</option>
+      <option value="contacted" ${l.status === 'contacted' ? 'selected' : ''}>🟢 Contacted</option>
       <option value="qualified" ${l.status === 'qualified' ? 'selected' : ''}>🟢 Qualified</option>
       <option value="closed" ${l.status === 'closed' ? 'selected' : ''}>🔴 Closed</option>
     </select></td>
@@ -2316,7 +2338,7 @@
     function rMyLeads() {
       const fl = getSpFiltered();
       renderSPTable('sp-leads-body', fl);
-      
+
       const statusLeads = spLeads.filter(l => {
         const fm = spFilt === 'all' || l.status === spFilt;
         const q = spSq.toLowerCase();
@@ -2445,7 +2467,7 @@
       tb.innerHTML = fl.map(l => {
         const m = team.find(t => t.id === l.assigned_id);
         const init = m ? m.name.split(' ').map(n => n[0]).join('').slice(0, 2) : '?';
-        return `<tr><td><div class="sn">${l.school_name || '—'}</div><div class="sa">${l.address || ''}</div></td><td><span class="ph">${l.phone || '—'}</span></td><td><div style="color:var(--a4);font-size:12px;">${l.rating || '—'} ⭐</div><div style="font-size:11px;color:var(--tx3);">${l.reviews ? l.reviews + ' reviews' : ''}</div></td><td>${l.website ? `<a class="wb-link" href="${l.website}" target="_blank">🌐 Visit</a>` : '—'}</td><td><select class="badge ${bc[l.status] || 'bn'}" onchange="updStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;"><option value="new" ${l.status === 'new' ? 'selected' : ''}>🔵 New</option><option value="contacted" ${l.status === 'contacted' ? 'selected' : ''}>🟠 Contacted</option><option value="qualified" ${l.status === 'qualified' ? 'selected' : ''}>🟢 Qualified</option><option value="closed" ${l.status === 'closed' ? 'selected' : ''}>🔴 Closed</option></select></td><td><div style="display:flex;align-items:center;gap:7px;"><select class="ssel" onchange="assignLead(${l.id},this.value)" style="background:var(--s2);border:1.5px solid var(--bd);border-radius:7px;padding:4px 8px;color:var(--tx);font-size:11.5px;">${'<option value="">—</option>' + team.map(t => `<option value="${t.id}" ${t.id === l.assigned_id ? 'selected' : ''}>${t.name}</option>`).join('')}</select></div></td><td><div style="font-size:11px;color:var(--tx3);">${l.created_at ? new Date(l.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</div></td><td><div class="abts"><button class="ib" onclick="editLead(${l.id})" title="Edit">✏️</button><button class="ib del" onclick="delLead(${l.id})" title="Delete">🗑️</button></div></td></tr>`;
+        return `<tr><td><div class="sn">${l.school_name || '—'}</div><div class="sa">${l.address || ''}</div></td><td><span class="ph">${l.phone || '—'}</span></td><td><div style="color:var(--a4);font-size:12px;">${l.rating || '—'} ⭐</div><div style="font-size:11px;color:var(--tx3);">${l.reviews ? l.reviews + ' reviews' : ''}</div></td><td>${l.website ? `<a class="wb-link" href="${l.website}" target="_blank">🌐 Visit</a>` : '—'}</td><td><div style="display:flex;align-items:center;gap:6px;"><span style="font-size:14px;font-weight:700;color:${l.score > 0 ? 'var(--acc)' : 'var(--tx3)'}">${l.score || 0}</span>${l.pitch ? `<button class="ib bg" onclick="showPitch(${l.id})" title="View AI Pitch" style="font-size:11px;padding:3px 6px;">🤖</button>` : ''}</div></td><td><select class="badge ${bc[l.status] || 'bn'}" onchange="updStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;"><option value="new" ${l.status === 'new' ? 'selected' : ''}>🔵 New</option><option value="contacted" ${l.status === 'contacted' ? 'selected' : ''}>🟢 Contacted</option><option value="qualified" ${l.status === 'qualified' ? 'selected' : ''}>🟢 Qualified</option><option value="closed" ${l.status === 'closed' ? 'selected' : ''}>🔴 Closed</option></select></td><td><div style="display:flex;align-items:center;gap:7px;"><select class="ssel" onchange="assignLead(${l.id},this.value)" style="background:var(--s2);border:1.5px solid var(--bd);border-radius:7px;padding:4px 8px;color:var(--tx);font-size:11.5px;">${'<option value="">—</option>' + team.map(t => `<option value="${t.id}" ${t.id === l.assigned_id ? 'selected' : ''}>${t.name}</option>`).join('')}</select></div></td><td><div style="font-size:11px;color:var(--tx3);">${l.created_at ? new Date(l.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</div></td><td><div class="abts"><button class="ib" onclick="editLead(${l.id})" title="Edit">✏️</button><button class="ib del" onclick="delLead(${l.id})" title="Delete">🗑️</button></div></td></tr>`;
       }).join('');
     }
     function rPipe() { const stages = [{ k: 'new', l: 'New', c: '#5b6af7' }, { k: 'contacted', l: 'Contacted', c: '#f5a623' }, { k: 'qualified', l: 'Qualified', c: '#1de9a0' }, { k: 'closed', l: 'Closed', c: '#f25b7e' }]; const tot = leads.length || 1; document.getElementById('pipe-wrap').innerHTML = stages.map(s => { const cnt = leads.filter(l => l.status && l.status.trim().toLowerCase() === s.k).length; const pct = Math.round(cnt / tot * 100); return `<div class="ps"><div class="ps-top"><div class="ps-name"><div class="ps-dot" style="background:${s.c}"></div>${s.l}</div><span class="ps-cnt">${cnt}</span></div><div class="pb"><div class="pbf" style="width:${pct}%;background:${s.c}"></div></div><div class="pv">${pct}% of total</div></div>`; }).join(''); }
@@ -2487,6 +2509,10 @@
     function openAddTeam() { ['t-name', 't-role', 't-email', 't-phone'].forEach(id => document.getElementById(id).value = ''); openM('team-modal'); }
     async function saveTeam() { const n = document.getElementById('t-name').value.trim(), r = document.getElementById('t-role').value.trim(); if (!n || !r) { toast('Name and Role required', 'error'); return; } const data = { name: n, role: r, email: document.getElementById('t-email').value.trim(), phone: document.getElementById('t-phone').value.trim(), color: document.getElementById('t-color').value, status: document.getElementById('t-status').value }; try { const c = await post('/team', data); team.push(c); renderAll(); closeM('team-modal'); toast('✅ Team member added!', 'success'); } catch (e) { toast('Error: ' + e.message, 'error'); } }
     function openTD(id) { const m = team.find(t => t.id === id); if (!m) return; const ml = leads.filter(l => l.assigned_id === id); const init = m.name.split(' ').map(n => n[0]).join('').slice(0, 2); const av = document.getElementById('tda'); av.textContent = init; av.style.background = m.color + '18'; av.style.color = m.color; av.style.border = `2px solid ${m.color}30`; document.getElementById('tdn').textContent = m.name; document.getElementById('tdr').textContent = m.role; document.getElementById('tdc').textContent = [m.email, m.phone].filter(Boolean).join(' · '); document.getElementById('tds1').textContent = ml.length; document.getElementById('tds2').textContent = ml.filter(l => l.status === 'new').length; document.getElementById('tds3').textContent = ml.filter(l => l.status === 'qualified').length; document.getElementById('tds4').textContent = ml.filter(l => l.status === 'closed').length; document.getElementById('td-leads').innerHTML = ml.length ? ml.map(l => `<div class="ml"><div><div style="font-weight:700">${l.school_name}</div><div style="font-size:11.5px;color:var(--tx3)">${l.address || l.phone || ''}</div></div><span class="badge b${l.status[0]}">${l.status}</span></div>`).join('') : '<div style="color:var(--tx3);font-size:13px;padding:10px 0;">No schools assigned yet.</div>'; openM('td-modal'); }
+
+    // ── SCORES & PITCH ──
+    async function runScoring() { const btn = document.getElementById('score-btn'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Scoring...'; toast('📊 Scoring pending leads...', 'success'); try { const res = await post('/trigger-score', {}); toast(`✅ Scored ${res.scored} new leads!`, 'success'); if (res.scored > 0) { leads = await get('/leads'); renderAll(); } } catch (e) { toast('⚠️ Error: ' + e.message, 'error'); } btn.disabled = false; btn.innerHTML = '📊 Score Leads'; }
+    function showPitch(id) { const l = (leads.find(x => x.id === id) || spLeads.find(x => x.id === id)); if (!l || !l.pitch) return; document.getElementById('pm-txt').textContent = l.pitch; openM('pitch-modal'); }
 
     // ── N8N ──
     async function runN8nWorkflow() { const btn = document.getElementById('run-btn'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Running...'; toast('⚡ Triggering n8n workflow...', 'success'); try { await post('/trigger-n8n', {}); toast('✅ Workflow triggered! Loading new leads in 10s...', 'success'); setTimeout(async () => { leads = await get('/leads'); renderAll(); toast('🎉 New leads loaded from n8n!', 'success'); btn.disabled = false; btn.innerHTML = '⚡ Run n8n Workflow'; }, 10000); } catch (e) { toast('⚠️ Error: ' + e.message, 'error'); btn.disabled = false; btn.innerHTML = '⚡ Run n8n Workflow'; } }
