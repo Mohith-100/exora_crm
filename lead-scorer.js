@@ -23,6 +23,7 @@ const GAP_DEFINITIONS = [
         label: 'CRM / Enquiry Management',
         techSigs: ['leadsquared.com', 'hubspot.com', 'salesforce.com', 'zoho.com', 'nopaperforms', 'extraedge', 'meritto.com', 'noesisenquiry', 'leadform', 'forms.gle'],
         keywords: ['crm login', 'enquiry portal'],
+        apiCats: ['crm', 'marketing-automation'],
         boost: 10,
         pitch: 'No professional CRM or automated enquiry system detected. Exora CRM can automate lead capture, follow-ups, and convert more admissions—without any manual effort.',
     },
@@ -31,6 +32,7 @@ const GAP_DEFINITIONS = [
         label: 'LMS / Online Learning',
         techSigs: ['moodle', 'canvas', 'blackboard', 'teachable', 'udemy', 'educomp', 'learnpress', 'tutorlms'],
         keywords: ['student portal', 'lms login'],
+        apiCats: ['lms'],
         boost: 10,
         pitch: 'No LMS or online learning platform found. Exora LMS enables live/recorded classes, homework, quizzes, and parent-teacher communication—all in one place.',
     },
@@ -39,6 +41,7 @@ const GAP_DEFINITIONS = [
         label: 'Online Fee Payment',
         techSigs: ['razorpay.com', 'stripe.com', 'paytm.in', 'payu.in', 'instamojo.com', 'ccavenue.com', 'cashfree.com', 'secure.pay'],
         keywords: ['pay fee online', 'online fee portal'],
+        apiCats: ['payment-processors'],
         boost: 10,
         pitch: 'No online fee payment gateway detected. Exora Payments allows parents to pay fees anytime via UPI, cards, or net banking—reducing admin workload by 80%.',
     },
@@ -47,6 +50,7 @@ const GAP_DEFINITIONS = [
         label: 'Online Admission Portal',
         techSigs: ['admission.nopaperforms', 'apply.meritto'],
         keywords: ['apply online', 'online admission portal', 'registration form'],
+        apiCats: [],
         boost: 8,
         pitch: 'No digital admission process found. Exora Admissions digitises the entire process—from application to document upload and fee payment, cutting paperwork completely.',
     },
@@ -55,6 +59,7 @@ const GAP_DEFINITIONS = [
         label: 'Mobile App / Parent Portal',
         techSigs: ['play.google.com/store/apps', 'apps.apple.com'],
         keywords: ['download our app', 'parent portal'],
+        apiCats: [],
         boost: 7,
         pitch: 'No mobile app or parent portal detected. Exora Parent App keeps parents updated with attendance, homework, fees, and notices—boosting their satisfaction.',
     },
@@ -63,6 +68,7 @@ const GAP_DEFINITIONS = [
         label: 'Attendance / ERP System',
         techSigs: ['fedena', 'edunext', 'entab', 'myclassboard', 'schoolpad', 'edadmin'],
         keywords: ['erp login', 'school erp login', 'staff login'],
+        apiCats: ['erp'],
         boost: 7,
         pitch: 'No digital attendance or ERP system detected. Exora ERP lets teachers mark attendance digitally, auto-notifying parents and generating compliance reports.',
     },
@@ -71,6 +77,7 @@ const GAP_DEFINITIONS = [
         label: 'Live Chat / Chatbot',
         techSigs: ['tawk.to', 'tidio.co', 'zendesk.com', 'intercom.io', 'freshchat.com', 'drift.com', 'crisp.chat', 'whatsapp.com/send', 'wa.me'],
         keywords: [],
+        apiCats: ['live-chat'],
         boost: 5,
         pitch: 'No live chat or WhatsApp integration found. Exora AI Chatbot handles admission queries 24/7 on WhatsApp and your website, converting visitors into enrolled students automatically.',
     },
@@ -79,10 +86,51 @@ const GAP_DEFINITIONS = [
         label: 'Secure Website (HTTPS)',
         techSigs: [],
         keywords: [],
+        apiCats: [],
         boost: 5,
         pitch: 'Website is not secure (no HTTPS). Exora handles your HTTPS setup as part of the website package, building trust with parents immediately.',
     },
 ];
+
+// ── FREE LOCAL DEEP SCANNER ───────────────────────────────
+// Replaces expensive APIs by aggressively scanning for invisible tech signatures
+function deepTechScan(html) {
+    if (!html) return [];
+
+    const $ = cheerio.load(html);
+    const foundTechs = new Set();
+    const rawHtml = html.toLowerCase();
+
+    // 1. Scrape all domains from scripts, iframes, and links
+    const externalDomains = [];
+    $('script[src]').each((_, el) => externalDomains.push($(el).attr('src')));
+    $('iframe[src]').each((_, el) => externalDomains.push($(el).attr('src')));
+    $('link[href]').each((_, el) => externalDomains.push($(el).attr('href')));
+
+    const domainString = externalDomains.filter(Boolean).map(d => d.toLowerCase()).join(' ');
+
+    // 2. Map of signatures to categories
+    const techSignatures = [
+        { cat: 'crm', match: ['leadsquared', 'hubspot', 'salesforce', 'zoho', 'nopaperforms', 'meritto', 'leadform', 'extraedge', 'forms.gle'] },
+        { cat: 'lms', match: ['moodle', 'canvas', 'learnpress', 'tutorlms', 'teachable', 'blackboard', 'educomp'] },
+        { cat: 'payment-processors', match: ['razorpay', 'stripe', 'paytm', 'payu', 'instamojo', 'ccavenue', 'cashfree', 'billdesk'] },
+        { cat: 'erp', match: ['fedena', 'edunext', 'entab', 'myclassboard', 'schoolpad', 'edadmin'] },
+        { cat: 'live-chat', match: ['tawk.to', 'tidio', 'zendesk', 'intercom', 'freshchat', 'drift', 'crisp', 'whatsapp.com/send', 'wa.me'] }
+    ];
+
+    // 3. Hunt through both the visible domains AND the invisible raw HTML
+    for (const tech of techSignatures) {
+        for (const signature of tech.match) {
+            // Uncover hidden scripts embedded directly into the HTML body that cheerio wouldn't extract as an external source
+            if (domainString.includes(signature) || rawHtml.includes(signature)) {
+                foundTechs.add(tech.cat);
+                break; // Found one tool in this category, move to next category
+            }
+        }
+    }
+
+    return Array.from(foundTechs);
+}
 
 // ── WEBSITE STATUS CHECK ─────────────────────────────────────
 async function checkWebsiteStatus(url) {
@@ -120,7 +168,7 @@ async function checkWebsiteStatus(url) {
 }
 
 // ── GAP DETECTOR ─────────────────────────────────────────────
-function detectGaps(html, websiteStatus, isHttps) {
+function detectGaps(html, websiteStatus, isHttps, wappalyzerData = []) {
     const foundGaps = [];
     const $ = cheerio.load(html || '');
 
@@ -147,7 +195,13 @@ function detectGaps(html, websiteStatus, isHttps) {
         const hasTechSig = gap.techSigs && gap.techSigs.some((sig) => techString.includes(sig));
         const hasKeyword = gap.keywords && gap.keywords.some((kw) => bodyText.includes(kw));
 
-        if (!hasTechSig && !hasKeyword) {
+        // Deep Tech API Scan Match
+        let hasApiMatch = false;
+        if (gap.apiCats && wappalyzerData.length > 0) {
+            hasApiMatch = gap.apiCats.some(cat => wappalyzerData.includes(cat));
+        }
+
+        if (!hasTechSig && !hasKeyword && !hasApiMatch) {
             foundGaps.push(gap);
         }
     }
@@ -223,7 +277,16 @@ async function scoreLead(lead) {
     const { status: websiteStatus, html, isHttps } = await checkWebsiteStatus(lead.website);
     console.log(`   🌐 Website status: ${websiteStatus}`);
 
-    const gaps = detectGaps(html, websiteStatus, isHttps);
+    // Call Free Local Deep Scanner instead of Wappalyzer
+    let apiTechs = [];
+    if (websiteStatus === 'live') {
+        apiTechs = deepTechScan(html);
+        if (apiTechs.length > 0) {
+            console.log(`   📡 Deep scanner detected tech categories: ${apiTechs.join(', ')}`);
+        }
+    }
+
+    const gaps = detectGaps(html, websiteStatus, isHttps, apiTechs);
     console.log(`   📉 Gaps found: ${gaps.map((g) => g.key).join(', ') || 'none'}`);
 
     const baseScore = lead.base_score || 0;

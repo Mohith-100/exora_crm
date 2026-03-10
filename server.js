@@ -225,7 +225,7 @@ function calcBaseScore({ rating, reviews, phone, website, address }) {
 // ── LEADS ──
 app.get('/api/leads', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM leads ORDER BY created_at DESC');
+    const result = await pool.query('SELECT * FROM leads ORDER BY school_name ASC');
     res.json(result.rows);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -234,7 +234,7 @@ app.get('/api/leads/mine', requireAuth(['salesperson']), async (req, res) => {
   try {
     const teamId = req.user.team_id;
     const result = await pool.query(
-      'SELECT * FROM leads WHERE assigned_id=$1 ORDER BY created_at DESC',
+      'SELECT * FROM leads WHERE assigned_id=$1 ORDER BY school_name ASC',
       [teamId]
     );
     res.json(result.rows);
