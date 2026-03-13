@@ -132,6 +132,19 @@
       text-align: center;
     }
 
+    .ni-badge {
+      font-size: 9px;
+      padding: 1.5px 5px;
+      background: var(--a2);
+      color: white;
+      border-radius: 4px;
+      margin-left: 6px;
+      font-weight: 700;
+      vertical-align: middle;
+      display: inline-block;
+      line-height: 1;
+    }
+
     .dropdown-btn {
       justify-content: space-between;
     }
@@ -479,10 +492,95 @@
       color: var(--tx);
     }
 
-    .ft.active {
-      background: rgba(91, 106, 247, 0.12);
-      color: var(--acc);
-      border-color: rgba(91, 106, 247, 0.3);
+    .bell-btn {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--s2);
+      border: 1.5px solid var(--bd);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 18px;
+      color: var(--tx2);
+      margin-right: 12px;
+    }
+
+    .bell-btn:hover {
+      background: var(--bd);
+      transform: translateY(-1px);
+    }
+
+    .bell-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      background: #f25b7e;
+      border: 1.5px solid var(--s1);
+      border-radius: 50%;
+      display: none;
+    }
+
+    .bell-dot.active {
+      display: block;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(242, 91, 126, 0.7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 8px rgba(242, 91, 126, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(242, 91, 126, 0);
+      }
+    }
+
+    .btn-xs {
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+      font-weight: 600;
+    }
+
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--bd);
+      color: var(--tx2);
+    }
+
+    .badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge.yellow {
+      background: rgba(247, 185, 36, 0.15);
+      color: #f7b924;
+    }
+
+    .badge.gray {
+      background: rgba(108, 117, 125, 0.15);
+      color: #6c757d;
     }
 
     table {
@@ -1429,6 +1527,386 @@
       font-size: 14px;
       color: #ff4d79;
     }
+
+    /* ─────────────────────────────────────────────────────────
+       LEAD DETAIL SIDE PANEL
+    ──────────────────────────────────────────────────────── */
+    .lead-panel-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(4px);
+      z-index: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .lead-panel-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .lead-panel {
+      position: fixed;
+      top: 0;
+      right: -560px;
+      width: 540px;
+      height: 100vh;
+      background: var(--s1);
+      border-left: 1.5px solid var(--bd);
+      z-index: 700;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.35s cubic-bezier(0.34, 1.10, 0.64, 1);
+      box-shadow: -20px 0 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .lead-panel.open {
+      right: 0;
+    }
+
+    .lp-head {
+      padding: 20px 22px 16px;
+      border-bottom: 1.5px solid var(--bd);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(91, 106, 247, 0.06) 0%, transparent 80%);
+    }
+
+    .lp-school-name {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .lp-school-meta {
+      font-size: 12px;
+      color: var(--tx2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .lp-close {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1.5px solid var(--bd);
+      background: var(--s2);
+      color: var(--tx2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .lp-close:hover {
+      background: var(--s3);
+      color: var(--tx);
+    }
+
+    .lp-tabs {
+      display: flex;
+      border-bottom: 1.5px solid var(--bd);
+      flex-shrink: 0;
+      background: var(--s1);
+    }
+
+    .lp-tab {
+      flex: 1;
+      padding: 12px 10px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--tx2);
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      transition: all 0.18s;
+      letter-spacing: 0.3px;
+    }
+
+    .lp-tab:hover {
+      color: var(--tx);
+      background: rgba(91, 106, 247, 0.04);
+    }
+
+    .lp-tab.active {
+      color: var(--acc);
+      border-bottom-color: var(--acc);
+      background: rgba(91, 106, 247, 0.05);
+    }
+
+    .lp-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 22px;
+    }
+
+    .lp-pane {
+      display: none;
+    }
+
+    .lp-pane.active {
+      display: block;
+    }
+
+    .lp-sec-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      color: var(--tx3);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .lp-form {
+      background: var(--s2);
+      border: 1.5px solid var(--bd);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .lp-row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .lp-fg {
+      margin-bottom: 10px;
+    }
+
+    .lp-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--tx2);
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .lp-input,
+    .lp-select,
+    .lp-textarea {
+      width: 100%;
+      background: var(--s3);
+      border: 1.5px solid var(--bd);
+      border-radius: 8px;
+      padding: 8px 11px;
+      color: var(--tx);
+      font-size: 12.5px;
+      outline: none;
+      font-family: 'Cabinet Grotesk', sans-serif;
+      transition: border-color 0.2s;
+    }
+
+    .lp-input:focus,
+    .lp-select:focus,
+    .lp-textarea:focus {
+      border-color: var(--acc);
+    }
+
+    .lp-textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    .lp-btn {
+      width: 100%;
+      background: var(--acc);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Cabinet Grotesk', sans-serif;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin-top: 4px;
+    }
+
+    .lp-btn:hover {
+      background: #6e7df8;
+      transform: translateY(-1px);
+    }
+
+    .lp-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .call-card {
+      background: var(--s2);
+      border: 1.5px solid var(--bd);
+      border-radius: 10px;
+      padding: 13px 15px;
+      margin-bottom: 9px;
+      transition: border-color 0.15s;
+    }
+
+    .call-card:hover {
+      border-color: rgba(91, 106, 247, 0.3);
+    }
+
+    .call-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 7px;
+    }
+
+    .call-outcome-badge {
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+
+    .out-interested {
+      background: rgba(29, 233, 160, 0.12);
+      color: var(--a3);
+    }
+
+    .out-callback {
+      background: rgba(245, 166, 35, 0.12);
+      color: var(--a4);
+    }
+
+    .out-not_interested {
+      background: rgba(242, 91, 126, 0.12);
+      color: var(--a2);
+    }
+
+    .out-no_answer {
+      background: rgba(91, 106, 247, 0.12);
+      color: var(--acc);
+    }
+
+    .out-closed {
+      background: rgba(29, 233, 160, 0.15);
+      color: #1de9a0;
+    }
+
+    .out-voicemail {
+      background: rgba(62, 207, 255, 0.12);
+      color: var(--a5);
+    }
+
+    .call-meta {
+      font-size: 11.5px;
+      color: var(--tx2);
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+
+    .call-notes-txt {
+      font-size: 12px;
+      color: var(--tx2);
+      line-height: 1.55;
+      border-top: 1px solid rgba(26, 26, 53, 0.7);
+      padding-top: 7px;
+      margin-top: 4px;
+    }
+
+    .call-followup {
+      font-size: 11px;
+      color: var(--a4);
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .note-card {
+      background: var(--s2);
+      border: 1.5px solid var(--bd);
+      border-radius: 10px;
+      padding: 13px 15px;
+      margin-bottom: 9px;
+      transition: border-color 0.15s;
+    }
+
+    .note-card:hover {
+      border-color: rgba(91, 106, 247, 0.3);
+    }
+
+    .note-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 7px;
+    }
+
+    .note-author {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--acc);
+    }
+
+    .note-time {
+      font-size: 10.5px;
+      color: var(--tx3);
+    }
+
+    .note-text {
+      font-size: 12.5px;
+      color: var(--tx);
+      line-height: 1.6;
+    }
+
+    .lp-empty {
+      text-align: center;
+      padding: 28px 20px;
+      color: var(--tx3);
+      font-size: 13px;
+    }
+
+    .lp-empty .em-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+      opacity: 0.4;
+    }
+
+    .lp-loading {
+      text-align: center;
+      padding: 20px;
+      color: var(--tx3);
+      font-size: 12px;
+    }
+
+    .ib.view-details {
+      gap: 4px;
+      padding: 0 8px;
+      width: auto;
+      font-size: 11px;
+      color: var(--acc);
+      border-color: rgba(91, 106, 247, 0.3);
+    }
+
+    .ib.view-details:hover {
+      background: rgba(91, 106, 247, 0.1);
+      color: var(--acc);
+      border-color: var(--acc);
+    }
   </style>
 </head>
 
@@ -1487,6 +1965,8 @@
       <div class="ni" id="nav-adminuser" onclick="showAdminPage('adminuser',this)"><span class="ni-ic">⚙️</span>Admin
         User</div>
       <div class="ni" onclick="openM('wh-modal')"><span class="ni-ic">🔗</span>n8n Webhook</div>
+      <div class="ni" id="nav-score" onclick="showAdminPage('score',this)"><span class="ni-ic">⚡</span>Score Engine
+      </div>
     </div>
 
     <!-- SALESPERSON NAV -->
@@ -1496,7 +1976,7 @@
         Dashboard</div>
 
       <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
-        <div><span class="ni-ic">📋</span>My Leads</div>
+        <div><span class="ni-ic">📋</span>My Leads <span class="ni-badge" id="my-leads-badge" style="display:none"></span></div>
         <i class="arrow"></i>
       </div>
       <div class="dropdown-content" id="sp-leads-domains-list"></div>
@@ -1533,6 +2013,9 @@
       </div>
       <div class="tb-right">
         <div class="srv-status srv-ok" id="srv-badge">● Server OK</div>
+        <div class="bell-btn" id="reminders-bell" onclick="toggleRemindersPanel()" title="Today's Reminders">
+          🔔 <span class="bell-dot" id="bell-dot"></span>
+        </div>
         <input class="search" type="text" placeholder="🔍  Search schools..." oninput="doSearch(this.value)">
         <button class="btn bg" id="score-btn" onclick="runScoring()">📊 Score Leads</button>
         <button class="btn bg" id="run-btn" onclick="runN8nWorkflow()">⚡ Run n8n Workflow</button>
@@ -1592,6 +2075,15 @@
         <div class="sc-sub">closed / total</div>
       </div>
     </div>
+    
+    <div class="card" id="adm-activity-card" style="margin-bottom:20px;">
+      <div class="ch">
+        <div class="ct">Recent Team Activity</div>
+      </div>
+      <div id="adm-activity-feed">
+        <div style="padding:20px;text-align:center;color:var(--tx3);font-size:13px;">Loading activity...</div>
+      </div>
+    </div>
 
     <!-- TEAM -->
     <div class="tsec">
@@ -1624,6 +2116,7 @@
             <tr>
               <th>School Info</th>
               <th>Phone</th>
+              <th>Website</th>
               <th>Rating</th>
               <th>Score & Priority</th>
               <th>Status</th>
@@ -1901,6 +2394,67 @@
     <div id="alp-leads-list"></div>
   </div>
 
+  <!-- SCORE ENGINE SETTINGS PAGE -->
+  <div class="page-section" id="score-page">
+    <div class="topbar">
+      <div>
+        <div class="page-title">⚡ Score Engine Settings</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">All scoring rules are saved in your database —
+          changes apply to future scoring runs immediately</div>
+      </div>
+      <button class="btn bp" onclick="loadScoreSettings()" style="font-size:12px;">🔄 Refresh</button>
+    </div>
+    <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+      <!-- BASE SCORE CARD -->
+      <div style="background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);padding:20px;">
+        <div
+          style="font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--tx3);text-transform:uppercase;margin-bottom:4px;">
+          BASE SCORE RULES</div>
+        <div style="font-size:12px;color:var(--tx2);margin-bottom:16px;">Points awarded from Google Maps data (rating,
+          reviews, presence signals)</div>
+        <div id="base-config-list"></div>
+      </div>
+      <!-- GAP SCORE CARD -->
+      <div style="background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);padding:20px;">
+        <div
+          style="font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--tx3);text-transform:uppercase;margin-bottom:4px;">
+          GAP BOOST RULES</div>
+        <div style="font-size:12px;color:var(--tx2);margin-bottom:16px;">Bonus points added when a gap is detected on
+          the school's website</div>
+        <div id="gap-config-list"></div>
+      </div>
+    </div>
+    <!-- Detection method explainer -->
+    <div
+      style="margin:0 20px 20px;background:rgba(91,106,247,0.06);border:1.5px solid rgba(91,106,247,0.2);border-radius:var(--r);padding:18px;">
+      <div style="font-size:11px;font-weight:700;color:var(--acc);margin-bottom:10px;">🔍 HOW GAP DETECTION WORKS</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <div style="font-size:11.5px;color:var(--tx2);"><strong style="color:var(--tx);">CRM / Enquiry</strong><br>Scans
+          for HubSpot, LeadSquared, Zoho, Meritto scripts in webpage code</div>
+        <div style="font-size:11.5px;color:var(--tx2);"><strong style="color:var(--tx);">Fee Payment</strong><br>Looks
+          for Razorpay, Paytm, Stripe, PayU payment gateway scripts</div>
+        <div style="font-size:11.5px;color:var(--tx2);"><strong style="color:var(--tx);">Mobile App</strong><br>Checks
+          for Play Store / App Store links in the page</div>
+        <div style="font-size:11.5px;color:var(--tx2);"><strong style="color:var(--tx);">HTTPS / SSL</strong><br>Checks
+          if the website URL uses HTTPS or not</div>
+        <div style="font-size:11.5px;color:var(--tx2);"><strong style="color:var(--tx);">LMS</strong><br>Scans for
+          Moodle, Canvas, Teachable, LearnPress etc.</div>
+        <div style="font-size:11.5px;color:var(--tx2);"><strong style="color:var(--tx);">Live Chat</strong><br>Detects
+          Tawk.to, Tidio, WhatsApp, Zendesk, Freshchat</div>
+        <div style="font-size:11.5px;color:var(--tx2);"><strong style="color:var(--tx);">Admission
+            Portal</strong><br>Looks for keywords: "apply online", "registration form"</div>
+        <div style="font-size:11.5px;color:var(--tx2);"><strong style="color:var(--tx);">ERP /
+            Attendance</strong><br>Detects Fedena, Entab, MyClassboard, SchoolPad</div>
+      </div>
+      <div
+        style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(91,106,247,0.15);font-size:11px;color:var(--tx3);">
+        ⚠️ <strong>Limitation:</strong> Only the school's public website is scanned. If a tool is used internally
+        (separate app/portal not embedded in the website), it won't be detected. Gap = "not found on website" not
+        "doesn't exist".
+      </div>
+    </div>
+  </div>
+
   <!-- ADMIN USER SETTINGS PAGE -->
   <div class="page-section" id="adminuser-page">
     <div class="topbar">
@@ -1980,7 +2534,10 @@
         <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Your assigned leads in this domain</div>
       </div>
       <div class="tb-right">
-        <div class="srv-status srv-ok sp-badge active">● Active</div>
+        <div class="srv-status srv-ok sp-badge active" style="margin-right:15px;">● Active</div>
+        <div class="bell-btn" id="sp-reminders-bell" onclick="toggleRemindersPanel()" title="Today's Reminders">
+          🔔 <span class="bell-dot" id="sp-bell-dot"></span>
+        </div>
         <input class="search" type="text" placeholder="🔍 Search leads..." oninput="spSearch(this.value)">
       </div>
     </div>
@@ -1994,6 +2551,7 @@
             <tr>
               <th>School Info</th>
               <th>Phone</th>
+              <th>Website</th>
               <th>Rating</th>
               <th>Score & Priority</th>
               <th>Status</th>
@@ -2014,7 +2572,11 @@
         <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Your leads filtered by status</div>
       </div>
       <div class="tb-right">
-        <div class="srv-status srv-ok sp-badge active">● Active</div>
+        <div class="srv-status srv-ok sp-badge active" style="margin-right:15px;">● Active</div>
+        <div class="bell-btn" id="sp-prospects-reminders-bell" onclick="toggleRemindersPanel()"
+          title="Today's Reminders">
+          🔔 <span class="bell-dot" id="sp-prospects-bell-dot"></span>
+        </div>
         <input class="search" type="text" placeholder="🔍 Search prospects..." oninput="spSearch(this.value)">
       </div>
     </div>
@@ -2040,6 +2602,116 @@
     </div>
   </div>
 
+  <!-- LEAD DETAIL SIDE PANEL -->
+  <div class="lead-panel-overlay" id="lp-overlay" onclick="closeLeadPanel()"></div>
+  <div class="lead-panel" id="lead-panel">
+    <div class="lp-head">
+      <div style="flex:1;min-width:0">
+        <div class="lp-school-name" id="lp-school-name"></div>
+        <div class="lp-school-meta" id="lp-school-meta"></div>
+      </div>
+      <button class="lp-close" onclick="closeLeadPanel()">✕</button>
+    </div>
+    <div class="lp-tabs">
+      <div class="lp-tab active" id="lp-tab-log" onclick="switchLPTab('log')">📞 Log Call</div>
+      <div class="lp-tab" id="lp-tab-history" onclick="switchLPTab('history')">📋 Call History</div>
+      <div class="lp-tab" id="lp-tab-notes" onclick="switchLPTab('notes')">📝 Notes</div>
+      <div class="lp-tab" id="lp-tab-reminders" onclick="switchLPTab('reminders')">🔔 Reminders</div>
+    </div>
+    <div class="lp-body">
+      <!-- LOG CALL -->
+      <div class="lp-pane active" id="lp-pane-log">
+        <div class="lp-sec-title">Log a New Call</div>
+        <div class="lp-form">
+          <div class="lp-row2">
+            <div class="lp-fg">
+              <label class="lp-label">OUTCOME</label>
+              <select class="lp-select" id="lp-outcome">
+                <option value="interested">✅ Interested</option>
+                <option value="callback">🔄 Call Back Later</option>
+                <option value="no_answer" selected>📵 No Answer</option>
+                <option value="voicemail">📼 Left Voicemail</option>
+                <option value="not_interested">❌ Not Interested</option>
+                <option value="closed">🎯 Deal Closed!</option>
+              </select>
+            </div>
+            <div class="lp-fg">
+              <label class="lp-label">DURATION (minutes)</label>
+              <input class="lp-input" id="lp-duration" type="number" min="0" placeholder="e.g. 5">
+            </div>
+          </div>
+          <div class="lp-fg">
+            <label class="lp-label">CALL NOTES</label>
+            <textarea class="lp-textarea" id="lp-call-notes"
+              placeholder="What was discussed? Key points, objections, commitments..."></textarea>
+          </div>
+          <div class="lp-fg">
+            <label class="lp-label">NEXT FOLLOW-UP DATE</label>
+            <input class="lp-input" id="lp-followup" type="date">
+          </div>
+          <button class="lp-btn" id="lp-log-btn" onclick="logCall()">📞 Save Call Log</button>
+        </div>
+      </div>
+      <!-- CALL HISTORY -->
+      <div class="lp-pane" id="lp-pane-history">
+        <div class="lp-sec-title">Call History</div>
+        <div id="lp-call-list">
+          <div class="lp-loading"><span class="spin"></span></div>
+        </div>
+      </div>
+      <!-- NOTES -->
+      <div class="lp-pane" id="lp-pane-notes">
+        <div class="lp-sec-title">Add a Note</div>
+        <div class="lp-form">
+          <div class="lp-fg">
+            <textarea class="lp-textarea" id="lp-note-text" placeholder="Type your note here..."></textarea>
+          </div>
+          <button class="lp-btn" id="lp-note-btn" onclick="addNote()">📝 Save Note</button>
+        </div>
+        <div class="lp-sec-title">Previous Notes</div>
+        <div id="lp-notes-list">
+          <div class="lp-loading"><span class="spin"></span></div>
+        </div>
+      </div>
+      <!-- REMINDERS -->
+      <div class="lp-pane" id="lp-pane-reminders">
+        <div class="lp-sec-title">Set a Follow-up Reminder</div>
+        <div class="lp-form">
+          <div class="lp-fg">
+            <label class="lp-label">REMIND AT (Date & Time)</label>
+            <input class="lp-input" id="lp-remind-time" type="datetime-local">
+          </div>
+          <div class="lp-fg">
+            <label class="lp-label">REMINDER NOTE</label>
+            <textarea class="lp-textarea" id="lp-remind-note" placeholder="What should we remind you about?"></textarea>
+          </div>
+          <button class="lp-btn bp" id="lp-remind-btn" onclick="saveReminder()">🔔 Save Reminder</button>
+        </div>
+        <div class="lp-sec-title">Reminders for this Lead</div>
+        <div id="lp-remind-list">
+          <div class="lp-loading"><span class="spin"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODAY'S REMINDERS PANEL -->
+  <div class="lead-panel-overlay" id="rem-overlay" onclick="toggleRemindersPanel()"></div>
+  <div class="lead-panel" id="rem-panel">
+    <div class="lp-head">
+      <div style="flex:1">
+        <div class="lp-school-name">Today's Reminders</div>
+        <div class="lp-school-meta">Tasks and follow-ups scheduled for today</div>
+      </div>
+      <button class="lp-close" onclick="toggleRemindersPanel()">✕</button>
+    </div>
+    <div class="lp-body">
+      <div id="today-rem-list" style="padding:15px;">
+        <div class="lp-loading"><span class="spin"></span></div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
@@ -2047,6 +2719,22 @@
     let leads = [], team = [], editId = null, filt = 'all', sq = '';
     let currentUser = null, authToken = null;
     let spLeads = [], spFilt = 'all', spSq = '', pendingNewSP = null;
+
+    // ── Website column helper ─────────────────────────────────
+    function websiteCell(l) {
+      const w = (l.website && l.website.trim() && l.website !== 'undefined' && l.website !== 'null') ? l.website : '';
+      if (!w) {
+        return '<span style="color:var(--tx3);font-size:11px;">— No Website</span>';
+      }
+      const visitLink = `<a href="${w}" target="_blank" class="wb-link" title="${w}" style="white-space:nowrap;">🌐 Visit Site</a>`;
+      if (l.website_status === 'broken') {
+        return `<div style="display:flex;flex-direction:column;gap:3px;">`
+          + `<span style="background:rgba(242,91,126,0.12);color:var(--a2);padding:2px 7px;border-radius:20px;font-size:10.5px;font-weight:700;white-space:nowrap;">⚠️ Broken</span>`
+          + visitLink
+          + `</div>`;
+      }
+      return visitLink;
+    }
 
     const domains = [{ id: 'schools', label: 'Schools', icon: '🏫' }];
     const statuses = ['new', 'contacted', 'qualified', 'closed'];
@@ -2211,6 +2899,10 @@
         document.getElementById('au-pass').value = '';
         document.getElementById('au-err').style.display = 'none';
       }
+      else if (page === 'score') {
+        document.getElementById('score-page').classList.add('visible');
+        loadScoreSettings();
+      }
       else if (page === 'leads') {
         document.getElementById('leads-page').classList.add('visible');
         const ptitle = domains.find(d => d.id === param).label + ' Leads';
@@ -2233,9 +2925,11 @@
       const tsec = document.querySelector('.tsec');
       const stats = document.querySelector('.stats');
       const wbar = document.querySelector('.wbar');
+      const acard = document.getElementById('adm-activity-card');
       if (tsec) tsec.style.display = (page === 'team' || page === 'dashboard') ? '' : 'none';
       if (stats) stats.style.display = page === 'dashboard' ? '' : 'none';
       if (wbar) wbar.style.display = page === 'dashboard' ? '' : 'none';
+      if (acard) acard.style.display = page === 'dashboard' ? '' : 'none';
 
       if (page === 'leads' || page === 'prospects') {
         rLeads();
@@ -2308,7 +3002,10 @@
         document.getElementById('sp-welcome-title').textContent = 'My Dashboard';
         document.getElementById('sp-welcome-sub').textContent = `Welcome, ${firstName}! Here's your activity.`;
         const badge = document.getElementById('my-leads-badge');
-        if (spLeads.length) { badge.style.display = ''; badge.textContent = spLeads.length; }
+        if (badge && spLeads.length) { 
+          badge.style.display = 'inline-block'; 
+          badge.textContent = spLeads.length; 
+        }
         rSPStats(); rSPActivity(); rMyLeads();
       } catch (e) { toast('Error loading your leads: ' + e.message, 'error'); }
     }
@@ -2343,7 +3040,8 @@
       const bc = { new: 'bn', contacted: 'bc', qualified: 'bq', closed: 'bx' };
       tb.innerHTML = leadsArray.map(l => `<tr>
     <td><div class="sn">${l.school_name || '—'}</div><div class="sa">${l.address || ''}</div>${l.pitch ? `<div style="margin-top:6px;"><a class="wb-link" style="cursor:pointer;white-space:nowrap;" onclick="showPitch(${l.id})">💬 View Pitch</a></div>` : ''}</td>
-    <td><div style="font-size:12px;color:var(--tx2);white-space:nowrap;">${l.phone || '—'}</div></td>
+    <td><div style="font-size:12px;color:var(--tx2);white-space:nowrap;">${(l.phone && l.phone.trim() && l.phone !== 'undefined' && l.phone !== 'null') ? l.phone : '—'}</div></td>
+    <td style="white-space:nowrap;">${websiteCell(l)}</td>
     <td><div style="color:var(--a4);font-size:12.5px;">${l.rating || '—'} ⭐</div></td>
     <td><div style="display:flex;align-items:center;gap:12px;"><div class="score-pill"><strong>${l.score || 0}</strong> /100</div><div style="font-size:14px;">${l.priority == '🔥 high' ? '🔥' : l.priority == '⚡ medium' ? '⚡' : '📋'}</div></div></td>
     <td><select class="badge ${bc[l.status] || 'bn'}" onchange="spUpdStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;">
@@ -2352,8 +3050,9 @@
       <option value="qualified" ${l.status === 'qualified' ? 'selected' : ''}>🟢 Qualified</option>
       <option value="closed" ${l.status === 'closed' ? 'selected' : ''}>🔴 Closed</option>
     </select></td>
-    <td><div class="abts"><button class="ib" onclick="spEditLead(${l.id})" title="Edit">✏️</button></div></td>
+    <td><div class="abts"><button class="ib view-details" onclick="openLeadPanel(${l.id})" title="Calls &amp; Notes">📋 Details</button><button class="ib" onclick="spEditLead(${l.id})" title="Edit">✏️</button></div></td>
   </tr>`).join('');
+
     }
 
     function rMyLeads() {
@@ -2472,7 +3171,7 @@
     }
 
     // ── ADMIN RENDER ──
-    function renderAll() { rStats(); rLeads(); rPipe(); rTeam(); popAssign(); }
+    function renderAll() { rStats(); rLeads(); rPipe(); rTeam(); popAssign(); rActivity(); }
     function rStats() {
       const tot = leads.length, nw = leads.filter(l => !l.status || l.status.trim().toLowerCase() === 'new').length;
       const closed = leads.filter(l => l.status && l.status.trim().toLowerCase() === 'closed').length;
@@ -2488,7 +3187,10 @@
       tb.innerHTML = fl.map(l => {
         const m = team.find(t => t.id === l.assigned_id);
         const init = m ? m.name.split(' ').map(n => n[0]).join('').slice(0, 2) : '?';
-        return `<tr><td><div class="sn">${l.school_name || '—'}</div><div class="sa">${l.address || ''}</div>${l.pitch ? `<div style="margin-top:6px;"><a class="wb-link" style="cursor:pointer;white-space:nowrap;" onclick="showPitch(${l.id})">💬 View Pitch</a></div>` : ''}</td><td><div style="font-size:12px;color:var(--tx2);white-space:nowrap;">${l.phone || '—'}</div></td><td><div style="color:var(--a4);font-size:12.5px;">${l.rating || '—'} ⭐</div></td><td><div style="display:flex;align-items:center;gap:12px;"><div class="score-pill"><strong>${l.score || 0}</strong> /100</div><div style="font-size:14px;">${l.priority == '🔥 high' ? '🔥' : l.priority == '⚡ medium' ? '⚡' : '📋'}</div></div></td><td><select class="badge ${bc[l.status] || 'bn'}" onchange="updStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;"><option value="new" ${l.status === 'new' ? 'selected' : ''}>🔵 New</option><option value="contacted" ${l.status === 'contacted' ? 'selected' : ''}>🟢 Contacted</option><option value="qualified" ${l.status === 'qualified' ? 'selected' : ''}>🟢 Qualified</option><option value="closed" ${l.status === 'closed' ? 'selected' : ''}>🔴 Closed</option></select></td><td><div class="abts"><button class="ib" onclick="editLead(${l.id})" title="Edit">✏️</button><button class="ib del" onclick="delLead(${l.id})" title="Delete">🗑️</button></div></td></tr>`;
+        const pStr = (l.phone && l.phone.trim() && l.phone !== 'undefined' && l.phone !== 'null') ? l.phone : '—';
+        return `<tr><td><div class="sn">${l.school_name || '—'}</div><div class="sa">${l.address || ''}</div>${l.pitch ? `<div style="margin-top:6px;"><a class="wb-link" style="cursor:pointer;white-space:nowrap;" onclick="showPitch(${l.id})">💬 View Pitch</a></div>` : ''}</td><td><div style="font-size:12px;color:var(--tx2);white-space:nowrap;">${pStr}</div></td><td style="white-space:nowrap;">${websiteCell(l)}</td><td><div style="color:var(--a4);font-size:12.5px;">${l.rating || '—'} ⭐</div></td><td><div style="display:flex;align-items:center;gap:12px;"><div class="score-pill"><strong>${l.score || 0}</strong> /100</div><div style="font-size:14px;">${l.priority == '🔥 high' ? '🔥' : l.priority == '⚡ medium' ? '⚡' : '📋'}</div></div></td><td><select class="badge ${bc[l.status] || 'bn'}" onchange="updStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;"><option value="new" ${l.status === 'new' ? 'selected' : ''}>🔵 New</option><option value="contacted" ${l.status === 'contacted' ? 'selected' : ''}>🟢 Contacted</option><option value="qualified" ${l.status === 'qualified' ? 'selected' : ''}>🟢 Qualified</option><option value="closed" ${l.status === 'closed' ? 'selected' : ''}>🔴 Closed</option></select></td><td><div class="abts"><button class="ib view-details" onclick="openLeadPanel(${l.id})" title="Calls & Notes">📋 Details</button><button class="ib" onclick="editLead(${l.id})" title="Edit">✏️</button><button class="ib del" onclick="delLead(${l.id})" title="Delete">🗑️</button></div></td></tr>`;
+
+
       }).join('');
     }
     function rPipe() { const stages = [{ k: 'new', l: 'New', c: '#5b6af7' }, { k: 'contacted', l: 'Contacted', c: '#f5a623' }, { k: 'qualified', l: 'Qualified', c: '#1de9a0' }, { k: 'closed', l: 'Closed', c: '#f25b7e' }]; const tot = leads.length || 1; document.getElementById('pipe-wrap').innerHTML = stages.map(s => { const cnt = leads.filter(l => l.status && l.status.trim().toLowerCase() === s.k).length; const pct = Math.round(cnt / tot * 100); return `<div class="ps"><div class="ps-top"><div class="ps-name"><div class="ps-dot" style="background:${s.c}"></div>${s.l}</div><span class="ps-cnt">${cnt}</span></div><div class="pb"><div class="pbf" style="width:${pct}%;background:${s.c}"></div></div><div class="pv">${pct}% of total</div></div>`; }).join(''); }
@@ -2503,6 +3205,26 @@
       }).join('') + `<div style="background:var(--s1);border:1.5px dashed var(--bd);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;cursor:pointer;gap:8px;" onclick="showAdminPage('addsp',document.getElementById('nav-addsp'))"><div style="font-size:28px;opacity:0.2">+</div><div style="font-size:12px;color:var(--tx3)">Add Sales Person</div></div>`;
     }
     function popAssign() { const s = document.getElementById('f-assign'); if (!s) return; s.innerHTML = '<option value="">Unassigned</option>' + team.map(m => `<option value="${m.id}">${m.name}</option>`).join(''); }
+    async function rActivity() {
+      const el = document.getElementById('adm-activity-feed');
+      if (!el) return;
+      try {
+        const logs = await get('/activity', true);
+        if (!logs.length) { el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--tx3);font-size:13px;">No team activity yet.</div>'; return; }
+        const outcomeMap = { interested: '✅ Interested', callback: '🔄 Call Back', not_interested: '❌ Not Interested', no_answer: '📵 No Answer', closed: '🎯 Closed', voicemail: '📼 Voicemail' };
+        el.innerHTML = logs.map(l => {
+          const dt = new Date(l.created_at); 
+          const dtStr = dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+          
+          if (l.type === 'note') {
+             return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'Note added'}</p><div class="act-meta"><span>👤 ${l.added_by}</span><span>📅 ${dtStr}</span></div></div><span class="badge bn" style="background:rgba(29, 233, 160, 0.1);color:var(--a3);">📝 Note</span></div>`;
+          }
+
+          const followup = l.next_followup ? `<div style="margin-top:5px;font-size:10.5px;color:var(--a3);font-weight:700;">📅 Follow-up: ${new Date(l.next_followup).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</div>` : '';
+          return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'No notes added'}</p>${followup}<div class="act-meta"><span>👤 ${l.added_by}</span><span>⏱ ${l.duration || 0} min</span><span>📅 ${dtStr}</span></div></div><span class="badge bn">${outcomeMap[l.outcome] || '📞 Call'}</span></div>`;
+        }).join('');
+      } catch (e) { el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--a2);font-size:13px;">Failed to load activity feed.</div>'; }
+    }
 
     // Assign existing leads from team page
     function openAssignExisting(teamId) { const m = team.find(t => t.id === teamId); if (!m) return; pendingNewSP = m; leads = leads || []; showAssignLeadsPage(m); }
@@ -2569,6 +3291,331 @@
     function toast(msg, type) { const t = document.getElementById('toast'); t.textContent = msg; t.className = `toast ${type} show`; clearTimeout(tT); tT = setTimeout(() => { t.className = 'toast'; }, 3200); }
 
     init();
+
+    // ══════════════════════════════════════════════════════════
+    // SCORE ENGINE SETTINGS
+    // ══════════════════════════════════════════════════════════
+    async function loadScoreSettings() {
+      try {
+        const rows = await fetch(API + '/score-config').then(r => r.json());
+        renderConfigList('base-config-list', rows.filter(r => r.category === 'base'));
+        renderConfigList('gap-config-list', rows.filter(r => r.category === 'gap'));
+      } catch (e) { toast('Failed to load score config: ' + e.message, 'error'); }
+    }
+
+    function renderConfigList(containerId, rows) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      el.innerHTML = rows.map(function (r) {
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(26,26,53,0.6);gap:10px;">'
+          + '<div style="flex:1;min-width:0;">'
+          + '<div style="font-size:12.5px;font-weight:600;color:var(--tx);">' + r.label + '</div>'
+          + '</div>'
+          + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
+          + '<input type="number" min="0" max="50" value="' + r.points + '" id="cfg-pts-' + r.id + '" style="width:54px;background:var(--s2);border:1.5px solid var(--bd);border-radius:6px;padding:5px 7px;color:var(--tx);font-size:12px;text-align:center;outline:none;" onchange="saveScoreRule(' + r.id + ')" title="Points">'
+          + '<span style="font-size:10px;color:var(--tx3);">pts</span>'
+          + '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11.5px;color:var(--tx2);">'
+          + '<input type="checkbox" id="cfg-en-' + r.id + '" ' + (r.enabled ? 'checked' : '') + ' onchange="saveScoreRule(' + r.id + ')" style="accent-color:var(--acc);width:14px;height:14px;">'
+          + 'On</label>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+    }
+
+    async function saveScoreRule(id) {
+      const ptsEl = document.getElementById('cfg-pts-' + id);
+      const enEl = document.getElementById('cfg-en-' + id);
+      if (!ptsEl || !enEl) return;
+      try {
+        await fetch(API + '/score-config/' + id, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ points: parseInt(ptsEl.value), enabled: enEl.checked })
+        });
+        toast('✅ Rule saved!', 'success');
+      } catch (e) { toast('Error saving rule: ' + e.message, 'error'); }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    let currentPanelLeadId = null;
+
+    function openLeadPanel(leadId) {
+      const l = leads.find(x => x.id === leadId) || spLeads.find(x => x.id === leadId);
+      if (!l) return;
+      currentPanelLeadId = leadId;
+      document.getElementById('lp-school-name').textContent = l.school_name || 'Unknown School';
+      const badge = { new: '🔵 New', contacted: '🟢 Contacted', qualified: '✅ Qualified', closed: '🔴 Closed' };
+      const metaParts = [];
+      if (l.phone && l.phone !== 'undefined' && l.phone !== 'null') metaParts.push('📞 ' + l.phone);
+      if (l.rating) metaParts.push('⭐ ' + l.rating);
+      metaParts.push('<span style="background:rgba(91,106,247,0.12);color:var(--acc);padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">' + (badge[l.status] || l.status) + '</span>');
+      document.getElementById('lp-school-meta').innerHTML = metaParts.join(' &nbsp;&middot;&nbsp; ');
+      if (currentUser && currentUser.role === 'admin') {
+        document.getElementById('lp-tab-log').style.display = 'none';
+        switchLPTab('history');
+      } else {
+        document.getElementById('lp-tab-log').style.display = '';
+        switchLPTab('log');
+      }
+      document.getElementById('lp-overlay').classList.add('open');
+      document.getElementById('lead-panel').classList.add('open');
+      loadCallHistory();
+      loadNotes();
+      loadReminders();
+    }
+
+    function closeLeadPanel() {
+      document.getElementById('lp-overlay').classList.remove('open');
+      document.getElementById('lead-panel').classList.remove('open');
+      currentPanelLeadId = null;
+    }
+
+    function switchLPTab(tab) {
+      ['log', 'history', 'notes', 'reminders'].forEach(t => {
+        document.getElementById('lp-tab-' + t).classList.toggle('active', t === tab);
+        document.getElementById('lp-pane-' + t).classList.toggle('active', t === tab);
+      });
+    }
+
+    async function loadCallHistory() {
+      const container = document.getElementById('lp-call-list');
+      container.innerHTML = '<div class="lp-loading"><span class="spin"></span>&nbsp; Loading...</div>';
+      try {
+        const calls = await fetch(API + '/leads/' + currentPanelLeadId + '/calls').then(r => r.json());
+        if (!calls.length) {
+          container.innerHTML = '<div class="lp-empty"><div class="em-icon">📵</div>No calls logged yet.<br>Use the "Log Call" tab to record your first call.</div>';
+          return;
+        }
+        const outcomeMap = {
+          interested: { cls: 'out-interested', label: '✅ Interested' },
+          callback: { cls: 'out-callback', label: '🔄 Call Back' },
+          not_interested: { cls: 'out-not_interested', label: '❌ Not Interested' },
+          no_answer: { cls: 'out-no_answer', label: '📵 No Answer' },
+          closed: { cls: 'out-closed', label: '🎯 Closed' },
+          voicemail: { cls: 'out-voicemail', label: '📼 Voicemail' },
+        };
+        container.innerHTML = calls.map(function (c) {
+          const om = outcomeMap[c.outcome] || { cls: 'out-no_answer', label: c.outcome };
+          const dt = new Date(c.called_at);
+          const dtStr = dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+          const followup = c.next_followup ? '<div class="call-followup">📅 Follow-up: <strong>' + new Date(c.next_followup).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + '</strong></div>' : '';
+          const notesHtml = c.notes ? '<div class="call-notes-txt">' + c.notes + '</div>' : '';
+          const calledBy = (c.called_by && c.called_by !== 'undefined' && c.called_by !== 'null') ? c.called_by : 'Unknown';
+          return '<div class="call-card"><div class="call-card-top"><span class="call-outcome-badge ' + om.cls + '">' + om.label + '</span><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:10.5px;color:var(--tx3)">' + dtStr + '</span><button onclick="deleteCall(' + c.id + ')" title="Delete call log" style="width:22px;height:22px;border-radius:5px;border:1.5px solid rgba(242,91,126,0.25);background:rgba(242,91,126,0.07);color:var(--a2);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;" onmouseover="this.style.background=\'rgba(242,91,126,0.18)\'" onmouseout="this.style.background=\'rgba(242,91,126,0.07)\'">🗑</button></div></div><div class="call-meta"><span>👤 ' + calledBy + '</span>' + (c.duration ? '<span>⏱ ' + c.duration + ' min</span>' : '') + '</div>' + notesHtml + followup + '</div>';
+
+        }).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="lp-empty">⚠️ Failed to load call history.</div>';
+      }
+    }
+
+    async function deleteCall(callId) {
+      if (!currentPanelLeadId) return;
+      if (!confirm('Delete this call log? This cannot be undone.')) return;
+      try {
+        const res = await fetch(API + '/leads/' + currentPanelLeadId + '/calls/' + callId, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Delete failed');
+        toast('🗑️ Call log deleted.', '');
+        await loadCallHistory();
+      } catch (e) { toast('Error: ' + e.message, 'error'); }
+    }
+
+    async function logCall() {
+      if (!currentPanelLeadId) return;
+      const outcome = document.getElementById('lp-outcome').value;
+      const duration = parseInt(document.getElementById('lp-duration').value) || 0;
+      const notes = document.getElementById('lp-call-notes').value.trim();
+      const followup = document.getElementById('lp-followup').value || null;
+      const called_by = (currentUser && currentUser.name) || 'Unknown';
+      const btn = document.getElementById('lp-log-btn');
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span>&nbsp; Saving...';
+      try {
+        await fetch(API + '/leads/' + currentPanelLeadId + '/calls', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ called_by, outcome, duration, notes, next_followup: followup })
+        });
+        document.getElementById('lp-outcome').value = 'no_answer';
+        document.getElementById('lp-duration').value = '';
+        document.getElementById('lp-call-notes').value = '';
+        document.getElementById('lp-followup').value = '';
+        toast('📞 Call logged successfully!', 'success');
+        await loadCallHistory();
+        switchLPTab('history');
+      } catch (e) { toast('Error logging call: ' + e.message, 'error'); }
+      btn.disabled = false; btn.innerHTML = '📞 Save Call Log';
+    }
+
+    async function loadNotes() {
+      const container = document.getElementById('lp-notes-list');
+      container.innerHTML = '<div class="lp-loading"><span class="spin"></span>&nbsp; Loading...</div>';
+      try {
+        const notes = await fetch(API + '/leads/' + currentPanelLeadId + '/notes').then(r => r.json());
+        if (!notes.length) {
+          container.innerHTML = '<div class="lp-empty"><div class="em-icon">📝</div>No notes yet. Add your first note above.</div>';
+          return;
+        }
+        container.innerHTML = notes.map(function (n) {
+          const dt = new Date(n.created_at);
+          const dtStr = dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+          return '<div class="note-card"><div class="note-card-header"><span class="note-author">✍️ ' + n.added_by + '</span><span class="note-time">' + dtStr + '</span></div><div class="note-text">' + n.note + '</div></div>';
+        }).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="lp-empty">⚠️ Failed to load notes.</div>';
+      }
+    }
+
+    async function addNote() {
+      if (!currentPanelLeadId) return;
+      const noteText = document.getElementById('lp-note-text').value.trim();
+      if (!noteText) { toast('Please write a note before saving.', 'error'); return; }
+      const added_by = (currentUser && currentUser.name) || 'Unknown';
+      const btn = document.getElementById('lp-note-btn');
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span>&nbsp; Saving...';
+      try {
+        await fetch(API + '/leads/' + currentPanelLeadId + '/notes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ added_by, note: noteText })
+        });
+        document.getElementById('lp-note-text').value = '';
+        toast('📝 Note added!', 'success');
+        await loadNotes();
+      } catch (e) { toast('Error saving note: ' + e.message, 'error'); }
+      btn.disabled = false; btn.innerHTML = '📝 Save Note';
+    }
+
+    async function loadReminders() {
+      const container = document.getElementById('lp-remind-list');
+      if (!container) return;
+      container.innerHTML = '<div class="lp-loading"><span class="spin"></span>&nbsp; Loading...</div>';
+      try {
+        const reminders = await fetch(API + '/leads/' + currentPanelLeadId + '/reminders').then(r => r.json());
+        if (!reminders.length) {
+          container.innerHTML = '<div class="lp-empty"><div class="em-icon">🔔</div>No reminders set for this lead.</div>';
+          return;
+        }
+        container.innerHTML = reminders.map(function (r) {
+          const dt = new Date(r.remind_at);
+          const dtStr = dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+          const isPending = r.status === 'pending';
+          const statusBadge = isPending ? '<span class="badge yellow">Pending</span>' : '<span class="badge gray">' + r.status + '</span>';
+
+          let actions = '';
+          if (isPending) {
+            actions = '<div style="display:flex;gap:5px;margin-top:8px;">'
+              + '<button onclick="updateRemStatus(' + r.id + ',\'done\')" class="btn-xs btn-success">Complete</button>'
+              + '<button onclick="updateRemStatus(' + r.id + ',\'dismissed\')" class="btn-xs btn-outline">Dismiss</button>'
+              + '</div>';
+          }
+
+          return '<div class="call-card" style="border-left:3px solid ' + (isPending ? '#f7b924' : '#6c757d') + ';">'
+            + '<div class="call-card-top"><span style="font-size:12px;font-weight:700;color:var(--tx)">⏰ ' + dtStr + '</span>' + statusBadge + '</div>'
+            + '<div style="font-size:13px;color:var(--tx2);margin-top:5px;">' + (r.message || 'No description') + '</div>'
+            + '<div style="font-size:10px;color:var(--tx3);margin-top:5px;">Set by: ' + r.created_by + '</div>'
+            + actions
+            + '</div>';
+        }).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="lp-empty">⚠️ Failed to load reminders.</div>';
+      }
+    }
+
+    async function saveReminder() {
+      if (!currentPanelLeadId) return;
+      const timeInput = document.getElementById('lp-remind-time').value;
+      const message = document.getElementById('lp-remind-note').value.trim();
+      if (!timeInput) { toast('Please select a date and time.', 'error'); return; }
+
+      const btn = document.getElementById('lp-remind-btn');
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span>&nbsp; Saving...';
+      try {
+        await fetch(API + '/reminders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lead_id: currentPanelLeadId,
+            remind_at: timeInput,
+            message,
+            created_by: (currentUser && currentUser.name) || 'Unknown'
+          })
+        });
+        document.getElementById('lp-remind-time').value = '';
+        document.getElementById('lp-remind-note').value = '';
+        toast('🔔 Reminder set!', 'success');
+        await loadReminders();
+      } catch (e) { toast('Error saving reminder: ' + e.message, 'error'); }
+      btn.disabled = false; btn.innerHTML = '🔔 Save Reminder';
+    }
+
+    async function updateRemStatus(id, status) {
+      try {
+        await fetch(API + '/reminders/' + id, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        toast('✅ Status updated', 'success');
+        await loadReminders();
+        checkTodayReminders();
+      } catch (e) { toast('Error: ' + e.message, 'error'); }
+    }
+
+    function toggleRemindersPanel() {
+      const panel = document.getElementById('rem-panel');
+      const overlay = document.getElementById('rem-overlay');
+      const isOpen = panel.classList.contains('open');
+      if (isOpen) {
+        panel.classList.remove('open');
+        overlay.classList.remove('open');
+      } else {
+        panel.classList.add('open');
+        overlay.classList.add('open');
+        loadTodayReminders();
+      }
+    }
+
+    async function checkTodayReminders() {
+      try {
+        const rows = await fetch(API + '/reminders/today').then(r => r.json());
+        const dots = ['bell-dot', 'sp-bell-dot', 'sp-prospects-bell-dot'];
+        dots.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.classList.toggle('active', rows.length > 0);
+        });
+      } catch (e) { }
+    }
+
+    async function loadTodayReminders() {
+      const container = document.getElementById('today-rem-list');
+      container.innerHTML = '<div class="lp-loading"><span class="spin"></span>&nbsp; Loading...</div>';
+      try {
+        const rows = await fetch(API + '/reminders/today').then(r => r.json());
+        if (!rows.length) {
+          container.innerHTML = '<div class="lp-empty">☕ No pending reminders for today.</div>';
+          return;
+        }
+        container.innerHTML = rows.map(function (r) {
+          const dt = new Date(r.remind_at);
+          const timeStr = dt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+          return '<div class="call-card" style="border-left:3px solid #f7b924;">'
+            + '<div class="call-card-top"><span style="font-size:12px;font-weight:700;color:var(--tx)">⏰ ' + timeStr + '</span></div>'
+            + '<div style="font-size:14px;font-weight:700;color:var(--acc);margin-top:5px;cursor:pointer;" onclick="toggleRemindersPanel(); openLeadPanel(' + r.lead_id + ');">' + r.school_name + '</div>'
+            + '<div style="font-size:13px;color:var(--tx2);margin-top:5px;">' + (r.message || 'No description') + '</div>'
+            + '<div style="display:flex;gap:5px;margin-top:10px;">'
+            + '<button onclick="updateRemStatus(' + r.id + ',\'done\'); loadTodayReminders();" class="btn-xs btn-success">Done</button>'
+            + '<button onclick="updateRemStatus(' + r.id + ',\'dismissed\'); loadTodayReminders();" class="btn-xs btn-outline">Dismiss</button>'
+            + '</div>'
+            + '</div>';
+        }).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="lp-empty">⚠️ Failed to load reminders.</div>';
+      }
+    }
+
+    // Initial check
+    setTimeout(checkTodayReminders, 2000);
+    setInterval(checkTodayReminders, 60000); // Check every minute
   </script>
 
 </body>

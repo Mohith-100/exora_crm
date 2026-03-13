@@ -39,7 +39,22 @@ function calcBaseScore({ rating, reviews, phone, website, address }) {
 // ── PHONE CLEANER ─────────────────────────────────────────────
 function cleanPhone(raw) {
     if (!raw) return '';
-    return String(raw).replace(/^['"\s]+/, '').trim();
+    let s = String(raw).trim();
+    // Remove leading single quote (from Excel imports)
+    s = s.replace(/^[']+/, '').trim();
+    // Filter out literal garbage strings
+    if (/^(undefined|null|none|nan|#ERROR!|#N\/A|#VALUE!|#REF!|#NAME\?|#DIV\/0!|#NULL!)$/i.test(s)) return '';
+    return s;
+}
+
+function cleanWebsite(raw) {
+    if (!raw) return '';
+    let url = String(raw).trim().replace(/^['"\s]+|['"\s]+$/g, '');
+    if (!url) return '';
+    if (!url.startsWith('http') && !url.startsWith('//')) {
+        url = 'https://' + url;
+    }
+    return url;
 }
 
 // ── SCRAPE & SAVE ─────────────────────────────────────────────
@@ -63,11 +78,11 @@ async function scrapeAndSave(query = 'preschools in Bengaluru') {
     for (const place of places) {
         try {
             const phone = cleanPhone(place.phoneNumber || place.phone || '');
-            const website = place.website || '';
+            const website = cleanWebsite(place.website || '');
             const address = place.address || '';
             const name = place.title || place.name || 'Unknown';
             const rating = place.rating ? String(place.rating) : null;
-            const reviews = place.reviews || place.reviewsCount || null;
+            const reviews = (place.reviews || place.reviewsCount) ? parseInt(place.reviews || place.reviewsCount) : null;
             const baseScore = calcBaseScore({ rating, reviews, phone, website, address });
 
             const result = await pool.query(

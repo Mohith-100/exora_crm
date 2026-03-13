@@ -2,8 +2,8 @@ const fs = require('fs');
 let html = fs.readFileSync('index.html', 'utf8');
 
 // 1. Rename "Status" to "Prospects" in Sidebar and make it a dropdown
-html = html.replace(`<div class="ni" onclick="setPage('Status',this)"><span class="ni-ic">🚦</span>Status</div>`, 
-`<div class="ni dropdown-btn" onclick="toggleDropdown(this)"><div style="display:flex;align-items:center;gap:9px;"><span class="ni-ic">🚦</span>Prospects</div><span class="arrow">▶</span></div>
+html = html.replace(`<div class="ni" onclick="setPage('Status',this)"><span class="ni-ic">🚦</span>Status</div>`,
+  `<div class="ni dropdown-btn" onclick="toggleDropdown(this)"><div style="display:flex;align-items:center;gap:9px;"><span class="ni-ic">🚦</span>Prospects</div><span class="arrow">▶</span></div>
   <div class="dropdown-content" id="prospects-filter-list"></div>`);
 
 // 2. Remove the Pipeline and Conversion cards from the Dashboard grid
@@ -14,8 +14,8 @@ html = html.replace(`<div class="sc c4"><div class="sc-ic">💰</div><div class=
 
 // 3. Remove Leads table and Pipeline from Dashboard view, replace with Team view ONLY
 // We'll also rename the ID 'view-Status' to 'view-Prospects'
-html = html.replace(/<div id="view-Status" class="view-section">[\s\S]*?<\/div>[\s\S]*?<\/div>[\s\S]*?<\/div>/, 
-`<div id="view-Prospects" class="view-section">
+html = html.replace(/<div id="view-Status" class="view-section">[\s\S]*?<\/div>[\s\S]*?<\/div>[\s\S]*?<\/div>/,
+  `<div id="view-Prospects" class="view-section">
     <div class="card" style="margin-bottom:20px;">
       <div class="ch">
         <div class="ct" id="prospect-table-title">Prospects</div>
@@ -30,8 +30,8 @@ html = html.replace(/<div id="view-Status" class="view-section">[\s\S]*?<\/div>[
   </div>`);
 
 // 4. Update the Javascript logic
-html = html.replace(/function renderStatusFilters\(\) \{[\s\S]*?\}/, 
-`function renderStatusFilters() {
+html = html.replace(/function renderStatusFilters\(\) \{[\s\S]*?\}/,
+  `function renderStatusFilters() {
   const container = document.getElementById('prospects-filter-list');
   if(!container) return;
   let html = \`<div class="ni" onclick="setPage('Prospects', this, 'all')"><span class="ni-ic">📋</span>All</div>\`;
@@ -42,8 +42,8 @@ html = html.replace(/function renderStatusFilters\(\) \{[\s\S]*?\}/,
   container.innerHTML = html;
 }`);
 
-html = html.replace(/function setPage\(viewName, el, domainId = null\) \{[\s\S]*?\}/, 
-`function setPage(viewName, el, param = null) {
+html = html.replace(/function setPage\(viewName, el, domainId = null\) \{[\s\S]*?\}/,
+  `function setPage(viewName, el, param = null) {
   if(viewName === 'Leads') currentDomain = param;
   if(viewName === 'Prospects' && param) filt = param;
   
@@ -66,12 +66,12 @@ html = html.replace(/function setPage\(viewName, el, domainId = null\) \{[\s\S]*
 }`);
 
 // 5. Fix the stats logic so ALL leads without a valid status are correctly categorized as 'new' 
-html = html.replace(`const nw = leads.filter(l => !l.status || l.status?.toLowerCase() === 'new').length;`, 
-`const nw = leads.filter(l => {
+html = html.replace(`const nw = leads.filter(l => !l.status || l.status?.toLowerCase() === 'new').length;`,
+  `const nw = leads.filter(l => {
     const st = (l.status || '').toLowerCase().trim();
     return !st || st === 'new' || !['contacted', 'qualified', 'closed'].includes(st);
   }).length;`);
-  
+
 html = html.replace(`document.getElementById('s4').textContent = tot ? Math.round(closed / tot * 100) + '%' : '0%';`, '');
 
 fs.writeFileSync('index.html', html);

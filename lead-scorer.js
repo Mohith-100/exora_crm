@@ -16,6 +16,12 @@ const { Pool } = require('pg');
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: false });
 
+// ── Load scoring config from DB ────────────────────────────
+async function loadScoreConfig() {
+    const { rows } = await pool.query('SELECT * FROM score_config ORDER BY sort_order ASC');
+    return rows;
+}
+
 // ── EXORA SERVICE GAP DEFINITIONS ───────────────────────────
 const GAP_DEFINITIONS = [
     {
@@ -270,45 +276,77 @@ ${urgency}
 `.trim();
 }
 
-// ── SCORE & UPDATE ONE LEAD ──────────────────────────────────
+// \u2500\u2500 SCORE & UPDATE ONE LEAD ──────────────────────────────────
 async function scoreLead(lead) {
-    console.log(`\n🔎 Scoring: ${lead.school_name}`);
+    console.log(`\n\ud83d\udd0e Scoring: ${lead.school_name}`);
 
+    // Load live config from DB every time (always up-to-date)
+    const cfg = await loadScoreConfig();
+    const baseCfg = cfg.filter(c => c.category === 'base');
+    const gapCfg = cfg.filter(c => c.category === 'gap');
+
+    // \u2500\u2500 Dynamic base score from DB config \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    const getBase = (key) => { const r = baseCfg.find(c => c.key === key); return (r && r.enabled) ? r.points : 0; };
+    let baseScore = 0;
+    const rating = parseFloat(lead.rating) || 0;
+    if (rating >= 4.5) baseScore += getBase('rating_4_5');
+    else if (rating >= 4.0) baseScore += getBase('rating_4_0');
+    else if (rating >= 3.5) baseScore += getBase('rating_3_5');
+    else if (rating >= 3.0) baseScore += getBase('rating_3_0');
+    else if (rating > 0) baseScore += getBase('rating_any');
+    const rv = parseInt(lead.reviews) || 0;
+    if (rv >= 200) baseScore += getBase('reviews_200');
+    else if (rv >= 100) baseScore += getBase('reviews_100');
+    else if (rv >= 50) baseScore += getBase('reviews_50');
+    else if (rv >= 20) baseScore += getBase('reviews_20');
+    else if (rv >= 5) baseScore += getBase('reviews_5');
+    if (lead.phone) baseScore += getBase('has_phone');
+    if (lead.website) baseScore += getBase('has_website');
+    if (lead.address) baseScore += getBase('has_address');
+    baseScore = Math.min(baseScore, 80);
+    console.log(`   \ud83d\udcca Base score (dynamic): ${baseScore}`);
+
+    // \u2500\u2500 Website check \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     const { status: websiteStatus, html, isHttps } = await checkWebsiteStatus(lead.website);
-    console.log(`   🌐 Website status: ${websiteStatus}`);
+    console.log(`   \ud83c\udf10 Website status: ${websiteStatus}`);
 
-    // Call Free Local Deep Scanner instead of Wappalyzer
     let apiTechs = [];
     if (websiteStatus === 'live') {
         apiTechs = deepTechScan(html);
-        if (apiTechs.length > 0) {
-            console.log(`   📡 Deep scanner detected tech categories: ${apiTechs.join(', ')}`);
-        }
+        if (apiTechs.length > 0) console.log(`   \ud83d\udce1 Deep scanner detected: ${apiTechs.join(', ')}`);
     }
 
-    const gaps = detectGaps(html, websiteStatus, isHttps, apiTechs);
-    console.log(`   📉 Gaps found: ${gaps.map((g) => g.key).join(', ') || 'none'}`);
+    // \u2500\u2500 Gap detection + dynamic boosts from DB config \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    const detectedGaps = detectGaps(html, websiteStatus, isHttps, apiTechs);
+    const gaps = detectedGaps
+        .map(g => {
+            const dbRule = gapCfg.find(c => c.key === g.key);
+            if (!dbRule || !dbRule.enabled) return null; // skip disabled rules
+            return { ...g, boost: dbRule.points };       // use DB points
+        })
+        .filter(Boolean);
+    console.log(`   \ud83d\udcc9 Gaps: ${gaps.map(g => g.key + '(+' + g.boost + 'pt)').join(', ') || 'none'}`);
 
-    const baseScore = lead.base_score || 0;
     const finalScore = calcFinalScore(baseScore, gaps);
     const priority = classifyPriority(finalScore, gaps.length);
     const pitch = generatePitch(lead, gaps, websiteStatus, finalScore, priority);
 
     await pool.query(
         `UPDATE leads SET
-           website_status = $1,
-           gaps_found     = $2,
-           score          = $3,
-           priority       = $4,
-           pitch          = $5,
+           base_score     = $1,
+           website_status = $2,
+           gaps_found     = $3,
+           score          = $4,
+           priority       = $5,
+           pitch          = $6,
            scored_at      = NOW(),
            status         = CASE WHEN status = 'new' THEN 'scored' ELSE status END
-         WHERE id = $6`,
-        [websiteStatus, JSON.stringify(gaps.map((g) => g.key)), finalScore, priority, pitch, lead.id]
+         WHERE id = $7`,
+        [baseScore, websiteStatus, JSON.stringify(gaps.map(g => g.key)), finalScore, priority, pitch, lead.id]
     );
 
-    console.log(`   ✅ Score: ${baseScore} → ${finalScore}/100 | Priority: ${priority}`);
-    return { ...lead, website_status: websiteStatus, gaps, score: finalScore, priority, pitch };
+    console.log(`   \u2705 Score: ${baseScore} base + gaps \u2192 ${finalScore}/100 | Priority: ${priority}`);
+    return { ...lead, base_score: baseScore, website_status: websiteStatus, gaps, score: finalScore, priority, pitch };
 }
 
 // ── SCORE ALL UN-SCORED LEADS ────────────────────────────────

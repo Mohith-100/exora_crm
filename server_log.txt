@@ -1,0 +1,8 @@
+
+🚀 LeadFlow backend running at http://localhost:3001
+🔗 n8n webhook     → POST http://localhost:3001/webhook/leads
+📊 Trigger score   → POST http://localhost:3001/api/trigger-score
+⚡ Full pipeline   → POST http://localhost:3001/api/trigger-all
+📋 Leads API       → GET  http://localhost:3001/api/leads
+✅ Connected to PostgreSQL — exora_crm
+✅ Tables ready!

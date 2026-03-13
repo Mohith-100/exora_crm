@@ -2,8 +2,8 @@ const fs = require('fs');
 let html = fs.readFileSync('index.html', 'utf8');
 
 // 1. Add CSS
-html = html.replace('.ni:hover{background:var(--s2);color:var(--tx);}', 
-`.ni:hover{background:var(--s2);color:var(--tx);}
+html = html.replace('.ni:hover{background:var(--s2);color:var(--tx);}',
+  `.ni:hover{background:var(--s2);color:var(--tx);}
 .dropdown-btn { display: flex; align-items: center; justify-content: space-between; }
 .dropdown-content { display: none; background: rgba(0,0,0,0.1); border-radius: 9px; margin: 4px 0 8px 8px; padding: 4px; }
 .dropdown-content.open { display: block; }
@@ -108,15 +108,15 @@ let currentDomain = 'schools';
 
 function renderSidebarDomains() {
   const container = document.getElementById('leads-domains-list');
-  container.innerHTML = domains.map(d => \\`<div class="ni" onclick="setPage('Leads', this, '\${d.id}')"><span class="ni-ic">\${d.icon}</span>\${d.label}</div>\\`).join('');
+  container.innerHTML = domains.map(d => \\`< div class="ni" onclick = "setPage('Leads', this, '\${d.id}')" > <span class="ni-ic">\${d.icon}</span>\${ d.label }</div >\\`).join('');
 }
 
 function renderStatusFilters() {
   const container = document.getElementById('status-filters');
   if(!container) return;
-  let html = \\`<div class="ft active" onclick="setF('all',this)">All</div>\\`;
+  let html = \\`< div class="ft active" onclick = "setF('all',this)" > All</div >\\`;
   statuses.forEach(s => {
-    html += \\`<div class="ft" onclick="setF('\${s}',this)">\${s.charAt(0).toUpperCase() + s.slice(1)}</div>\\`;
+    html += \\`< div class="ft" onclick = "setF('\${s}',this)" >\${ s.charAt(0).toUpperCase() + s.slice(1) }</div >\\`;
   });
   container.innerHTML = html;
 }
@@ -142,8 +142,8 @@ function setPage(viewName, el, domainId = null) {
 html = html.replace(/const API = 'http:\\/\\/localhost:3001\\/api';[\\s\\S]*?(?=\\/\/ ── API CALLS ──)/, newJsTop);
 
 // 5. Update renderAll and rLeads
-html = html.replace(/function renderAll\\(\\)\\{rStats\\(\\);rLeads\\(\\);rPipe\\(\\);rTeam\\(\\);popAssign\\(\\);\\}/, 
-`function renderAll(){
+html = html.replace(/function renderAll\\(\\)\\{rStats\\(\\);rLeads\\(\\);rPipe\\(\\);rTeam\\(\\);popAssign\\(\\);\\}/,
+  `function renderAll(){
   renderSidebarDomains();
   renderStatusFilters();
   rStats();
@@ -157,12 +157,12 @@ const newRLeads = `
 function renderTable(tbodyId, leadsArray) {
   const tb = document.getElementById(tbodyId);
   if(!tb) return;
-  if(!leadsArray.length) { tb.innerHTML = \\`<tr class="empty"><td colspan="8">No leads found.</td></tr>\\`; return; }
+  if(!leadsArray.length) { tb.innerHTML = \\`< tr class="empty" > <td colspan="8">No leads found.</td></tr >\\`; return; }
   const bc = {new:'bn', contacted:'bc', qualified:'bq', closed:'bx'};
   tb.innerHTML = leadsArray.map(l => {
     const m = team.find(t=>t.id===l.assigned_id);
     const init = m ? m.name.split(' ').map(n=>n[0]).join('').slice(0,2) : '?';
-    return \\`<tr>
+    return \\`< tr >
       <td><div class="sn">\${l.school_name||'—'}</div><div class="sa">\${l.address||''}</div></td>
       <td><span class="ph">\${l.phone||'—'}</span></td>
       <td><div style="color:var(--a4);font-size:12px;">\${l.rating||'—'} ⭐</div><div style="font-size:11px;color:var(--tx3);">\${l.reviews?l.reviews+' reviews':''}</div></td>
@@ -171,7 +171,7 @@ function renderTable(tbodyId, leadsArray) {
         <select class="badge \${bc[l.status]||'bn'}" onchange="updStatus(\${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;">
           \${statuses.map(s => \\`<option value="\${s}" \${l.status===s?'selected':''}>\${s==='new'?'🔵 New':s==='contacted'?'🟠 Contacted':s==='qualified'?'🟢 Qualified':'🔴 Closed'}</option>\\`).join('')}
         </select>
-      </td>
+      </td >
       <td>
         <div style="display:flex;align-items:center;gap:7px;">
           <div style="width:24px;height:24px;border-radius:50%;background:\${m?.color||'#333'}22;color:\${m?.color||'#888'};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;">\${init}</div>
@@ -180,7 +180,7 @@ function renderTable(tbodyId, leadsArray) {
       </td>
       <td><div style="font-size:11px;color:var(--tx3);">\${l.created_at ? new Date(l.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—'}</div><div style="font-size:10.5px;color:var(--tx3);margin-top:2px;">\${l.created_at ? new Date(l.created_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : ''}</div></td>
       <td><div class="abts"><button class="ib" onclick="editLead(\${l.id})" title="Edit">✏️</button><button class="ib del" onclick="delLead(\${l.id})" title="Delete">🗑️</button></div></td>
-    </tr>\\`;
+    </tr >\\`;
   }).join('');
 }
 

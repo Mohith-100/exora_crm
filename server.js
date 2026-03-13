@@ -66,6 +66,80 @@ async function initDB() {
       );
     `);
 
+    // ── Call logs, Lead notes, Reminders ──
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS call_logs (
+        id            SERIAL PRIMARY KEY,
+        lead_id       INTEGER NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+        called_by     TEXT    NOT NULL,
+        called_at     TIMESTAMPTZ DEFAULT NOW(),
+        duration      INTEGER DEFAULT 0,
+        outcome       TEXT    DEFAULT 'no_answer',
+        notes         TEXT    DEFAULT '',
+        next_followup DATE
+      );
+      CREATE TABLE IF NOT EXISTS lead_notes (
+        id         SERIAL PRIMARY KEY,
+        lead_id    INTEGER NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+        added_by   TEXT    NOT NULL,
+        note       TEXT    NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS reminders (
+        id          SERIAL PRIMARY KEY,
+        lead_id     INTEGER NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+        call_log_id INTEGER REFERENCES call_logs(id) ON DELETE CASCADE,
+        remind_at   TIMESTAMPTZ NOT NULL,
+        message     TEXT DEFAULT '',
+        status      TEXT DEFAULT 'pending',
+        created_by  TEXT NOT NULL DEFAULT 'Unknown',
+        created_at  TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    // ── Score config table ──
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS score_config (
+        id         SERIAL PRIMARY KEY,
+        category   TEXT    NOT NULL,
+        key        TEXT    NOT NULL UNIQUE,
+        label      TEXT    NOT NULL,
+        points     INTEGER NOT NULL DEFAULT 0,
+        enabled    BOOLEAN NOT NULL DEFAULT true,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+    const cfgCount = await pool.query('SELECT COUNT(*) FROM score_config');
+    if (parseInt(cfgCount.rows[0].count) === 0) {
+      await pool.query(`
+        INSERT INTO score_config (category, key, label, points, enabled, sort_order) VALUES
+          ('base', 'rating_4_5',   'Rating >= 4.5 stars',     25, true,  1),
+          ('base', 'rating_4_0',   'Rating >= 4.0 stars',     20, true,  2),
+          ('base', 'rating_3_5',   'Rating >= 3.5 stars',     14, true,  3),
+          ('base', 'rating_3_0',   'Rating >= 3.0 stars',      8, true,  4),
+          ('base', 'rating_any',   'Rating > 0 (any)',          4, true,  5),
+          ('base', 'reviews_200',  '200+ Google reviews',     20, true,  6),
+          ('base', 'reviews_100',  '100+ Google reviews',     16, true,  7),
+          ('base', 'reviews_50',   '50+ Google reviews',      12, true,  8),
+          ('base', 'reviews_20',   '20+ Google reviews',       8, true,  9),
+          ('base', 'reviews_5',    '5+ Google reviews',        4, true,  10),
+          ('base', 'has_phone',    'Has phone number',        10, true,  11),
+          ('base', 'has_website',  'Has website',             15, true,  12),
+          ('base', 'has_address',  'Has address',             10, true,  13),
+          ('gap',  'crm',         'No CRM / Enquiry System', 10, true,  20),
+          ('gap',  'lms',         'No LMS / Online Learning',10, true,  21),
+          ('gap',  'payment',     'No Online Fee Payment',   10, true,  22),
+          ('gap',  'admission',   'No Admission Portal',      8, true,  23),
+          ('gap',  'app',         'No Mobile App',            7, true,  24),
+          ('gap',  'attendance',  'No Attendance / ERP',      7, true,  25),
+          ('gap',  'chatbot',     'No Live Chat / WhatsApp',  5, true,  26),
+          ('gap',  'ssl',         'No HTTPS / Secure Site',   5, true,  27)
+        ON CONFLICT (key) DO NOTHING;
+      `);
+      console.log('  ✅ Score config seeded');
+    }
+
     // Safe migration: add columns that may be missing from older DB instances
     await pool.query(`
       ALTER TABLE leads ADD COLUMN IF NOT EXISTS base_score     NUMERIC     DEFAULT 0;
@@ -79,6 +153,15 @@ async function initDB() {
       ALTER TABLE leads ADD COLUMN IF NOT EXISTS search_query   TEXT;
       ALTER TABLE leads ADD COLUMN IF NOT EXISTS missing_services TEXT;
       ALTER TABLE leads ADD COLUMN IF NOT EXISTS sales_pitch    TEXT;
+    `);
+
+    // Safe migration for Reminders (rename note to message if exists)
+    await pool.query(`
+      DO $$ BEGIN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='reminders' AND column_name='note') THEN
+          ALTER TABLE reminders RENAME COLUMN note TO message;
+        END IF;
+      END $$;
     `);
 
     // ── Safe migrations (add columns if missing) ──
@@ -205,10 +288,15 @@ app.post('/api/auth/register', requireAuth(['admin']), async (req, res) => {
   }
 });
 
-// ── Helpers ──────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────
 function cleanPhone(raw) {
   if (!raw) return '';
-  return String(raw).replace(/^['"\s]+/, '').trim();
+  let s = String(raw).trim();
+  // Remove leading single quote (from Excel imports)
+  s = s.replace(/^[']+/, '').trim();
+  // Filter out literal garbage strings
+  if (/^(undefined|null|none|nan|#ERROR!|#N\/A|#VALUE!|#REF!|#NAME\?|#DIV\/0!|#NULL!)$/i.test(s)) return '';
+  return s;
 }
 function calcBaseScore({ rating, reviews, phone, website, address }) {
   let score = 0;
@@ -221,6 +309,26 @@ function calcBaseScore({ rating, reviews, phone, website, address }) {
   if (address) score += 10;
   return Math.min(score, 80);
 }
+
+// ── Score Config API ─────────────────────────────────
+app.get('/api/score-config', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM score_config ORDER BY sort_order ASC');
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+app.patch('/api/score-config/:id', async (req, res) => {
+  const { points, enabled } = req.body;
+  const updates = []; const vals = []; let i = 1;
+  if (points !== undefined) { updates.push(`points=$${i++}`); vals.push(parseInt(points)); }
+  if (enabled !== undefined) { updates.push(`enabled=$${i++}`); vals.push(Boolean(enabled)); }
+  if (!updates.length) return res.status(400).json({ error: 'Nothing to update' });
+  updates.push(`updated_at=NOW()`); vals.push(req.params.id);
+  try {
+    const r = await pool.query(`UPDATE score_config SET ${updates.join(',')} WHERE id=$${i} RETURNING *`, vals);
+    res.json(r.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
 
 // ── LEADS ──
 app.get('/api/leads', async (req, res) => {
@@ -345,6 +453,254 @@ app.post('/api/leads/:id/score', async (req, res) => {
     if (!rows.length) return res.status(404).json({ error: 'Lead not found' });
     const scored = await scoreLead(rows[0]);
     res.json({ success: true, lead: scored });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── CALL LOGS ─────────────────────────────────────────
+app.post('/api/leads/:id/calls', async (req, res) => {
+  const { id } = req.params;
+  let { called_by, duration, outcome, notes, next_followup } = req.body;
+  if (!called_by || called_by === 'undefined' || called_by === 'null') called_by = 'Unknown';
+  try {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const result = await client.query(
+        `INSERT INTO call_logs (lead_id, called_by, duration, outcome, notes, next_followup)
+         VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+        [id, called_by, duration || 0, outcome || 'no_answer', notes || '', next_followup || null]
+      );
+      const newCall = result.rows[0];
+
+      // If there's a follow-up, create a reminder automatically
+      if (next_followup) {
+        // Fetch lead school name for the note
+        const leadRes = await client.query('SELECT school_name FROM leads WHERE id=$1', [id]);
+        const schoolName = leadRes.rows[0]?.school_name || 'Prospect';
+
+        // Set reminder time to 09:00 AM on that day
+        const remindAt = new Date(next_followup);
+        remindAt.setHours(9, 0, 0, 0);
+        
+        const outcomeLabel = { interested: 'Interested', callback: 'Call Back', no_answer: 'No Answer', voicemail: 'Left Voicemail', not_interested: 'Not Interested', closed: 'Deal Closed!' }[outcome] || outcome;
+        const msg = `Follow up with ${schoolName} - outcome: ${outcomeLabel}`;
+
+        await client.query(
+          `INSERT INTO reminders (lead_id, call_log_id, remind_at, message, created_by)
+           VALUES ($1,$2,$3,$4,$5)`,
+          [id, newCall.id, remindAt, msg, called_by]
+        );
+      }
+
+      await client.query('COMMIT');
+      res.json(newCall);
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+app.get('/api/leads/:id/calls', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM call_logs WHERE lead_id=$1 ORDER BY called_at DESC', [req.params.id]);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+app.delete('/api/leads/:id/calls/:callId', async (req, res) => {
+  try {
+    const result = await pool.query('DELETE FROM call_logs WHERE id=$1 AND lead_id=$2 RETURNING id', [req.params.callId, req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ error: 'Call log not found' });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/activity', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      (SELECT 
+        id, lead_id, called_by as added_by, called_at as created_at, 
+        'call' as type, outcome, duration, notes, next_followup 
+       FROM call_logs)
+      UNION ALL
+      (SELECT 
+        id, lead_id, added_by, created_at, 
+        'note' as type, NULL as outcome, NULL as duration, note as notes, NULL as next_followup 
+       FROM lead_notes)
+      ORDER BY created_at DESC 
+      LIMIT 30
+    `);
+    
+    // Fetch school names for these activities
+    const activities = result.rows;
+    if (activities.length === 0) return res.json([]);
+    
+    const leadIds = [...new Set(activities.map(a => a.lead_id))];
+    const leadsResult = await pool.query('SELECT id, school_name FROM leads WHERE id = ANY($1)', [leadIds]);
+    const leadMap = {};
+    leadsResult.rows.forEach(l => leadMap[l.id] = l.school_name);
+    
+    res.json(activities.map(a => ({ ...a, school_name: leadMap[a.lead_id] || 'Unknown School' })));
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── LEAD NOTES ─────────────────────────────────────────
+app.post('/api/leads/:id/notes', async (req, res) => {
+  const { id } = req.params;
+  let { added_by, note } = req.body;
+  if (!added_by || added_by === 'undefined') added_by = 'Unknown';
+  if (!note) return res.status(400).json({ error: 'note is required' });
+  try {
+    const result = await pool.query(`INSERT INTO lead_notes (lead_id, added_by, note) VALUES ($1,$2,$3) RETURNING *`, [id, added_by, note]);
+    res.json(result.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+app.get('/api/leads/:id/notes', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM lead_notes WHERE lead_id=$1 ORDER BY created_at DESC', [req.params.id]);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── REMINDERS ─────────────────────────────────────────
+app.post('/api/reminders', async (req, res) => {
+  const { lead_id, call_log_id, remind_at, message, created_by } = req.body;
+  if (!lead_id || !remind_at) return res.status(400).json({ error: 'lead_id and remind_at required' });
+  const by = (!created_by || created_by === 'undefined') ? 'Unknown' : created_by;
+  try {
+    const result = await pool.query(
+      `INSERT INTO reminders (lead_id, call_log_id, remind_at, message, created_by) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+      [lead_id, call_log_id || null, remind_at, message || '', by]
+    );
+    res.json(result.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+app.get('/api/reminders/today', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT r.*, 
+             l.school_name, 
+             l.phone,
+             u.email as rep_email,
+             u.name as rep_name
+      FROM reminders r
+      JOIN leads l ON r.lead_id = l.id
+      LEFT JOIN users u ON LOWER(r.created_by) = LOWER(u.name)
+      WHERE r.remind_at::date = CURRENT_DATE
+      AND r.status = 'pending'
+      ORDER BY r.created_by, r.remind_at ASC
+    `);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+app.get('/api/reminders/upcoming', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT r.*, 
+             l.school_name, 
+             l.phone,
+             u.email as rep_email,
+             u.name as rep_name
+      FROM reminders r
+      JOIN leads l ON r.lead_id = l.id
+      LEFT JOIN users u ON LOWER(r.created_by) = LOWER(u.name)
+      WHERE r.remind_at >= NOW() 
+      AND r.remind_at <= NOW() + INTERVAL '7 days'
+      AND r.status = 'pending'
+      ORDER BY r.remind_at ASC
+    `);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/reminders/by-rep/:email', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT r.*, 
+             l.school_name, 
+             l.phone,
+             u.email as rep_email,
+             u.name as rep_name
+      FROM reminders r
+      JOIN leads l ON r.lead_id = l.id
+      LEFT JOIN users u ON LOWER(r.created_by) = LOWER(u.name)
+      WHERE u.email = $1
+      AND r.status = 'pending'
+      ORDER BY r.remind_at ASC
+    `, [req.params.email]);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+app.patch('/api/reminders/:id', async (req, res) => {
+  const { status } = req.body;
+  if (!['done', 'dismissed'].includes(status)) return res.status(400).json({ error: 'status must be done or dismissed' });
+  try {
+    const result = await pool.query(`UPDATE reminders SET status=$1 WHERE id=$2 RETURNING *`, [status, req.params.id]);
+    res.json(result.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/leads/:id/reminders', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM reminders WHERE lead_id=$1 ORDER BY remind_at ASC', [req.params.id]);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Fix corrupted data ──────────────────────────────
+app.get('/api/fix-data', async (req, res) => {
+  try {
+    const corrupted = ['undefined', 'null', 'none', 'NaN', '#ERROR!', '#N/A'];
+    let totalFixed = 0;
+
+    // Fix phones
+    const r1 = await pool.query(`
+      UPDATE leads 
+      SET phone = '' 
+      WHERE phone IS NULL 
+         OR TRIM(LOWER(phone)) = ANY($1) 
+         OR phone ~* '^#(ERROR|N\/A|VALUE|REF|NAME|DIV/0|NULL)'
+      RETURNING id
+    `, [corrupted]);
+    totalFixed += r1.rowCount;
+
+    // Fix school names
+    const r2 = await pool.query(`
+      UPDATE leads 
+      SET school_name = 'Unknown School' 
+      WHERE school_name IS NULL OR TRIM(LOWER(school_name)) = ANY($1)
+      RETURNING id
+    `, [corrupted]);
+    totalFixed += r2.rowCount;
+
+    // Fix call logs
+    const r3 = await pool.query(`
+      UPDATE call_logs 
+      SET called_by = 'Unknown' 
+      WHERE called_by IS NULL OR TRIM(LOWER(called_by)) = ANY($1)
+      RETURNING id
+    `, [corrupted]);
+    totalFixed += r3.rowCount;
+
+    // Fix lead notes
+    const r4 = await pool.query(`
+      UPDATE lead_notes 
+      SET added_by = 'Unknown' 
+      WHERE added_by IS NULL OR TRIM(LOWER(added_by)) = ANY($1)
+      RETURNING id
+    `, [corrupted]);
+    totalFixed += r4.rowCount;
+
+    res.json({ success: true, fixed_count: totalFixed });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Fix corrupted phone data ─────────────────────────────
+app.get('/api/fix-phones', async (req, res) => {
+  try {
+    const result = await pool.query(`UPDATE leads SET phone='' WHERE phone ~* '^#(ERROR|N\/A|VALUE|REF|NAME|DIV/0|NULL)' RETURNING id, school_name`);
+    res.json({ success: true, fixed: result.rowCount, leads: result.rows });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
