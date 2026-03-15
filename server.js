@@ -13,6 +13,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ── Globals for n8n tracking ──
+global.lastN8nTrigger = 'System';
+global.lastN8nDomain = 'school';
+
 // ── Serve frontend ──
 app.use(express.static(path.join(__dirname)));
 
@@ -39,6 +43,8 @@ async function initDB() {
         source TEXT DEFAULT 'n8n',
         status TEXT DEFAULT 'new',
         assigned_id INTEGER,
+        deal_value NUMERIC DEFAULT 0,
+        domain TEXT DEFAULT 'school',
         notes TEXT,
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
@@ -107,6 +113,8 @@ async function initDB() {
         points     INTEGER NOT NULL DEFAULT 0,
         enabled    BOOLEAN NOT NULL DEFAULT true,
         sort_order INTEGER NOT NULL DEFAULT 0,
+        labels_json JSONB,
+        pitches_json JSONB,
         updated_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
@@ -153,7 +161,30 @@ async function initDB() {
       ALTER TABLE leads ADD COLUMN IF NOT EXISTS search_query   TEXT;
       ALTER TABLE leads ADD COLUMN IF NOT EXISTS missing_services TEXT;
       ALTER TABLE leads ADD COLUMN IF NOT EXISTS sales_pitch    TEXT;
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS domain         TEXT DEFAULT 'school';
     `);
+
+    // ── Domains table ──
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS domains (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        label TEXT NOT NULL,
+        icon TEXT DEFAULT '📋',
+        query TEXT NOT NULL,
+        created_by TEXT DEFAULT 'Admin',
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+    const domCount = await pool.query('SELECT COUNT(*) FROM domains');
+    if (parseInt(domCount.rows[0].count) === 0) {
+      await pool.query(`
+        INSERT INTO domains (name, label, icon, query, created_by) 
+        VALUES ('school', 'Schools', '🏫', 'Preschools in Bengaluru', 'System')
+        ON CONFLICT DO NOTHING;
+      `);
+      console.log('  ✅ Default domains seeded');
+    }
 
     // Safe migration for Reminders (rename note to message if exists)
     await pool.query(`
@@ -215,20 +246,31 @@ function requireAuth(roles = []) {
 // ── AUTH ROUTES ──
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
+  console.log(`🔑 Login attempt: ${email}`);
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
   try {
     const result = await pool.query('SELECT * FROM users WHERE email=$1', [email.toLowerCase().trim()]);
-    if (!result.rows.length) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!result.rows.length) {
+      console.log(`❌ Login failed: User not found (${email})`);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
     const user = result.rows[0];
     const valid = await bcrypt.compare(password, user.password_hash);
-    if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!valid) {
+      console.log(`❌ Login failed: Invalid password for ${email}`);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
     const token = jwt.sign(
       { id: user.id, name: user.name, email: user.email, role: user.role, team_id: user.team_id },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
+    console.log(`✅ Login success: ${email} (${user.role})`);
     res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, team_id: user.team_id, territory: user.territory } });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { 
+    console.error(`❌ Login error: ${err.message}`);
+    res.status(500).json({ error: err.message }); 
+  }
 });
 
 app.get('/api/auth/me', requireAuth(), (req, res) => {
@@ -332,9 +374,54 @@ app.patch('/api/score-config/:id', async (req, res) => {
 
 // ── LEADS ──
 app.get('/api/leads', async (req, res) => {
+  const { domain } = req.query;
   try {
-    const result = await pool.query('SELECT * FROM leads ORDER BY school_name ASC');
+    let q = 'SELECT * FROM leads';
+    let params = [];
+    if (domain && domain !== 'all') {
+      q += ' WHERE domain = $1';
+      params.push(domain);
+    }
+    q += ' ORDER BY school_name ASC';
+    const result = await pool.query(q, params);
     res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── DOMAINS API ──
+app.get('/api/domains', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM domains ORDER BY created_at ASC');
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/domains', requireAuth(['admin']), async (req, res) => {
+  const { name, label, icon, query, created_by } = req.body;
+  try {
+    const exists = await pool.query('SELECT id FROM domains WHERE name = $1', [name]);
+    if (exists.rows.length > 0) return res.json({ exists: true });
+    
+    const result = await pool.query(
+      'INSERT INTO domains (name, label, icon, query, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [name, label, icon, query, created_by || 'Admin']
+    );
+    res.json(result.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/domains/:name', requireAuth(['admin']), async (req, res) => {
+  const { name } = req.params;
+  if (name === 'school') return res.status(400).json({ error: 'Cannot delete the base Schools sector' });
+  try {
+    const result = await pool.query('DELETE FROM domains WHERE name = $1 RETURNING *', [name]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Sector not found' });
+    
+    // Also delete leads associated with this domain
+    const leadCount = await pool.query('DELETE FROM leads WHERE domain = $1', [name]);
+    
+    console.log(`🗑️ Deleted sector: ${name} and ${leadCount.rowCount} associated leads`);
+    res.json({ success: true, message: `Sector '${name}' and its leads deleted successfully.` });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -350,14 +437,14 @@ app.get('/api/leads/mine', requireAuth(['salesperson']), async (req, res) => {
 });
 
 app.post('/api/leads', async (req, res) => {
-  const { school_name, address, phone, website, rating, reviews, source, status, assigned_id, notes } = req.body;
+  const { school_name, address, phone, website, rating, reviews, source, status, assigned_id, notes, deal_value } = req.body;
   try {
     const cleanedPhone = cleanPhone(phone);
     const base = calcBaseScore({ rating, reviews, phone: cleanedPhone, website, address });
     const result = await pool.query(
-      `INSERT INTO leads (school_name, address, phone, website, rating, reviews, base_score, score, source, status, assigned_id, notes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
-      [school_name, address, cleanedPhone, website, rating || null, reviews || null, base, base, source || 'manual', status || 'new', assigned_id || null, notes || '']
+      `INSERT INTO leads (school_name, address, phone, website, rating, reviews, base_score, score, source, status, assigned_id, notes, deal_value)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
+      [school_name, address, cleanedPhone, website, rating || null, reviews || null, base, base, source || 'manual', status || 'new', assigned_id || null, notes || '', deal_value || 0]
     );
     res.json(result.rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -376,6 +463,20 @@ app.patch('/api/leads/:id', async (req, res) => {
       `UPDATE leads SET ${setClause} WHERE id=$${values.length} RETURNING *`,
       values
     );
+    res.json(result.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.patch('/api/leads/:id/status', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  if (!status) return res.status(400).json({ error: 'status required' });
+  try {
+    const result = await pool.query(
+      'UPDATE leads SET status=$1 WHERE id=$2 RETURNING *',
+      [status, id]
+    );
+    if (!result.rows.length) return res.status(404).json({ error: 'Lead not found' });
     res.json(result.rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -432,11 +533,11 @@ app.post('/webhook/leads', async (req, res) => {
     const cleanedPhone = cleanPhone(phone);
     const base = calcBaseScore({ rating, reviews, phone: cleanedPhone, website, address });
     const result = await pool.query(
-      `INSERT INTO leads (school_name, address, phone, website, rating, reviews, base_score, score, source, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'n8n','new')
+      `INSERT INTO leads (school_name, address, phone, website, rating, reviews, base_score, score, source, status, domain)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'n8n','new',$9)
        ON CONFLICT DO NOTHING
        RETURNING *`,
-      [school_name || 'Unknown', address || '', cleanedPhone, website || '', rating || null, reviews || null, base, base]
+      [school_name || 'Unknown', address || '', cleanedPhone, website || '', rating || null, reviews || null, base, base, global.lastN8nDomain || 'school']
     );
     if (!result.rows.length) {
       return res.json({ success: true, skipped: true, message: 'Duplicate lead, skipped.' });
@@ -761,13 +862,18 @@ app.get('/api/stats', async (req, res) => {
 });
 
 // ── Trigger n8n (proxy) ──────────────────────────────────────
-app.post('/api/trigger-n8n', async (req, res) => {
+app.post('/api/trigger-n8n', requireAuth(['admin', 'salesperson']), async (req, res) => {
+  const { generated_by_name, custom_query, domain } = req.body;
+  if (generated_by_name) global.lastN8nTrigger = generated_by_name;
+  if (domain) global.lastN8nDomain = domain;
+
   try {
     const response = await fetch(process.env.N8N_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: process.env.N8N_QUERY })
+      body: JSON.stringify({ query: custom_query || process.env.N8N_QUERY })
     });
+    
     const data = await response.text();
     console.log('⚡ n8n workflow triggered:', data);
     res.json({ success: true, message: 'n8n workflow triggered!' });

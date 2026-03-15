@@ -26,75 +26,59 @@ async function loadScoreConfig() {
 const GAP_DEFINITIONS = [
     {
         key: 'crm',
-        label: 'CRM / Enquiry Management',
-        techSigs: ['leadsquared.com', 'hubspot.com', 'salesforce.com', 'zoho.com', 'nopaperforms', 'extraedge', 'meritto.com', 'noesisenquiry', 'leadform', 'forms.gle'],
-        keywords: ['crm login', 'enquiry portal'],
+        techSigs: ['leadsquared.com', 'hubspot.com', 'salesforce.com', 'zoho.com', 'nopaperforms', 'extraedge', 'meritto.com', 'noesisenquiry', 'leadform', 'forms.gle', 'zenoti.com', 'mindbodyonline.com', 'booksy.com', 'fresha.com', 'treatwell.com', 'vagaro.com', 'shedul.com', 'phorest.com', 'gettimely.com', 'shortcuts.net'],
+        keywords: ['crm login', 'enquiry portal', 'appointment booking', 'book now', 'online booking', 'salon login', 'stylist login', 'reserve a slot'],
         apiCats: ['crm', 'marketing-automation'],
-        boost: 10,
-        pitch: 'No professional CRM or automated enquiry system detected. Exora CRM can automate lead capture, follow-ups, and convert more admissions—without any manual effort.',
+        boost: 10
     },
     {
         key: 'lms',
-        label: 'LMS / Online Learning',
         techSigs: ['moodle', 'canvas', 'blackboard', 'teachable', 'udemy', 'educomp', 'learnpress', 'tutorlms'],
         keywords: ['student portal', 'lms login'],
         apiCats: ['lms'],
-        boost: 10,
-        pitch: 'No LMS or online learning platform found. Exora LMS enables live/recorded classes, homework, quizzes, and parent-teacher communication—all in one place.',
+        boost: 10
     },
     {
         key: 'payment',
-        label: 'Online Fee Payment',
         techSigs: ['razorpay.com', 'stripe.com', 'paytm.in', 'payu.in', 'instamojo.com', 'ccavenue.com', 'cashfree.com', 'secure.pay'],
         keywords: ['pay fee online', 'online fee portal'],
         apiCats: ['payment-processors'],
-        boost: 10,
-        pitch: 'No online fee payment gateway detected. Exora Payments allows parents to pay fees anytime via UPI, cards, or net banking—reducing admin workload by 80%.',
+        boost: 10
     },
     {
         key: 'admission',
-        label: 'Online Admission Portal',
         techSigs: ['admission.nopaperforms', 'apply.meritto'],
-        keywords: ['apply online', 'online admission portal', 'registration form'],
+        keywords: ['apply online', 'online admission portal', 'registration form', 'book appointment', 'become a member', 'new client form', 'patient portal'],
         apiCats: [],
-        boost: 8,
-        pitch: 'No digital admission process found. Exora Admissions digitises the entire process—from application to document upload and fee payment, cutting paperwork completely.',
+        boost: 8
     },
     {
         key: 'app',
-        label: 'Mobile App / Parent Portal',
         techSigs: ['play.google.com/store/apps', 'apps.apple.com'],
         keywords: ['download our app', 'parent portal'],
         apiCats: [],
-        boost: 7,
-        pitch: 'No mobile app or parent portal detected. Exora Parent App keeps parents updated with attendance, homework, fees, and notices—boosting their satisfaction.',
+        boost: 7
     },
     {
         key: 'attendance',
-        label: 'Attendance / ERP System',
         techSigs: ['fedena', 'edunext', 'entab', 'myclassboard', 'schoolpad', 'edadmin'],
-        keywords: ['erp login', 'school erp login', 'staff login'],
+        keywords: ['erp login', 'school erp login', 'staff login', 'employee portal', 'hrms login', 'roster login'],
         apiCats: ['erp'],
-        boost: 7,
-        pitch: 'No digital attendance or ERP system detected. Exora ERP lets teachers mark attendance digitally, auto-notifying parents and generating compliance reports.',
+        boost: 7
     },
     {
         key: 'chatbot',
-        label: 'Live Chat / Chatbot',
         techSigs: ['tawk.to', 'tidio.co', 'zendesk.com', 'intercom.io', 'freshchat.com', 'drift.com', 'crisp.chat', 'whatsapp.com/send', 'wa.me'],
         keywords: [],
         apiCats: ['live-chat'],
-        boost: 5,
-        pitch: 'No live chat or WhatsApp integration found. Exora AI Chatbot handles admission queries 24/7 on WhatsApp and your website, converting visitors into enrolled students automatically.',
+        boost: 5
     },
     {
         key: 'ssl',
-        label: 'Secure Website (HTTPS)',
         techSigs: [],
         keywords: [],
         apiCats: [],
-        boost: 5,
-        pitch: 'Website is not secure (no HTTPS). Exora handles your HTTPS setup as part of the website package, building trust with parents immediately.',
+        boost: 5
     },
 ];
 
@@ -231,19 +215,41 @@ function classifyPriority(finalScore, gapCount) {
 
 // ── PITCH GENERATOR ──────────────────────────────────────────
 function generatePitch(lead, gaps, websiteStatus, finalScore, priority) {
-    const name = lead.school_name || 'your school';
-    const gapLabels = gaps.map((g) => g.label);
+    let domain = lead.domain || 'school';
+    console.log(`[DEBUG] generatePitch for ${lead.school_name}: initial domain='${domain}'`);
+    // Normalize: remove trailing 's' for plural strings (schools -> school, hospitals -> hospital)
+    if (domain !== 'manufacturing' && domain.endsWith('s')) {
+        domain = domain.slice(0, -1);
+        console.log(`[DEBUG] normalized domain='${domain}'`);
+    }
+    const name = lead.school_name || `your ${domain}`;
+    
+    // Domain-specific terminology
+    const domainTerms = {
+        school: { target: 'parents', type: 'admissions' },
+        gym: { target: 'potential members', type: 'memberships' },
+        manufacturing: { target: 'potential clients', type: 'deals' },
+        hospital: { target: 'patients', type: 'consultations' },
+        salon: { target: 'new clients', type: 'bookings' },
+        default: { target: 'customers', type: 'business' }
+    };
+    const terms = domainTerms[domain] || domainTerms.default;
+
+    const gapLabels = gaps.map((g) => (g.labels && g.labels[domain]) || (g.labels && g.labels.default) || g.label || g.key);
 
     let intro = '';
     if (websiteStatus === 'missing') {
-        intro = `${name} currently has no website, making it nearly invisible to parents searching online.`;
+        intro = `${name} currently has no website, making it nearly invisible to ${terms.target} searching online.`;
     } else if (websiteStatus === 'broken') {
-        intro = `${name}'s website appears to be offline or broken, causing lost admission opportunities daily.`;
+        intro = `${name}'s website appears to be offline or broken, causing lost ${terms.type} opportunities daily.`;
     } else {
         intro = `${name} has an online presence, but our analysis identified ${gaps.length} critical technology gaps.`;
     }
 
-    const pitchPoints = gaps.slice(0, 5).map((g, i) => `${i + 1}. ${g.pitch}`).join('\n');
+    const pitchPoints = gaps.slice(0, 5).map((g, i) => {
+        const p = (g.pitches && g.pitches[domain]) || (g.pitches && g.pitches.default) || g.pitch || '';
+        return `${i + 1}. ${p}`;
+    }).join('\n');
 
     const urgency =
         priority === '🔥 high'
@@ -322,7 +328,12 @@ async function scoreLead(lead) {
         .map(g => {
             const dbRule = gapCfg.find(c => c.key === g.key);
             if (!dbRule || !dbRule.enabled) return null; // skip disabled rules
-            return { ...g, boost: dbRule.points };       // use DB points
+            return { 
+                ...g, 
+                boost: dbRule.points,
+                labels: dbRule.labels_json || {},
+                pitches: dbRule.pitches_json || {}
+            };
         })
         .filter(Boolean);
     console.log(`   \ud83d\udcc9 Gaps: ${gaps.map(g => g.key + '(+' + g.boost + 'pt)').join(', ') || 'none'}`);

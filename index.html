@@ -145,6 +145,29 @@
       line-height: 1;
     }
 
+    .ni-del {
+      margin-left: auto;
+      opacity: 0;
+      transition: all 0.2s;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 5px;
+      cursor: pointer;
+      color: var(--tx3);
+      filter: grayscale(1);
+    }
+
+    .ni:hover .ni-del {
+      opacity: 0.5;
+    }
+
+    .ni-del:hover {
+      opacity: 1 !important;
+      filter: grayscale(0);
+      background: rgba(242, 91, 126, 0.15);
+      color: #f25b7e;
+    }
+
     .dropdown-btn {
       justify-content: space-between;
     }
@@ -1907,6 +1930,223 @@
       color: var(--acc);
       border-color: var(--acc);
     }
+
+    /* ── KANBAN PIPELINE ── */
+    .kanban-board {
+      display: flex;
+      gap: 16px;
+      margin-top: 20px;
+      padding-bottom: 24px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--s4) transparent;
+    }
+
+    .kanban-board::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .kanban-board::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .kanban-board::-webkit-scrollbar-thumb {
+      background: var(--s4);
+      border-radius: 10px;
+    }
+
+    .kanban-col {
+      background: rgba(13, 13, 31, 0.6);
+      border: 1px solid var(--bd);
+      border-radius: 16px;
+      min-width: 320px;
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .kanban-col.drag-over {
+      background: rgba(91, 106, 247, 0.1);
+      border-color: var(--acc);
+      transform: scale(1.02);
+    }
+
+    .kanban-hdr {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .kanban-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .kanban-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .kanban-title {
+      font-family: 'Clash Display', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--tx);
+    }
+
+    .kanban-count {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      color: var(--tx2);
+      font-weight: 700;
+    }
+
+    .kanban-list {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 200px;
+      flex: 1;
+    }
+
+    .kanban-empty-msg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--tx3);
+      font-size: 12px;
+      font-style: italic;
+      pointer-events: none;
+    }
+
+    .kc {
+      background: #13132a;
+      /* Slightly darker than column */
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: grab;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .kc:active {
+      cursor: grabbing;
+      transform: rotate(2deg) scale(1.05);
+      z-index: 1000;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .kc:hover {
+      border-color: rgba(91, 106, 247, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .kc-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .kc-name {
+      font-family: 'Clash Display', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--tx);
+      line-height: 1.2;
+      flex: 1;
+    }
+
+    .kc-tag {
+      background: rgba(245, 166, 35, 0.15);
+      color: var(--a4);
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-left: 8px;
+      flex-shrink: 0;
+    }
+
+    .kc-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .kc-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      color: var(--tx2);
+    }
+
+    .kc-row i {
+      font-size: 12px;
+      opacity: 0.6;
+    }
+
+    .kc-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .kc-stats-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .kc-val {
+      font-weight: 700;
+      color: var(--a3);
+      font-size: 12.5px;
+    }
+
+    .kc-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .kc-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid var(--bd);
+      background: var(--s3);
+      color: var(--tx2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+
+    .kc-btn:hover {
+      background: var(--acc);
+      color: white;
+      border-color: var(--acc);
+    }
   </style>
 </head>
 
@@ -1952,12 +2192,8 @@
       </div>
       <div class="dropdown-content" id="leads-domains-list"></div>
 
-      <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
-        <div><span class="ni-ic">🎯</span>Prospects</div>
-        <i class="arrow"></i>
+      <div class="ni" id="nav-pipeline" onclick="showAdminPage('pipeline',this)"><span class="ni-ic">🛣️</span>Pipeline
       </div>
-      <div class="dropdown-content" id="prospects-filter-list"></div>
-
       <div class="nl">Workspace</div>
       <div class="ni" id="nav-team" onclick="showAdminPage('team',this)"><span class="ni-ic">🧑‍💼</span>Team</div>
       <div class="ni" id="nav-addsp" onclick="showAdminPage('addsp',this)"><span class="ni-ic">👤</span>Add Sales Person
@@ -1976,16 +2212,14 @@
         Dashboard</div>
 
       <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
-        <div><span class="ni-ic">📋</span>My Leads <span class="ni-badge" id="my-leads-badge" style="display:none"></span></div>
+        <div><span class="ni-ic">📋</span>My Leads <span class="ni-badge" id="my-leads-badge"
+            style="display:none"></span></div>
         <i class="arrow"></i>
       </div>
       <div class="dropdown-content" id="sp-leads-domains-list"></div>
 
-      <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
-        <div><span class="ni-ic">🎯</span>My Prospects</div>
-        <i class="arrow"></i>
-      </div>
-      <div class="dropdown-content" id="sp-prospects-filter-list"></div>
+      <div class="ni" id="nav-sppipeline" onclick="showSPPage('pipeline',this)"><span class="ni-ic">🛣️</span>My
+        Pipeline</div>
     </div>
 
     <div class="user-foot">
@@ -2019,7 +2253,7 @@
         <input class="search" type="text" placeholder="🔍  Search schools..." oninput="doSearch(this.value)">
         <button class="btn bg" id="score-btn" onclick="runScoring()">📊 Score Leads</button>
         <button class="btn bg" id="run-btn" onclick="runN8nWorkflow()">⚡ Run n8n Workflow</button>
-        <button class="btn bp" onclick="openAddLead()">+ Add School</button>
+        <button class="btn bp" onclick="openAddLead()">+ Add Lead</button>
       </div>
     </div>
 
@@ -2032,21 +2266,6 @@
       <button class="btn bg bsm" onclick="openM('wh-modal')">⚙ Setup Guide</button>
     </div>
 
-    <!-- PIPELINE TRIGGER -->
-    <div class="card"
-      style="margin-bottom:20px;background:var(--s2);border:1px solid var(--bd);padding:20px;border-radius:var(--r);">
-      <div style="font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-        <span style="font-size:18px;">⚡</span> AI Lead Generation Pipeline
-      </div>
-      <div style="display:flex;gap:12px;align-items:center;">
-        <input type="text" id="pipe-query" class="fi" style="flex:1;font-size:13px;"
-          placeholder="e.g. Preschools in Koramangala, Bangalore">
-        <button class="btn bp" onclick="runPipeline()" id="pipe-btn">🚀 Run Pipeline</button>
-      </div>
-      <div id="pipe-log"
-        style="margin-top:12px;font-family:monospace;font-size:12px;color:var(--tx2);display:none;background:rgba(0,0,0,0.2);padding:12px;border-radius:8px;line-height:1.5;">
-      </div>
-    </div>
 
     <!-- STATS -->
     <div class="stats">
@@ -2069,13 +2288,28 @@
         <div class="sc-sub">across all schools</div>
       </div>
       <div class="sc c4">
-        <div class="sc-ic">💰</div>
-        <div class="sc-lbl">Conversion</div>
+        <div class="sc-ic">🏆</div>
+        <div class="sc-lbl">Won Deals</div>
         <div class="sc-val" id="s4">—</div>
-        <div class="sc-sub">closed / total</div>
+        <div class="sc-sub">won / total</div>
       </div>
     </div>
-    
+
+    <!-- DOMAIN GENERATOR WIDGET -->
+    <div
+      style="background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);padding:18px 22px;margin-bottom:20px;">
+      <div style="font-family:'Clash Display',sans-serif;font-size:15px;font-weight:700;margin-bottom:14px;">⚡ Generate
+        Leads for a Domain</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <input class="fi" id="domain-search-input" placeholder="e.g. Hospitals, Gyms, IT Companies..."
+          style="flex:1;min-width:220px;" onkeydown="if(event.key==='Enter')generateDomainLeads()">
+        <button class="btn bp" onclick="generateDomainLeads()" id="domain-gen-btn">⚡ Generate Leads</button>
+      </div>
+      <div style="font-size:11px;color:var(--tx3);margin-top:8px;">
+        Type any business type → a new tab will be created under Leads automatically
+      </div>
+    </div>
+
     <div class="card" id="adm-activity-card" style="margin-bottom:20px;">
       <div class="ch">
         <div class="ct">Recent Team Activity</div>
@@ -2129,44 +2363,32 @@
     </div>
   </div>
 
-  <!-- PROSPECTS PAGE (ADMIN) -->
-  <div class="page-section" id="prospects-page">
+  <!-- PIPELINE PAGE (ADMIN) -->
+  <div class="page-section" id="pipeline-page">
     <div class="topbar">
       <div>
-        <div class="page-title" id="prospects-page-title">Prospects</div>
-        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">All status specific leads</div>
+        <div class="page-title">Pipeline</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Drag & drop leads across stages</div>
       </div>
       <div class="tb-right">
-        <input class="search" type="text" placeholder="🔍 Search prospects..." oninput="doSearch(this.value)">
+        <button class="btn bg" onclick="loadPipeline()" style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;">🔄</span> Refresh
+        </button>
+        <button class="btn bp" onclick="openAddLead()">+ Add School</button>
       </div>
     </div>
-    <div class="cgrid">
-      <div class="card">
-        <div class="ch">
-          <div class="ct" id="prospect-table-title">Prospects</div>
-        </div>
-        <div style="overflow-x:auto;">
-          <table style="width:100%;border-collapse:collapse;">
-            <thead>
-              <tr>
-                <th>School Info</th>
-                <th>Phone</th>
-                <th>Rating</th>
-                <th>Score & Priority</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="status-leads-body"></tbody>
-          </table>
-        </div>
+
+    <!-- PIPELINE FILTERS -->
+    <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px;">
+      <div style="font-size:11px; font-weight:700; color:var(--tx3); text-transform:uppercase; letter-spacing:1px;">
+        Filter</div>
+      <div class="ftabs" id="pipe-ftabs">
+        <!-- Domains rendered by renderSidebarDomains() -->
       </div>
-      <div class="card">
-        <div class="ch">
-          <div class="ct">Pipeline</div>
-        </div>
-        <div id="pipe-wrap"></div>
-      </div>
+    </div>
+
+    <div class="kanban-board" id="kanban-board">
+      <!-- Status columns rendered by loadPipeline() -->
     </div>
   </div>
 
@@ -2178,39 +2400,49 @@
       </div>
       <div class="mb">
         <div class="fr2">
-          <div class="fg"><label class="fl">School Name *</label><input class="fi" id="f-sname"
-              placeholder="ABC Preschool"></div>
+          <div class="fg"><label class="fl">Name *</label><input class="fi" id="f-sname"
+              placeholder="e.g. ABC Preschool"></div>
           <div class="fg"><label class="fl">Phone</label><input class="fi" id="f-phone" placeholder="+91 98765 43210">
           </div>
         </div>
         <div class="fg"><label class="fl">Address</label><input class="fi" id="f-addr"
             placeholder="123, MG Road, Bengaluru"></div>
         <div class="fr2">
-          <div class="fg"><label class="fl">Website</label><input class="fi" id="f-web"
-              placeholder="https://school.com"></div>
+          <div class="fg"><label class="fl">Website</label><input class="fi" id="f-web" placeholder="https://site.com">
+          </div>
           <div class="fg"><label class="fl">Rating (0–5)</label><input class="fi" id="f-rating" type="number" step="0.1"
               min="0" max="5" placeholder="4.8"></div>
+          <div class="fg"><label class="fl">Reviews</label><input class="fi" id="f-reviews" type="number"
+              placeholder="100"></div>
         </div>
         <div class="fr2">
-          <div class="fg"><label class="fl">Reviews Count</label><input class="fi" id="f-reviews" type="number"
-              placeholder="120"></div>
-          <div class="fg"><label class="fl">Source</label><select class="fs" id="f-source">
-              <option value="n8n">n8n Workflow</option>
-              <option value="manual">Manual</option>
-              <option value="google">Google Maps</option>
-              <option value="referral">Referral</option>
-            </select></div>
+          <div class="fg"><label class="fl">Domain</label>
+            <select class="fi" id="f-domain">
+              <option value="school">🏫 Schools</option>
+              <option value="manufacturing">🏭 Manufacturing</option>
+              <option value="gym">💪 Gyms</option>
+              <option value="hospital">🏥 Hospitals</option>
+              <option value="salon">✂️ Salons</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl">Status</label>
+            <select class="fi" id="f-status">
+              <option value="new">🔵 New</option>
+              <option value="contacted">🟠 Contacted</option>
+              <option value="interested">🟡 Interested</option>
+              <option value="proposal">🟣 Proposal Sent</option>
+              <option value="won">🟢 Won</option>
+              <option value="lost">🔴 Lost</option>
+            </select>
+          </div>
         </div>
         <div class="fr2">
-          <div class="fg"><label class="fl">Status</label><select class="fs" id="f-status">
-              <option value="new">New</option>
-              <option value="contacted">Contacted</option>
-              <option value="qualified">Qualified</option>
-              <option value="closed">Closed</option>
-            </select></div>
-          <div class="fg"><label class="fl">Assign To</label><select class="fs" id="f-assign"></select></div>
+          <div class="fg"><label class="fl">Assign To</label><select class="fi" id="f-assign"></select></div>
+          <div class="fg"><label class="fl">Deal Value (₹)</label><input class="fi" id="f-dv" type="number"
+              placeholder="0"></div>
         </div>
-        <div class="fg"><label class="fl">Notes</label><input class="fi" id="f-notes" placeholder="Any notes..."></div>
+        <div class="fg"><label class="fl">Notes</label><input class="fi" id="f-notes"
+            placeholder="Any internal notes..."></div>
       </div>
       <div class="mf"><button class="btn bg" onclick="closeM('lead-modal')">Cancel</button><button class="btn bp"
           id="lm-save" onclick="saveLead()">Save Lead</button></div>
@@ -2391,6 +2623,12 @@
           id="assign-submit-btn" onclick="submitAssignLeads()">✓ Submit Assignment</button></div>
     </div>
     <div class="alp-assignee" id="alp-assignee"></div>
+    <div style="padding: 12px 22px; display: flex; align-items: center; gap: 12px; border-bottom: 1.5px solid var(--bd); background: rgba(0,0,0,0.05);">
+      <span style="font-size: 11px; font-weight: 700; color: var(--tx3); text-transform: uppercase; letter-spacing: 0.5px;">Filter by Sector:</span>
+      <select id="alp-domain-filter" class="fi" style="width: auto; height: 32px; padding: 0 10px; font-size: 12px; margin: 0; min-width: 180px;" onchange="renderALLeads()">
+        <!-- Populated dynamically -->
+      </select>
+    </div>
     <div id="alp-leads-list"></div>
   </div>
 
@@ -2501,27 +2739,43 @@
       </div>
       <div class="sc c2">
         <div class="sc-ic">⏳</div>
-        <div class="sc-lbl">Pending</div>
+        <div class="sc-lbl">Active</div>
         <div class="sc-val" id="sp-s2">—</div>
-        <div class="sc-sub">need attention</div>
+        <div class="sc-sub">new & contacted</div>
       </div>
       <div class="sc c3">
-        <div class="sc-ic">✅</div>
-        <div class="sc-lbl">Qualified</div>
+        <div class="sc-ic">🟡</div>
+        <div class="sc-lbl">Interested</div>
         <div class="sc-val" id="sp-s3">—</div>
-        <div class="sc-sub">ready to close</div>
+        <div class="sc-sub">potential leads</div>
       </div>
       <div class="sc c4">
-        <div class="sc-ic">🎯</div>
-        <div class="sc-lbl">Closed</div>
+        <div class="sc-ic">🏆</div>
+        <div class="sc-lbl">Won</div>
         <div class="sc-val" id="sp-s4">—</div>
-        <div class="sc-sub">won this month</div>
+        <div class="sc-sub">successfully won</div>
       </div>
     </div>
     <div class="card">
       <div class="ch">
         <div class="ct">Recent Activity</div>
       </div>
+
+      <!-- DOMAIN GENERATOR WIDGET (SP) -->
+      <div
+        style="background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);padding:18px 22px;margin: 10px 20px 20px;">
+        <div style="font-family:'Clash Display',sans-serif;font-size:15px;font-weight:700;margin-bottom:14px;">⚡
+          Generate Leads for a Domain</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <input class="fi" id="sp-domain-search-input" placeholder="e.g. Hospitals, Gyms, IT Companies..."
+            style="flex:1;min-width:220px;" onkeydown="if(event.key==='Enter')generateDomainLeads('sp')">
+          <button class="btn bp" onclick="generateDomainLeads('sp')" id="sp-domain-gen-btn">⚡ Generate Leads</button>
+        </div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:8px;">
+          Type any business type → a new tab will be created under Leads automatically
+        </div>
+      </div>
+
       <div id="sp-activity"></div>
     </div>
   </div>
@@ -2559,44 +2813,6 @@
             </tr>
           </thead>
           <tbody id="sp-leads-body"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- SALESPERSON — MY PROSPECTS PAGE -->
-  <div class="page-section" id="sp-prospects-page">
-    <div class="topbar">
-      <div>
-        <div class="page-title" id="sp-prospects-page-title">My Prospects</div>
-        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Your leads filtered by status</div>
-      </div>
-      <div class="tb-right">
-        <div class="srv-status srv-ok sp-badge active" style="margin-right:15px;">● Active</div>
-        <div class="bell-btn" id="sp-prospects-reminders-bell" onclick="toggleRemindersPanel()"
-          title="Today's Reminders">
-          🔔 <span class="bell-dot" id="sp-prospects-bell-dot"></span>
-        </div>
-        <input class="search" type="text" placeholder="🔍 Search prospects..." oninput="spSearch(this.value)">
-      </div>
-    </div>
-    <div class="card">
-      <div class="ch">
-        <div class="ct" id="sp-prospect-table-title">Prospects</div>
-      </div>
-      <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;">
-          <thead>
-            <tr>
-              <th>School Info</th>
-              <th>Phone</th>
-              <th>Rating</th>
-              <th>Score & Priority</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="sp-status-leads-body"></tbody>
         </table>
       </div>
     </div>
@@ -2716,9 +2932,10 @@
 
   <script>
     const API = 'http://localhost:3001/api';
-    let leads = [], team = [], editId = null, filt = 'all', sq = '';
+    let leads = [], team = [], editId = null, filt = 'all', sq = '', currentDomain = 'school';
     let currentUser = null, authToken = null;
-    let spLeads = [], spFilt = 'all', spSq = '', pendingNewSP = null;
+    let spLeads = [], spFilt = 'all', spSq = '', pendingNewSP = null, alpSelectedIds = [];
+    let domains = [{ id: 'school', label: 'Schools', icon: '🏫' }];
 
     // ── Website column helper ─────────────────────────────────
     function websiteCell(l) {
@@ -2736,8 +2953,7 @@
       return visitLink;
     }
 
-    const domains = [{ id: 'schools', label: 'Schools', icon: '🏫' }];
-    const statuses = ['new', 'contacted', 'qualified', 'closed'];
+    const statuses = ['new', 'contacted', 'interested', 'proposal', 'won', 'lost'];
 
     function toggleDropdown(el) {
       el.classList.toggle('open');
@@ -2749,10 +2965,124 @@
     function renderSidebarDomains() {
       // Admin
       const c1 = document.getElementById('leads-domains-list');
-      if (c1) c1.innerHTML = domains.map(d => `<div class="ni" onclick="showAdminPage('leads', this, '${d.id}')"><span class="ni-ic">${d.icon}</span>${d.label}</div>`).join('');
+      if (c1) {
+        c1.innerHTML = domains.map(d => {
+          const isSelected = currentDomain === d.id;
+          const delBtn = d.id !== 'school' ? `<span class="ni-del" title="Delete Sector" onclick="event.stopPropagation();deleteDomain('${d.id}')">✕</span>` : '';
+          return `<div class="ni ${isSelected ? 'active' : ''}" onclick="showAdminPage('leads', this, '${d.id}')"><span class="ni-ic">${d.icon}</span>${d.label}${delBtn}</div>`;
+        }).join('');
+      }
+
       // Sales Person
       const c2 = document.getElementById('sp-leads-domains-list');
-      if (c2) c2.innerHTML = domains.map(d => `<div class="ni" onclick="showSPPage('leads', this, '${d.id}')"><span class="ni-ic">${d.icon}</span>${d.label}</div>`).join('');
+      if (c2) c2.innerHTML = domains.map(d => `<div class="ni ${currentDomain === d.id ? 'active' : ''}" onclick="showSPPage('leads', this, '${d.id}')"><span class="ni-ic">${d.icon}</span>${d.label}</div>`).join('');
+
+      // Pipeline Filters
+      const c3 = document.getElementById('pipe-ftabs');
+      if (c3) {
+        c3.innerHTML = `<div class="ft ${pipeFilt === 'all' ? 'active' : ''}" onclick="setF('all', this)">All Domains</div>` +
+          domains.map(d => `<div class="ft ${pipeFilt === d.id ? 'active' : ''}" onclick="setF('${d.id}', this)">${d.icon} ${d.label}</div>`).join('');
+      }
+    }
+
+    async function loadDomains() {
+      try {
+        const rows = await get('/domains');
+        domains = rows.map(r => ({ id: r.name, label: r.label, icon: r.icon }));
+        renderSidebarDomains();
+      } catch (e) {
+        console.error('Failed to load domains:', e);
+      }
+    }
+
+    async function deleteDomain(domainId) {
+      if (domainId === 'school') return;
+      
+      const confirmed = confirm(`Are you sure you want to delete the "${domainId}" sector? \n\n⚠️ This will also delete ALL leads associated with this sector.`);
+      if (!confirmed) return;
+
+      try {
+        await del(`/domains/${domainId}`);
+        toast(`🗑️ Sector and its leads deleted.`, 'success');
+        
+        // Remove from local list
+        domains = domains.filter(d => d.id !== domainId);
+        
+        // If we were on this domain, redirect to Schools
+        if (currentDomain === domainId) {
+          showAdminPage('dashboard', document.getElementById('nav-dash'));
+          currentDomain = 'school';
+        }
+        
+        renderSidebarDomains();
+        await loadAdminData(); // Refresh lead counts
+      } catch (e) {
+        toast('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function generateDomainLeads(role = 'admin') {
+      const inputId = role === 'admin' ? 'domain-search-input' : 'sp-domain-search-input';
+      const btnId = role === 'admin' ? 'domain-gen-btn' : 'sp-domain-gen-btn';
+      const input = document.getElementById(inputId);
+      const val = input.value.trim();
+      if (!val) return toast('Please enter a business type or search query', 'info');
+
+      const btn = document.getElementById(btnId);
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span> Generating...';
+
+      try {
+        // Extract label (first word) and normalize ID
+        const firstWord = val.split(' ')[0];
+        const label = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase().replace(/s$/, '');
+        const domainId = label.toLowerCase();
+
+        // Icon Map
+        const iconMap = {
+          hospital: '🏥', gym: '💪', school: '🏫', it: '💻', restaurant: '🍽️',
+          hotel: '🏨', pharmacy: '💊', clinic: '🏥', college: '🎓', factory: '🏭',
+          company: '💼', manufacturing: '🏭', tech: '💻', software: '💻', salon: '✂️'
+        };
+        const icon = iconMap[domainId] || '📋';
+
+        // 1. Create domain in DB
+        const res = await post('/domains', {
+          name: domainId,
+          label: label + 's',
+          icon: icon,
+          query: val,
+          created_by: currentUser.name
+        }, true);
+
+        if (!res.exists) {
+          domains.push({ id: domainId, label: label + 's', icon: icon });
+          renderSidebarDomains();
+        }
+
+        // 2. Trigger n8n
+        await post('/api/trigger-n8n', {
+          generated_by_name: currentUser.name,
+          custom_query: val,
+          domain: domainId
+        }, true);
+
+        toast(`🚀 Generating leads for ${label}s... This may take ~30s.`, 'success');
+        input.value = '';
+
+        // 3. Wait and refresh
+        setTimeout(async () => {
+          if (currentUser.role === 'admin') await loadAdminData();
+          else await loadSPData();
+          toast(`✅ ${label}s leads are now available!`, 'success');
+        }, 30000);
+
+      } catch (e) {
+        toast('Error: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '⚡ Generate Leads';
+      }
     }
 
     function renderStatusFilters() {
@@ -2786,7 +3116,7 @@
 
     // ── API CALLS ──
     async function get(path, auth = false) { const h = auth ? { Authorization: 'Bearer ' + authToken } : {}; const r = await fetch(API + path, { headers: h }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
-    async function post(path, data, auth = false) { const h = auth ? authHeaders() : { 'Content-Type': 'application/json' }; const r = await fetch(API + path, { method: 'POST', headers: h, body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function post(path, data, auth = true) { const h = auth ? authHeaders() : { 'Content-Type': 'application/json' }; const r = await fetch(API + path, { method: 'POST', headers: h, body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
     async function patch(path, data) { const r = await fetch(API + path, { method: 'PATCH', headers: authHeaders(), body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
     async function del(path) { const r = await fetch(API + path, { method: 'DELETE', headers: authHeaders() }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
 
@@ -2832,7 +3162,7 @@
       document.getElementById('u-role').textContent = user.role === 'admin' ? 'Administrator' : 'Sales Person';
       document.getElementById('main-sidebar').style.display = 'flex';
 
-      renderSidebarDomains();
+      await loadDomains();
       renderStatusFilters();
 
       if (user.role === 'admin') {
@@ -2879,12 +3209,11 @@
       }
     }
 
-    // ── ADMIN PAGE ROUTING ──
-    let currentDomain = 'schools';
-
     function showAdminPage(page, el, param = null) {
-      if (page === 'leads') currentDomain = param;
-      if (page === 'prospects' && param) filt = param;
+      if (page === 'leads') {
+        currentDomain = param;
+        renderSidebarDomains();
+      }
 
       const isMainPage = page === 'dashboard' || page === 'team';
       document.getElementById('admin-main').style.display = isMainPage ? 'block' : 'none';
@@ -2905,15 +3234,16 @@
       }
       else if (page === 'leads') {
         document.getElementById('leads-page').classList.add('visible');
-        const ptitle = domains.find(d => d.id === param).label + ' Leads';
+        const d = domains.find(d => d.id === param);
+        const ptitle = (d ? d.label : 'Domain') + ' Leads';
         document.getElementById('leads-page-title').textContent = ptitle;
         document.getElementById('domain-table-title').textContent = ptitle;
       }
-      else if (page === 'prospects') {
-        document.getElementById('prospects-page').classList.add('visible');
-        const ptitle = param === 'all' ? 'All Prospects' : (param.charAt(0).toUpperCase() + param.slice(1) + ' Prospects');
-        document.getElementById('prospects-page-title').textContent = ptitle;
-        document.getElementById('prospect-table-title').textContent = ptitle;
+      else if (page === 'pipeline') {
+        document.getElementById('pipeline-page').classList.add('visible');
+        pipeFilt = currentDomain;
+        renderSidebarDomains();
+        loadPipeline();
       }
 
       if (page === 'dashboard') document.getElementById('ptitle').textContent = 'Dashboard';
@@ -2931,7 +3261,7 @@
       if (wbar) wbar.style.display = page === 'dashboard' ? '' : 'none';
       if (acard) acard.style.display = page === 'dashboard' ? '' : 'none';
 
-      if (page === 'leads' || page === 'prospects') {
+      if (page === 'leads') {
         rLeads();
       }
     }
@@ -3002,9 +3332,9 @@
         document.getElementById('sp-welcome-title').textContent = 'My Dashboard';
         document.getElementById('sp-welcome-sub').textContent = `Welcome, ${firstName}! Here's your activity.`;
         const badge = document.getElementById('my-leads-badge');
-        if (badge && spLeads.length) { 
-          badge.style.display = 'inline-block'; 
-          badge.textContent = spLeads.length; 
+        if (badge && spLeads.length) {
+          badge.style.display = 'inline-block';
+          badge.textContent = spLeads.length;
         }
         rSPStats(); rSPActivity(); rMyLeads();
       } catch (e) { toast('Error loading your leads: ' + e.message, 'error'); }
@@ -3012,9 +3342,9 @@
 
     function rSPStats() {
       document.getElementById('sp-s1').textContent = spLeads.length;
-      document.getElementById('sp-s2').textContent = spLeads.filter(l => !l.status || l.status.trim().toLowerCase() === 'new' || l.status.trim().toLowerCase() === 'contacted').length;
-      document.getElementById('sp-s3').textContent = spLeads.filter(l => l.status && l.status.trim().toLowerCase() === 'qualified').length;
-      document.getElementById('sp-s4').textContent = spLeads.filter(l => l.status && l.status.trim().toLowerCase() === 'closed').length;
+      document.getElementById('sp-s2').textContent = spLeads.filter(l => l.status === 'new' || l.status === 'contacted').length;
+      document.getElementById('sp-s3').textContent = spLeads.filter(l => l.status === 'interested' || l.status === 'proposal' || l.status === 'qualified').length;
+      document.getElementById('sp-s4').textContent = spLeads.filter(l => l.status === 'won').length;
     }
 
     function rSPActivity() {
@@ -3027,9 +3357,10 @@
     function getSpFiltered() {
       return spLeads.filter(l => {
         const fm = spFilt === 'all' || l.status === spFilt;
+        const dm = (l.domain || 'school') === currentDomain;
         const q = spSq.toLowerCase();
         const sm = !q || (l.school_name || '').toLowerCase().includes(q) || (l.address || '').toLowerCase().includes(q);
-        return fm && sm;
+        return fm && dm && sm;
       });
     }
 
@@ -3061,50 +3392,89 @@
 
       const statusLeads = spLeads.filter(l => {
         const fm = spFilt === 'all' || l.status === spFilt;
+        const dm = (l.domain || 'school') === currentDomain;
         const q = spSq.toLowerCase();
         const sm = !q || (l.school_name || '').toLowerCase().includes(q) || (l.address || '').toLowerCase().includes(q);
-        return fm && sm;
+        return fm && dm && sm;
       });
       renderSPTable('sp-status-leads-body', statusLeads);
     }
 
     function showSPPage(page, el, param = null) {
-      if (page === 'leads') currentDomain = param;
-      if (page === 'prospects' && param) spFilt = param;
+      if (page === 'leads') {
+        currentDomain = param;
+        renderSidebarDomains();
+      }
 
       document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
-      if (page === 'spdash') document.getElementById('spdash-page').classList.add('visible');
+      if (page === 'spdash') {
+        document.getElementById('spdash-page').classList.add('visible');
+      }
       else if (page === 'leads') {
         document.getElementById('sp-leads-page').classList.add('visible');
-        const ptitle = domains.find(d => d.id === param).label + ' Leads';
+        const d = domains.find(d => d.id === param);
+        const ptitle = (d ? d.label : 'Domain') + ' Leads';
         document.getElementById('sp-leads-page-title').textContent = ptitle;
         document.getElementById('sp-domain-table-title').textContent = ptitle;
       }
-      else if (page === 'prospects') {
-        document.getElementById('sp-prospects-page').classList.add('visible');
-        const ptitle = param === 'all' ? 'All Prospects' : (param.charAt(0).toUpperCase() + param.slice(1) + ' Prospects');
-        document.getElementById('sp-prospects-page-title').textContent = ptitle;
-        document.getElementById('sp-prospect-table-title').textContent = ptitle;
+      else if (page === 'pipeline') {
+        document.getElementById('pipeline-page').classList.add('visible');
+        pipeFilt = currentDomain;
+        renderSidebarDomains();
+        loadPipeline();
       }
 
       document.querySelectorAll('.ni:not(.dropdown-btn)').forEach(n => n.classList.remove('active'));
       if (el) el.classList.add('active');
 
-      if (page === 'leads' || page === 'prospects') {
+      if (page === 'leads') {
         rMyLeads();
       }
+    }
+
+    function renderAll() {
+      if (currentUser.role === 'admin') {
+        rStats(); rLeads(); rPipe(); rTeam(); popAssign(); rActivity();
+      } else {
+        rSPStats(); rSPActivity(); rMyLeads();
+      }
+      if (document.getElementById('pipeline-page').classList.contains('visible')) loadPipeline();
     }
 
     function spSearch(q) { spSq = q; rMyLeads(); }
 
     async function spUpdStatus(id, status, sel) {
       const bc = { new: 'bn', contacted: 'bc', qualified: 'bq', closed: 'bx' };
-      sel.className = `badge ${bc[status] || 'bn'}`;
-      try { await patch(`/leads/${id}`, { status }); const l = spLeads.find(l => l.id === id); if (l) l.status = status; rSPStats(); rSPActivity(); toast('Status updated', 'success'); }
+      if (sel) sel.className = `badge ${bc[status] || 'bn'}`;
+      try {
+        await patch(`/leads/${id}`, { status });
+        const l = spLeads.find(l => l.id == id);
+        if (l) l.status = status;
+        rSPStats(); rSPActivity(); renderAll(); toast('Status updated', 'success');
+      }
       catch (e) { toast('Error: ' + e.message, 'error'); }
     }
 
-    function spEditLead(id) { const l = spLeads.find(l => l.id === id); if (!l) return; editId = id; document.getElementById('lm-title').textContent = 'Edit School Lead'; document.getElementById('lm-save').textContent = 'Update Lead'; document.getElementById('f-sname').value = l.school_name || ''; document.getElementById('f-phone').value = l.phone || ''; document.getElementById('f-addr').value = l.address || ''; document.getElementById('f-web').value = l.website || ''; document.getElementById('f-rating').value = l.rating || ''; document.getElementById('f-reviews').value = l.reviews || ''; document.getElementById('f-source').value = l.source || 'n8n'; document.getElementById('f-status').value = l.status || 'new'; document.getElementById('f-notes').value = l.notes || ''; const as = document.getElementById('f-assign'); if (as) as.innerHTML = '<option value="">Unassigned</option>'; openM('lead-modal'); }
+    function spEditLead(id) {
+      const l = spLeads.find(l => l.id === id);
+      if (!l) return;
+      editId = id;
+      document.getElementById('lm-title').textContent = 'Edit Lead Details';
+      document.getElementById('lm-save').textContent = 'Update Lead';
+      document.getElementById('f-sname').value = l.school_name || '';
+      document.getElementById('f-phone').value = l.phone || '';
+      document.getElementById('f-addr').value = l.address || '';
+      document.getElementById('f-web').value = l.website || '';
+      document.getElementById('f-rating').value = l.rating || '';
+      document.getElementById('f-reviews').value = l.reviews || '';
+      if (document.getElementById('f-source')) document.getElementById('f-source').value = l.source || 'n8n';
+      document.getElementById('f-status').value = l.status || 'new';
+      document.getElementById('f-notes').value = l.notes || '';
+      document.getElementById('f-dv').value = l.deal_value || 0;
+      const as = document.getElementById('f-assign');
+      if (as) as.innerHTML = '<option value="">Unassigned</option>';
+      openM('lead-modal');
+    }
 
     // ── ADD SALES PERSON ──
     async function registerSP() {
@@ -3132,37 +3502,70 @@
     }
 
     function showAssignLeadsPage(sp) {
+      alpSelectedIds = []; // Reset selections
       document.getElementById('admin-main').style.display = 'none';
       document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
       document.getElementById('assignleads-page').classList.add('visible');
       document.getElementById('alp-assignee').innerHTML = `<div style="font-size:24px;width:36px;height:36px;background:${sp.color}18;color:${sp.color};border:2px solid ${sp.color}30;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:13px;">${sp.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</div><div><strong>${sp.name}</strong> &nbsp;·&nbsp; ${sp.email} &nbsp;·&nbsp; ${sp.territory || '—'}</div>`;
+      
+      const filter = document.getElementById('alp-domain-filter');
+      if (filter) {
+        filter.innerHTML = '<option value="all">🌐 All Sectors</option>' + 
+          domains.map(d => `<option value="${d.id}">${d.icon} ${d.label}</option>`).join('');
+        filter.value = 'all';
+      }
+
+      renderALLeads();
+    }
+
+    function renderALLeads() {
+      const sp = pendingNewSP;
+      if (!sp) return;
+      const domainFilt = document.getElementById('alp-domain-filter')?.value || 'all';
+      
       const unassigned = leads.filter(l => !l.assigned_id);
       const assigned = leads.filter(l => l.assigned_id && l.assigned_id !== sp.id);
-      const all = [...unassigned, ...assigned];
+      let allLeads = [...unassigned, ...assigned];
+
+      if (domainFilt !== 'all') {
+        allLeads = allLeads.filter(l => (l.domain || 'school') === domainFilt);
+      }
+
       const bc = { new: 'bn', contacted: 'bc', qualified: 'bq', closed: 'bx' };
-      document.getElementById('alp-leads-list').innerHTML = all.length
-        ? all.map(l => `<div class="lead-cb-row" id="alp-r-${l.id}" onclick="toggleCB(${l.id})"><input type="checkbox" id="alp-cb-${l.id}" onclick="event.stopPropagation();toggleCB(${l.id})"><div style="flex:1"><div style="font-weight:700;font-size:13px;">${l.school_name || '—'}</div><div style="font-size:11.5px;color:var(--tx2);">${l.address || ''} ${l.phone ? '· ' + l.phone : ''}</div></div><span class="badge ${bc[l.status] || 'bn'}">${l.status}</span></div>`).join('')
-        : '<div style="padding:24px;text-align:center;color:var(--tx3);">No unassigned leads available.</div>';
+      document.getElementById('alp-leads-list').innerHTML = allLeads.length
+        ? allLeads.map(l => {
+          const isSel = alpSelectedIds.includes(l.id);
+          return `<div class="lead-cb-row ${isSel ? 'sel' : ''}" id="alp-r-${l.id}" onclick="toggleCB(${l.id})"><input type="checkbox" id="alp-cb-${l.id}" ${isSel ? 'checked' : ''} onclick="event.stopPropagation();toggleCB(${l.id})"><div style="flex:1"><div style="font-weight:700;font-size:13px;">${l.school_name || '—'}</div><div style="font-size:11.5px;color:var(--tx2);">${l.address || ''} ${l.phone ? '· ' + l.phone : ''}</div></div><span class="badge ${bc[l.status] || 'bn'}">${l.status}</span></div>`;
+        }).join('')
+        : `<div style="padding:40px 24px;text-align:center;color:var(--tx3);"><div style="font-size:24px;margin-bottom:10px;opacity:0.5;">📋</div>No leads found for this sector.</div>`;
       popAssign();
     }
 
     function toggleCB(id) {
+      const idx = alpSelectedIds.indexOf(id);
+      if (idx > -1) alpSelectedIds.splice(idx, 1);
+      else alpSelectedIds.push(id);
+      
       const cb = document.getElementById('alp-cb-' + id);
       const row = document.getElementById('alp-r-' + id);
-      cb.checked = !cb.checked;
-      row.classList.toggle('sel', cb.checked);
+      if (cb) cb.checked = alpSelectedIds.includes(id);
+      if (row) row.classList.toggle('sel', alpSelectedIds.includes(id));
     }
 
     async function submitAssignLeads() {
       if (!pendingNewSP) { toast('No pending sales person.', 'error'); return; }
-      const checked = leads.filter(l => document.getElementById('alp-cb-' + l.id)?.checked).map(l => l.id);
-      const btn = document.getElementById('assign-submit-btn'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
+      if (alpSelectedIds.length === 0) { toast('No leads selected — skipping assignment.', ''); return; }
+      
+      const btn = document.getElementById('assign-submit-btn'); 
+      btn.disabled = true; 
+      btn.innerHTML = '<span class="spin"></span> Processing...';
+      
       try {
-        if (checked.length) {
-          await post('/leads/assign', { lead_ids: checked, team_id: pendingNewSP.id });
-          leads.forEach(l => { if (checked.includes(l.id)) l.assigned_id = pendingNewSP.id; });
-          toast(`✅ ${checked.length} lead${checked.length > 1 ? 's' : ''} assigned to ${pendingNewSP.name}!`, 'success');
-        } else { toast('No leads selected — skipping assignment.', ''); }
+        await post('/leads/assign', { lead_ids: alpSelectedIds, team_id: pendingNewSP.id });
+        leads.forEach(l => { if (alpSelectedIds.includes(l.id)) l.assigned_id = pendingNewSP.id; });
+        toast(`✅ ${alpSelectedIds.length} lead${alpSelectedIds.length > 1 ? 's' : ''} assigned to ${pendingNewSP.name}!`, 'success');
+        
+        alpSelectedIds = [];
         pendingNewSP = null;
         showAdminPage('team', document.getElementById('nav-team'));
         await loadAdminData();
@@ -3171,29 +3574,66 @@
     }
 
     // ── ADMIN RENDER ──
-    function renderAll() { rStats(); rLeads(); rPipe(); rTeam(); popAssign(); rActivity(); }
+    function renderAll() { rStats(); rLeads(); rPipe(); rTeam(); popAssign(); rActivity(); if (document.getElementById('pipeline-page').classList.contains('visible')) loadPipeline(); }
     function rStats() {
-      const tot = leads.length, nw = leads.filter(l => !l.status || l.status.trim().toLowerCase() === 'new').length;
-      const closed = leads.filter(l => l.status && l.status.trim().toLowerCase() === 'closed').length;
+      const tot = leads.length;
+      const nw = leads.filter(l => !l.status || l.status.trim() === '' || l.status.trim().toLowerCase() === 'new').length;
+      const won = leads.filter(l => l.status && l.status.trim().toLowerCase() === 'won').length;
       const ratings = leads.filter(l => l.rating);
       const avgR = ratings.length ? (ratings.reduce((a, l) => a + Number(l.rating), 0) / ratings.length).toFixed(1) : '—';
-      document.getElementById('s1').textContent = tot; document.getElementById('s2').textContent = nw; document.getElementById('s3').textContent = avgR; document.getElementById('s4').textContent = tot ? Math.round(closed / tot * 100) + '%' : '0%';
+      document.getElementById('s1').textContent = tot;
+      document.getElementById('s2').textContent = nw;
+      document.getElementById('s3').textContent = avgR;
+      document.getElementById('s4').textContent = tot ? Math.round(won / tot * 100) + '%' : '0%';
     }
-    function getFiltered() { return leads.filter(l => { const fm = filt === 'all' || (l.status && l.status.trim().toLowerCase() === filt); const q = sq.toLowerCase(); const sm = !q || (l.school_name || '').toLowerCase().includes(q) || (l.address || '').toLowerCase().includes(q) || (l.phone || '').toLowerCase().includes(q); return fm && sm; }); }
+    function getFiltered() {
+      return leads.filter(l => {
+        const fm = filt === 'all' || (l.status && l.status.trim().toLowerCase() === filt);
+        const dm = (l.domain || 'school') === currentDomain;
+        const q = sq.toLowerCase();
+        const sm = !q || (l.school_name || '').toLowerCase().includes(q) || (l.address || '').toLowerCase().includes(q) || (l.phone || '').toLowerCase().includes(q);
+        return fm && dm && sm;
+      });
+    }
     function rLeads() {
       const tb = document.getElementById('leads-body'); const fl = getFiltered();
       if (!fl.length) { tb.innerHTML = '<tr class="empty"><td colspan="8">No leads found. Run your n8n workflow or add manually!</td></tr>'; return; }
-      const bc = { new: 'bn', contacted: 'bc', qualified: 'bq', closed: 'bx' };
+      const bc = { new: 'bn', contacted: 'bc', interested: 'bi', proposal: 'bp', won: 'bw', lost: 'bl' };
+
       tb.innerHTML = fl.map(l => {
+        const curStatus = (l.status || 'new').trim().toLowerCase();
         const m = team.find(t => t.id === l.assigned_id);
         const init = m ? m.name.split(' ').map(n => n[0]).join('').slice(0, 2) : '?';
         const pStr = (l.phone && l.phone.trim() && l.phone !== 'undefined' && l.phone !== 'null') ? l.phone : '—';
-        return `<tr><td><div class="sn">${l.school_name || '—'}</div><div class="sa">${l.address || ''}</div>${l.pitch ? `<div style="margin-top:6px;"><a class="wb-link" style="cursor:pointer;white-space:nowrap;" onclick="showPitch(${l.id})">💬 View Pitch</a></div>` : ''}</td><td><div style="font-size:12px;color:var(--tx2);white-space:nowrap;">${pStr}</div></td><td style="white-space:nowrap;">${websiteCell(l)}</td><td><div style="color:var(--a4);font-size:12.5px;">${l.rating || '—'} ⭐</div></td><td><div style="display:flex;align-items:center;gap:12px;"><div class="score-pill"><strong>${l.score || 0}</strong> /100</div><div style="font-size:14px;">${l.priority == '🔥 high' ? '🔥' : l.priority == '⚡ medium' ? '⚡' : '📋'}</div></div></td><td><select class="badge ${bc[l.status] || 'bn'}" onchange="updStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;"><option value="new" ${l.status === 'new' ? 'selected' : ''}>🔵 New</option><option value="contacted" ${l.status === 'contacted' ? 'selected' : ''}>🟢 Contacted</option><option value="qualified" ${l.status === 'qualified' ? 'selected' : ''}>🟢 Qualified</option><option value="closed" ${l.status === 'closed' ? 'selected' : ''}>🔴 Closed</option></select></td><td><div class="abts"><button class="ib view-details" onclick="openLeadPanel(${l.id})" title="Calls & Notes">📋 Details</button><button class="ib" onclick="editLead(${l.id})" title="Edit">✏️</button><button class="ib del" onclick="delLead(${l.id})" title="Delete">🗑️</button></div></td></tr>`;
-
-
+        return `<tr><td><div class="sn">${l.school_name || '—'}</div><div class="sa">${l.address || ''}</div>${l.pitch ? `<div style="margin-top:6px;"><a class="wb-link" style="cursor:pointer;white-space:nowrap;" onclick="showPitch(${l.id})">💬 View Pitch</a></div>` : ''}</td><td><div style="font-size:12px;color:var(--tx2);white-space:nowrap;">${pStr}</div></td><td style="white-space:nowrap;">${websiteCell(l)}</td><td><div style="color:var(--a4);font-size:12.5px;">${l.rating || '—'} ⭐</div></td><td><div style="display:flex;align-items:center;gap:12px;"><div class="score-pill"><strong>${l.score || 0}</strong> /100</div><div style="font-size:14px;">${l.priority == '🔥 high' ? '🔥' : l.priority == '⚡ medium' ? '⚡' : '📋'}</div></div></td><td><select class="badge ${bc[curStatus] || 'bn'}" onchange="updStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;">
+          <option value="new" ${curStatus === 'new' ? 'selected' : ''}>🔵 New</option>
+          <option value="contacted" ${curStatus === 'contacted' ? 'selected' : ''}>🟠 Contacted</option>
+          <option value="interested" ${curStatus === 'interested' ? 'selected' : ''}>🟡 Interested</option>
+          <option value="proposal" ${curStatus === 'proposal' ? 'selected' : ''}>🟣 Proposal Sent</option>
+          <option value="won" ${curStatus === 'won' ? 'selected' : ''}>🟢 Won</option>
+          <option value="lost" ${curStatus === 'lost' ? 'selected' : ''}>🔴 Lost</option>
+        </select></td><td><div class="abts"><button class="ib view-details" onclick="openLeadPanel(${l.id})" title="Calls & Notes">📋 Details</button><button class="ib" onclick="editLead(${l.id})" title="Edit">✏️</button><button class="ib del" onclick="delLead(${l.id})" title="Delete">🗑️</button></div></td></tr>`;
       }).join('');
     }
-    function rPipe() { const stages = [{ k: 'new', l: 'New', c: '#5b6af7' }, { k: 'contacted', l: 'Contacted', c: '#f5a623' }, { k: 'qualified', l: 'Qualified', c: '#1de9a0' }, { k: 'closed', l: 'Closed', c: '#f25b7e' }]; const tot = leads.length || 1; document.getElementById('pipe-wrap').innerHTML = stages.map(s => { const cnt = leads.filter(l => l.status && l.status.trim().toLowerCase() === s.k).length; const pct = Math.round(cnt / tot * 100); return `<div class="ps"><div class="ps-top"><div class="ps-name"><div class="ps-dot" style="background:${s.c}"></div>${s.l}</div><span class="ps-cnt">${cnt}</span></div><div class="pb"><div class="pbf" style="width:${pct}%;background:${s.c}"></div></div><div class="pv">${pct}% of total</div></div>`; }).join(''); }
+    function rPipe() {
+      const stages = [
+        { k: 'new', l: 'New', c: '#5b6af7' },
+        { k: 'contacted', l: 'Contacted', c: '#f5a623' },
+        { k: 'interested', l: 'Interested', c: '#ffeb3b' },
+        { k: 'proposal', l: 'Proposal Sent', c: '#9c27b0' },
+        { k: 'won', l: 'Won', c: '#1de9a0' },
+        { k: 'lost', l: 'Lost', c: '#f25b7e' }
+      ];
+      const tot = leads.length || 1;
+      const wrap = document.getElementById('pipe-wrap');
+      if (wrap) {
+        wrap.innerHTML = stages.map(s => {
+          const cnt = leads.filter(l => l.status === s.k).length;
+          const pct = Math.round(cnt / tot * 100);
+          return `<div class="ps"><div class="ps-top"><div class="ps-name"><div class="ps-dot" style="background:${s.c}"></div>${s.l}</div><span class="ps-cnt">${cnt}</span></div><div class="pb"><div class="pbf" style="width:${pct}%;background:${s.c}"></div></div><div class="pv">${pct}% of total</div></div>`;
+        }).join('');
+      }
+    }
     function rTeam() {
       const g = document.getElementById('team-grid');
       g.innerHTML = team.map(m => {
@@ -3213,11 +3653,11 @@
         if (!logs.length) { el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--tx3);font-size:13px;">No team activity yet.</div>'; return; }
         const outcomeMap = { interested: '✅ Interested', callback: '🔄 Call Back', not_interested: '❌ Not Interested', no_answer: '📵 No Answer', closed: '🎯 Closed', voicemail: '📼 Voicemail' };
         el.innerHTML = logs.map(l => {
-          const dt = new Date(l.created_at); 
+          const dt = new Date(l.created_at);
           const dtStr = dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-          
+
           if (l.type === 'note') {
-             return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'Note added'}</p><div class="act-meta"><span>👤 ${l.added_by}</span><span>📅 ${dtStr}</span></div></div><span class="badge bn" style="background:rgba(29, 233, 160, 0.1);color:var(--a3);">📝 Note</span></div>`;
+            return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'Note added'}</p><div class="act-meta"><span>👤 ${l.added_by}</span><span>📅 ${dtStr}</span></div></div><span class="badge bn" style="background:rgba(29, 233, 160, 0.1);color:var(--a3);">📝 Note</span></div>`;
           }
 
           const followup = l.next_followup ? `<div style="margin-top:5px;font-size:10.5px;color:var(--a3);font-weight:700;">📅 Follow-up: ${new Date(l.next_followup).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</div>` : '';
@@ -3235,18 +3675,84 @@
     }
 
     // ── LEAD CRUD ──
-    function openAddLead() { editId = null; document.getElementById('lm-title').textContent = 'Add School Lead'; document.getElementById('lm-save').textContent = 'Save Lead';['f-sname', 'f-phone', 'f-addr', 'f-web', 'f-notes'].forEach(id => document.getElementById(id).value = '');['f-rating', 'f-reviews'].forEach(id => document.getElementById(id).value = ''); document.getElementById('f-source').value = 'n8n'; document.getElementById('f-status').value = 'new'; popAssign(); openM('lead-modal'); }
-    function editLead(id) { const l = leads.find(l => l.id === id); if (!l) return; editId = id; document.getElementById('lm-title').textContent = 'Edit School Lead'; document.getElementById('lm-save').textContent = 'Update Lead'; document.getElementById('f-sname').value = l.school_name || ''; document.getElementById('f-phone').value = l.phone || ''; document.getElementById('f-addr').value = l.address || ''; document.getElementById('f-web').value = l.website || ''; document.getElementById('f-rating').value = l.rating || ''; document.getElementById('f-reviews').value = l.reviews || ''; document.getElementById('f-source').value = l.source || 'n8n'; document.getElementById('f-status').value = l.status || 'new'; document.getElementById('f-notes').value = l.notes || ''; popAssign(); document.getElementById('f-assign').value = l.assigned_id || ''; openM('lead-modal'); }
+    function openAddLead() {
+      editId = null;
+      document.getElementById('lm-title').textContent = 'Add New Lead';
+      document.getElementById('lm-save').textContent = 'Save Lead';
+      ['f-sname', 'f-phone', 'f-addr', 'f-web', 'f-notes'].forEach(id => document.getElementById(id).value = '');
+      ['f-rating', 'f-reviews', 'f-dv'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('f-domain').value = 'school';
+      document.getElementById('f-status').value = 'new';
+      popAssign();
+      openM('lead-modal');
+    }
+    function editLead(id) {
+      const l = leads.find(l => l.id === id);
+      if (!l) return;
+      editId = id;
+      document.getElementById('lm-title').textContent = 'Edit Lead Details';
+      document.getElementById('lm-save').textContent = 'Update Lead';
+      document.getElementById('f-sname').value = l.school_name || '';
+      document.getElementById('f-phone').value = l.phone || '';
+      document.getElementById('f-addr').value = l.address || '';
+      document.getElementById('f-web').value = l.website || '';
+      document.getElementById('f-rating').value = l.rating || '';
+      document.getElementById('f-reviews').value = l.reviews || '';
+      document.getElementById('f-domain').value = l.domain || 'school';
+      document.getElementById('f-status').value = l.status || 'new';
+      document.getElementById('f-notes').value = l.notes || '';
+      document.getElementById('f-dv').value = l.deal_value || 0;
+      popAssign();
+      document.getElementById('f-assign').value = l.assigned_id || '';
+      openM('lead-modal');
+    }
     async function saveLead() {
       const sn = document.getElementById('f-sname').value.trim();
       if (!sn) { toast('School name is required', 'error'); return; }
-      const data = { school_name: sn, phone: document.getElementById('f-phone').value.trim(), address: document.getElementById('f-addr').value.trim(), website: document.getElementById('f-web').value.trim(), rating: parseFloat(document.getElementById('f-rating').value) || null, reviews: parseInt(document.getElementById('f-reviews').value) || null, source: document.getElementById('f-source').value, status: document.getElementById('f-status').value, assigned_id: parseInt(document.getElementById('f-assign').value) || null, notes: document.getElementById('f-notes').value.trim() };
+      const data = {
+        school_name: sn,
+        phone: document.getElementById('f-phone').value.trim(),
+        address: document.getElementById('f-addr').value.trim(),
+        website: document.getElementById('f-web').value.trim(),
+        rating: parseFloat(document.getElementById('f-rating').value) || null,
+        reviews: parseInt(document.getElementById('f-reviews').value) || null,
+        source: 'manual',
+        domain: document.getElementById('f-domain').value || 'school',
+        status: document.getElementById('f-status').value,
+        assigned_id: parseInt(document.getElementById('f-assign').value) || null,
+        notes: document.getElementById('f-notes').value.trim(),
+        deal_value: parseFloat(document.getElementById('f-dv').value) || 0
+      };
       const btn = document.getElementById('lm-save'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
-      try { if (editId) { await patch(`/leads/${editId}`, data); const i = leads.findIndex(l => l.id === editId); if (i >= 0) leads[i] = { ...leads[i], ...data }; toast('✅ Lead updated!', 'success'); } else { const c = await post('/leads', data); leads.unshift(c); toast('✅ School lead added!', 'success'); } renderAll(); closeM('lead-modal'); } catch (e) { toast('Error: ' + e.message, 'error'); }
+      try {
+        if (editId) {
+          await patch(`/leads/${editId}`, data);
+          const i = leads.findIndex(l => l.id === editId);
+          if (i >= 0) leads[i] = { ...leads[i], ...data };
+          toast('✅ Lead updated!', 'success');
+        } else {
+          const c = await post('/leads', data);
+          leads.unshift(c);
+          toast('✅ School lead added!', 'success');
+        }
+        renderAll();
+        closeM('lead-modal');
+      } catch (e) { toast('Error: ' + e.message, 'error'); }
       btn.disabled = false; btn.textContent = editId ? 'Update Lead' : 'Save Lead';
     }
     async function delLead(id) { if (!confirm('Delete this school lead?')) return; try { await del(`/leads/${id}`); leads = leads.filter(l => l.id !== id); renderAll(); toast('Lead deleted', ''); } catch (e) { toast('Error: ' + e.message, 'error'); } }
-    async function updStatus(id, status, sel) { const bc = { new: 'bn', contacted: 'bc', qualified: 'bq', closed: 'bx' }; sel.className = `badge ${bc[status] || 'bn'}`; try { await patch(`/leads/${id}`, { status }); const l = leads.find(l => l.id === id); if (l) l.status = status; rStats(); rPipe(); toast('Status updated', 'success'); } catch (e) { toast('Error: ' + e.message, 'error'); } }
+    async function updStatus(id, status, sel) {
+      const bc = { new: 'bn', contacted: 'bc', interested: 'bi', proposal: 'bp', won: 'bw', lost: 'bl' };
+      if (sel) sel.className = `badge ${bc[status] || 'bn'}`;
+      try {
+        await patch(`/leads/${id}/status`, { status });
+        const leadId = Number(id);
+        const l = leads.find(l => l.id === leadId) || spLeads.find(l => l.id === leadId);
+        if (l) l.status = status;
+        renderAll();
+        toast('Status updated', 'success');
+      } catch (e) { toast('Error: ' + e.message, 'error'); }
+    }
 
     // ── TEAM CRUD ──
     function openAddTeam() { ['t-name', 't-role', 't-email', 't-phone'].forEach(id => document.getElementById(id).value = ''); openM('team-modal'); }
@@ -3258,6 +3764,93 @@
     function showPitch(id) { const l = (leads.find(x => x.id === id) || spLeads.find(x => x.id === id)); if (!l || !l.pitch) return; document.getElementById('pm-txt').textContent = l.pitch; openM('pitch-modal'); }
 
     // ── PIPELINE ──
+    // ── KANBAN PIPELINE ──
+    function loadPipeline() {
+      const board = document.getElementById('kanban-board');
+      if (!board) return;
+
+      const stages = [
+        { k: 'new', l: 'New', c: '#5b6af7' },
+        { k: 'contacted', l: 'Contacted', c: '#f5a623' },
+        { k: 'interested', l: 'Interested', c: '#ffeb3b' },
+        { k: 'proposal', l: 'Proposal Sent', c: '#9c27b0' },
+        { k: 'won', l: 'Won', c: '#1de9a0' },
+        { k: 'lost', l: 'Lost', c: '#f25b7e' }
+      ];
+
+      const leadData = currentUser.role === 'admin' ? leads : spLeads;
+      const filteredLeads = leadData.filter(l => {
+        if (pipeFilt === 'all') return true;
+        return (l.domain || 'school') === pipeFilt;
+      });
+
+      board.innerHTML = stages.map(s => {
+        const stageLeads = filteredLeads.filter(l => {
+          const st = (l.status || 'new').trim().toLowerCase();
+          return st === s.k;
+        });
+        const totalVal = stageLeads.reduce((a, l) => a + (parseFloat(l.deal_value) || 0), 0);
+
+        let cardsHtml = stageLeads.map(l => {
+          const pStr = (l.phone && l.phone.trim() && l.phone !== 'undefined' && l.phone !== 'null') ? l.phone : '—';
+          return `<div class="kc" draggable="true" ondragstart="drag(event, ${l.id})">
+            <div class="kc-top">
+              <div class="kc-name">${l.school_name || 'Unnamed school'}</div>
+              <div class="kc-tag">${(domains.find(d => d.id === l.domain) || { label: 'Lead' }).label.replace(/s$/, '')}</div>
+            </div>
+            <div class="kc-info">
+              <div class="kc-row"><i>📞</i> ${pStr}</div>
+              <div class="kc-row"><i>⭐</i> ${l.rating || '0.0'}</div>
+            </div>
+            <div class="kc-foot">
+              <div class="kc-val">₹${(parseFloat(l.deal_value) || 0).toLocaleString('en-IN')}</div>
+              <div class="kc-btns">
+                <button class="kc-btn" onclick="openLeadPanel(${l.id})" title="Details">📋</button>
+                <button class="kc-btn" onclick="${currentUser.role === 'admin' ? 'editLead' : 'spEditLead'}(${l.id})" title="Edit">✏️</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+
+        if (!cardsHtml) {
+          cardsHtml = `<div class="kanban-empty-msg">Drop cards here</div>`;
+        }
+
+        return `<div class="kanban-col" style="border-top: 3px solid ${s.c}" ondragover="allowDrop(event)" ondrop="drop(event, '${s.k}')" ondragenter="dragEnter(this)" ondragleave="dragLeave(this)">
+          <div class="kanban-hdr">
+            <div class="kanban-title-wrap">
+              <div class="kanban-dot" style="color:${s.c}; background:${s.c}"></div>
+              <div class="kanban-title">${s.l}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="kanban-count">${stageLeads.length}</div>
+              <div style="font-size:10px;color:var(--a3);margin-top:4px;font-weight:700;">₹${totalVal.toLocaleString('en-IN')}</div>
+            </div>
+          </div>
+          <div class="kanban-list">
+            ${cardsHtml}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function allowDrop(ev) { ev.preventDefault(); }
+    function drag(ev, id) { ev.dataTransfer.setData("leadId", id); }
+    function dragEnter(el) { el.classList.add('drag-over'); }
+    function dragLeave(el) { el.classList.remove('drag-over'); }
+    async function drop(ev, status) {
+      ev.preventDefault();
+      const id = ev.dataTransfer.getData("leadId");
+      const cols = document.querySelectorAll('.kanban-col');
+      cols.forEach(c => c.classList.remove('drag-over'));
+
+      try {
+        await updStatus(id, status);
+      } catch (e) {
+        toast('❌ Move failed: ' + e.message, 'error');
+      }
+    }
+
     async function runPipeline() {
       const q = document.getElementById('pipe-query').value.trim();
       if (!q) return toast('Enter a search query', 'error');
@@ -3281,7 +3874,20 @@
     async function runN8nWorkflow() { const btn = document.getElementById('run-btn'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Running...'; toast('⚡ Triggering n8n workflow...', 'success'); try { await post('/trigger-n8n', {}); toast('✅ Workflow triggered! Loading new leads in 10s...', 'success'); setTimeout(async () => { leads = await get('/leads'); renderAll(); toast('🎉 New leads loaded from n8n!', 'success'); btn.disabled = false; btn.innerHTML = '⚡ Run n8n Workflow'; }, 10000); } catch (e) { toast('⚠️ Error: ' + e.message, 'error'); btn.disabled = false; btn.innerHTML = '⚡ Run n8n Workflow'; } }
 
     // ── UTILS ──
-    function setF(f, el) { filt = f; document.querySelectorAll('#admin-main .ft').forEach(t => t.classList.remove('active')); el.classList.add('active'); rLeads(); }
+    let pipeFilt = 'all';
+    function setF(f, el) {
+      if (document.getElementById('pipeline-page').classList.contains('visible')) {
+        pipeFilt = f;
+        document.querySelectorAll('#pipeline-page .ft').forEach(t => t.classList.remove('active'));
+        if (el) el.classList.add('active');
+        loadPipeline();
+      } else {
+        filt = f;
+        document.querySelectorAll('#admin-main .ft').forEach(t => t.classList.remove('active'));
+        if (el) el.classList.add('active');
+        rLeads();
+      }
+    }
     function doSearch(q) { sq = q; rLeads(); }
     function openM(id) { document.getElementById(id).classList.add('open'); }
     function closeM(id) { document.getElementById(id).classList.remove('open'); }
@@ -3303,13 +3909,20 @@
       } catch (e) { toast('Failed to load score config: ' + e.message, 'error'); }
     }
 
+
+
     function renderConfigList(containerId, rows) {
       const el = document.getElementById(containerId);
       if (!el) return;
       el.innerHTML = rows.map(function (r) {
+        let label = r.label;
+        if (r.labels_json) {
+          const dom = (currentDomain === 'all' || !currentDomain) ? 'default' : currentDomain;
+          label = r.labels_json[dom] || r.labels_json.default || r.label;
+        }
         return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(26,26,53,0.6);gap:10px;">'
           + '<div style="flex:1;min-width:0;">'
-          + '<div style="font-size:12.5px;font-weight:600;color:var(--tx);">' + r.label + '</div>'
+          + '<div style="font-size:12.5px;font-weight:600;color:var(--tx);">' + label + '</div>'
           + '</div>'
           + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
           + '<input type="number" min="0" max="50" value="' + r.points + '" id="cfg-pts-' + r.id + '" style="width:54px;background:var(--s2);border:1.5px solid var(--bd);border-radius:6px;padding:5px 7px;color:var(--tx);font-size:12px;text-align:center;outline:none;" onchange="saveScoreRule(' + r.id + ')" title="Points">'
