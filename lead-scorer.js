@@ -10,11 +10,12 @@
  */
 
 require('dotenv').config();
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { Pool } = require('pg');
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: false });
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 
 // ── Load scoring config from DB ────────────────────────────
 async function loadScoreConfig() {
@@ -23,9 +24,12 @@ async function loadScoreConfig() {
 }
 
 // ── EXORA SERVICE GAP DEFINITIONS ───────────────────────────
+// ── EXORA SERVICE GAP DEFINITIONS ───────────────────────────
 const GAP_DEFINITIONS = [
     {
         key: 'crm',
+        label: 'CRM / Lead Management',
+        pitch: 'No professional CRM or automated enquiry system detected. Exora CRM can automate {target} capture, follow-ups, and convert more {type}—without any manual effort.',
         techSigs: ['leadsquared.com', 'hubspot.com', 'salesforce.com', 'zoho.com', 'nopaperforms', 'extraedge', 'meritto.com', 'noesisenquiry', 'leadform', 'forms.gle', 'zenoti.com', 'mindbodyonline.com', 'booksy.com', 'fresha.com', 'treatwell.com', 'vagaro.com', 'shedul.com', 'phorest.com', 'gettimely.com', 'shortcuts.net'],
         keywords: ['crm login', 'enquiry portal', 'appointment booking', 'book now', 'online booking', 'salon login', 'stylist login', 'reserve a slot'],
         apiCats: ['crm', 'marketing-automation'],
@@ -33,6 +37,8 @@ const GAP_DEFINITIONS = [
     },
     {
         key: 'lms',
+        label: 'Staff Training / LMS Portal',
+        pitch: 'No LMS or online training platform found. Exora LMS enables professional training, documentation, and quizzes for your team—all in one place.',
         techSigs: ['moodle', 'canvas', 'blackboard', 'teachable', 'udemy', 'educomp', 'learnpress', 'tutorlms'],
         keywords: ['student portal', 'lms login'],
         apiCats: ['lms'],
@@ -40,6 +46,8 @@ const GAP_DEFINITIONS = [
     },
     {
         key: 'payment',
+        label: 'Online Digital Payments',
+        pitch: 'No online payment gateway detected. Exora Payments allows {target} to pay safely via UPI, cards, or net banking—reducing manual collections by 80%.',
         techSigs: ['razorpay.com', 'stripe.com', 'paytm.in', 'payu.in', 'instamojo.com', 'ccavenue.com', 'cashfree.com', 'secure.pay'],
         keywords: ['pay fee online', 'online fee portal'],
         apiCats: ['payment-processors'],
@@ -47,6 +55,8 @@ const GAP_DEFINITIONS = [
     },
     {
         key: 'admission',
+        label: 'Digital Registration / Intake',
+        pitch: 'No digital onboarding process found. Exora digitises the entire process—from application to document upload and fee payment, cutting paperwork completely.',
         techSigs: ['admission.nopaperforms', 'apply.meritto'],
         keywords: ['apply online', 'online admission portal', 'registration form', 'book appointment', 'become a member', 'new client form', 'patient portal'],
         apiCats: [],
@@ -54,6 +64,8 @@ const GAP_DEFINITIONS = [
     },
     {
         key: 'app',
+        label: 'Mobile App / Client Portal',
+        pitch: 'No mobile app or {target} portal detected. Exora Client App keeps your {target} updated with schedules, invoices, and notices—boosting satisfaction.',
         techSigs: ['play.google.com/store/apps', 'apps.apple.com'],
         keywords: ['download our app', 'parent portal'],
         apiCats: [],
@@ -61,6 +73,8 @@ const GAP_DEFINITIONS = [
     },
     {
         key: 'attendance',
+        label: 'Workforce ERP / Attendance',
+        pitch: 'No digital attendance or ERP system detected. Exora ERP lets you mark attendance digitally, auto-notifying stakeholders and generating compliance reports.',
         techSigs: ['fedena', 'edunext', 'entab', 'myclassboard', 'schoolpad', 'edadmin'],
         keywords: ['erp login', 'school erp login', 'staff login', 'employee portal', 'hrms login', 'roster login'],
         apiCats: ['erp'],
@@ -68,6 +82,8 @@ const GAP_DEFINITIONS = [
     },
     {
         key: 'chatbot',
+        label: 'WhatsApp AI Chatbot',
+        pitch: 'No live chat or WhatsApp integration found. Exora AI Chatbot handles queries 24/7 on WhatsApp and your website, converting visitors into leads automatically.',
         techSigs: ['tawk.to', 'tidio.co', 'zendesk.com', 'intercom.io', 'freshchat.com', 'drift.com', 'crisp.chat', 'whatsapp.com/send', 'wa.me'],
         keywords: [],
         apiCats: ['live-chat'],
@@ -75,6 +91,8 @@ const GAP_DEFINITIONS = [
     },
     {
         key: 'ssl',
+        label: 'Secure Website (HTTPS)',
+        pitch: 'Website is not secure (no HTTPS). Exora handles your HTTPS setup as part of the website package, building trust with visitors immediately.',
         techSigs: [],
         keywords: [],
         apiCats: [],
@@ -214,28 +232,80 @@ function classifyPriority(finalScore, gapCount) {
 }
 
 // ── PITCH GENERATOR ──────────────────────────────────────────
-function generatePitch(lead, gaps, websiteStatus, finalScore, priority) {
-    let domain = lead.domain || 'school';
-    console.log(`[DEBUG] generatePitch for ${lead.school_name}: initial domain='${domain}'`);
-    // Normalize: remove trailing 's' for plural strings (schools -> school, hospitals -> hospital)
+// ── SECTOR INTELLIGENCE PROFILES ─────────────────────────────
+// Defines which services are most critical for specific industries
+const SECTOR_PROFILES = {
+    school: { priority: ['lms', 'admission', 'payment', 'crm', 'attendance'], labels: { lms: 'LMS / Student Portal', admission: 'Online Admissions', payment: 'Fee Payment' } },
+    college: { priority: ['lms', 'admission', 'payment', 'crm'], labels: { lms: 'LMS / Student Portal', admission: 'Online Admissions' } },
+    gym: { priority: ['app', 'payment', 'crm', 'chatbot'], labels: { app: 'Member App', crm: 'Member Management', payment: 'Membership Fees' } },
+    fitness: { priority: ['app', 'payment', 'crm', 'chatbot'], labels: { app: 'Client App', payment: 'Recurring Payments' } },
+    hospital: { priority: ['chatbot', 'crm', 'app', 'payment', 'ssl'], labels: { chatbot: 'Patient AI Assistant', app: 'Patient Portal', crm: 'Clinic Management' } },
+    clinic: { priority: ['chatbot', 'crm', 'app', 'payment'], labels: { chatbot: 'Patient AI Assistant', crm: 'Clinic Management' } },
+    manufacturing: { priority: ['attendance', 'crm', 'chatbot', 'ssl'], labels: { attendance: 'Workforce ERP', crm: 'Deal Tracker' } },
+    factory: { priority: ['attendance', 'crm', 'ssl'], labels: { attendance: 'Workforce ERP' } },
+    salon: { priority: ['admission', 'chatbot', 'payment', 'crm'], labels: { admission: 'Online Booking', crm: 'Appointment Manager' } },
+    spa: { priority: ['admission', 'chatbot', 'payment', 'crm'], labels: { admission: 'Online Booking' } },
+    auditing: { priority: ['crm', 'chatbot', 'ssl', 'payment'], labels: { crm: 'Client Pipeline', chatbot: 'Auto-Responder' } },
+    restaurant: { priority: ['chatbot', 'payment', 'app', 'crm'], labels: { payment: 'Digital Billing', chatbot: 'WhatsApp Ordering' } },
+    hotel: { priority: ['admission', 'chatbot', 'payment', 'crm'], labels: { admission: 'Booking Engine' } }
+};
+
+// ── PITCH GENERATOR ──────────────────────────────────────────
+async function generatePitch(lead, gaps, websiteStatus, finalScore, priority) {
+    let domainRaw = (lead.domain || 'school').toLowerCase().trim();
+    
+    // Normalize plural to singular (except manufacturing)
+    let domain = domainRaw;
     if (domain !== 'manufacturing' && domain.endsWith('s')) {
         domain = domain.slice(0, -1);
-        console.log(`[DEBUG] normalized domain='${domain}'`);
     }
+
+    // Dynamic terminology from DB
+    let terms = { target: 'customers', type: 'business' };
+    try {
+        const { rows } = await pool.query('SELECT target_term, type_term FROM domains WHERE name = $1', [domain]);
+        if (rows.length > 0) {
+            terms.target = rows[0].target_term || 'customers';
+            terms.type = rows[0].type_term || 'business';
+        }
+    } catch (e) {
+        console.error(`[WARN] Failed to fetch terms for domain ${domain}:`, e.message);
+    }
+
+    // --- NEW: Sector-Aware Intelligence ---
+    // 1. Identify Profile
+    let profile = SECTOR_PROFILES[domain] || SECTOR_PROFILES.school; // Fallback to school if unknown
+    
+    // 2. Intelligent dynamic classification for "new" sectors
+    if (!SECTOR_PROFILES[domain]) {
+        if (/health|med|doc|clinic|hospital/.test(domain)) profile = SECTOR_PROFILES.hospital;
+        else if (/train|edu|learn|coach/.test(domain)) profile = SECTOR_PROFILES.school;
+        else if (/work|industrial|prod|manufacturing/.test(domain)) profile = SECTOR_PROFILES.manufacturing;
+        else if (/book|salon|hair|spa|service/.test(domain)) profile = SECTOR_PROFILES.salon;
+        else if (/money|bill|pay|audit|finance/.test(domain)) profile = SECTOR_PROFILES.auditing;
+    }
+
+    // 3. Re-order gaps based on industry priority
+    const prioritizedGaps = [...gaps].sort((a, b) => {
+        const indexA = profile.priority.indexOf(a.key);
+        const indexB = profile.priority.indexOf(b.key);
+        
+        // If both are in priority list, use priority order
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        // If only one is in priority list, that one goes first
+        if (indexA !== -1) return -1;
+        if (indexB !== -1) return 1;
+        // Fallback to boost points
+        return (b.boost || 0) - (a.boost || 0);
+    });
+
     const name = lead.school_name || `your ${domain}`;
     
-    // Domain-specific terminology
-    const domainTerms = {
-        school: { target: 'parents', type: 'admissions' },
-        gym: { target: 'potential members', type: 'memberships' },
-        manufacturing: { target: 'potential clients', type: 'deals' },
-        hospital: { target: 'patients', type: 'consultations' },
-        salon: { target: 'new clients', type: 'bookings' },
-        default: { target: 'customers', type: 'business' }
-    };
-    const terms = domainTerms[domain] || domainTerms.default;
-
-    const gapLabels = gaps.map((g) => (g.labels && g.labels[domain]) || (g.labels && g.labels.default) || g.label || g.key);
+    // Use sector-specific label if available in profile
+    const gapLabels = prioritizedGaps.map((g) => {
+        const sectorLabel = profile.labels && (profile.labels[g.key] || profile.labels[g.key.replace(/s$/, '')]);
+        return sectorLabel || g.label || g.key;
+    });
 
     let intro = '';
     if (websiteStatus === 'missing') {
@@ -246,8 +316,22 @@ function generatePitch(lead, gaps, websiteStatus, finalScore, priority) {
         intro = `${name} has an online presence, but our analysis identified ${gaps.length} critical technology gaps.`;
     }
 
-    const pitchPoints = gaps.slice(0, 5).map((g, i) => {
-        const p = (g.pitches && g.pitches[domain]) || (g.pitches && g.pitches.default) || g.pitch || '';
+    const pitchPoints = prioritizedGaps.slice(0, 5).map((g, i) => {
+        let p = (g.pitches && (g.pitches[domain] || g.pitches[domainRaw] || g.pitches.default)) || g.pitch || '';
+        
+        // --- Sector Context Injection ---
+        if (domain === 'manufacturing' && g.key === 'crm') {
+            p = "Manual deal tracking is slowing you down. Exora CRM digitises your entire B2B pipeline, ensuring no purchase order or enquiry is ever missed.";
+        } else if (domain === 'salon' && g.key === 'admission') {
+            p = "Manual phone bookings are inefficient. Exora's Digital Booking Portal lets your clients schedule appointments 24/7 without disturbing your stylists.";
+        } else if (domain === 'gym' && g.key === 'app') {
+            p = "Engagement is key for retention. The Exora Client App keeps your members connected with workout plans, diet charts, and renewal alerts.";
+        } else if (domain === 'hospital' && g.key === 'chatbot') {
+            p = "Your staff is overwhelmed with routine queries. Exora AI Chatbot handles patient appointments and FAQs on WhatsApp, freeing up your reception desk.";
+        }
+
+        // Replace placeholders
+        p = p.replace(/{target}/g, terms.target).replace(/{type}/g, terms.type);
         return `${i + 1}. ${p}`;
     }).join('\n');
 
@@ -340,7 +424,7 @@ async function scoreLead(lead) {
 
     const finalScore = calcFinalScore(baseScore, gaps);
     const priority = classifyPriority(finalScore, gaps.length);
-    const pitch = generatePitch(lead, gaps, websiteStatus, finalScore, priority);
+    const pitch = await generatePitch(lead, gaps, websiteStatus, finalScore, priority);
 
     await pool.query(
         `UPDATE leads SET

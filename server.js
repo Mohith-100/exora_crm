@@ -1,4 +1,5 @@
 require('dotenv').config();
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
@@ -25,7 +26,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'leadflow_super_secret_2024';
 // ── PostgreSQL Connection ──
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: false
+  ssl: { rejectUnauthorized: false }
 });
 
 // ── Auto-create tables on startup ──
@@ -46,7 +47,9 @@ async function initDB() {
         deal_value NUMERIC DEFAULT 0,
         domain TEXT DEFAULT 'school',
         notes TEXT,
-        created_at TIMESTAMPTZ DEFAULT NOW()
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        CONSTRAINT unique_lead_name_addr UNIQUE (school_name, address),
+        CONSTRAINT unique_lead_name_phone UNIQUE (school_name, phone)
       );
       CREATE TABLE IF NOT EXISTS team (
         id SERIAL PRIMARY KEY,
@@ -118,6 +121,12 @@ async function initDB() {
         updated_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
+    // ── Score config table migration ──
+    await pool.query(`
+      ALTER TABLE score_config ADD COLUMN IF NOT EXISTS labels_json JSONB;
+      ALTER TABLE score_config ADD COLUMN IF NOT EXISTS pitches_json JSONB;
+    `);
+
     const cfgCount = await pool.query('SELECT COUNT(*) FROM score_config');
     if (parseInt(cfgCount.rows[0].count) === 0) {
       await pool.query(`
@@ -168,19 +177,28 @@ async function initDB() {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS domains (
         id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
+        name TEXT NOT NULL UNIQUE,
         label TEXT NOT NULL,
         icon TEXT DEFAULT '📋',
         query TEXT NOT NULL,
+        target_term TEXT DEFAULT 'customers',
+        type_term TEXT DEFAULT 'business',
         created_by TEXT DEFAULT 'Admin',
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
+      ALTER TABLE domains ADD COLUMN IF NOT EXISTS target_term TEXT DEFAULT 'customers';
+      ALTER TABLE domains ADD COLUMN IF NOT EXISTS type_term TEXT DEFAULT 'business';
     `);
     const domCount = await pool.query('SELECT COUNT(*) FROM domains');
     if (parseInt(domCount.rows[0].count) === 0) {
       await pool.query(`
-        INSERT INTO domains (name, label, icon, query, created_by) 
-        VALUES ('school', 'Schools', '🏫', 'Preschools in Bengaluru', 'System')
+        INSERT INTO domains (name, label, icon, query, target_term, type_term, created_by) 
+        VALUES 
+          ('school', 'Schools', '🏫', 'Preschools in Bengaluru', 'parents', 'admissions', 'System'),
+          ('gym', 'Gyms', '💪', 'Gyms in Bengaluru', 'potential members', 'memberships', 'System'),
+          ('manufacturing', 'Manufacturing', '🏭', 'Manufacturing companies in Bengaluru', 'potential clients', 'deals', 'System'),
+          ('hospital', 'Hospitals', '🏥', 'Hospitals in Bengaluru', 'patients', 'consultations', 'System'),
+          ('salon', 'Salons', '✂️', 'Salons in Bengaluru', 'new clients', 'bookings', 'System')
         ON CONFLICT DO NOTHING;
       `);
       console.log('  ✅ Default domains seeded');
@@ -396,15 +414,29 @@ app.get('/api/domains', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+app.patch('/api/domains/:name', requireAuth(['admin']), async (req, res) => {
+  const { name } = req.params;
+  const { label, icon, target_term, type_term } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE domains SET label = COALESCE($1, label), icon = COALESCE($2, icon), target_term = COALESCE($3, target_term), type_term = COALESCE($4, type_term)
+       WHERE name = $5 RETURNING *`,
+      [label, icon, target_term, type_term, name]
+    );
+    if (!result.rows.length) return res.status(404).json({ error: 'Sector not found' });
+    res.json(result.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.post('/api/domains', requireAuth(['admin']), async (req, res) => {
-  const { name, label, icon, query, created_by } = req.body;
+  const { name, label, icon, query, created_by, target_term, type_term } = req.body;
   try {
     const exists = await pool.query('SELECT id FROM domains WHERE name = $1', [name]);
     if (exists.rows.length > 0) return res.json({ exists: true });
     
     const result = await pool.query(
-      'INSERT INTO domains (name, label, icon, query, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [name, label, icon, query, created_by || 'Admin']
+      'INSERT INTO domains (name, label, icon, query, created_by, target_term, type_term) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [name, label, icon, query, created_by || 'Admin', target_term || 'customers', type_term || 'business']
     );
     res.json(result.rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -500,6 +532,24 @@ app.post('/api/leads/assign', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+app.post('/api/leads/dedup', requireAuth(['admin']), async (req, res) => {
+  try {
+    const r1 = await pool.query(`
+      DELETE FROM leads a USING leads b
+      WHERE a.id > b.id 
+      AND a.school_name = b.school_name 
+      AND (a.address = b.address OR (a.address IS NULL AND b.address IS NULL))
+    `);
+    const r2 = await pool.query(`
+      DELETE FROM leads a USING leads b
+      WHERE a.id > b.id 
+      AND a.school_name = b.school_name 
+      AND (a.phone = b.phone OR (a.phone IS NULL AND b.phone IS NULL))
+    `);
+    res.json({ success: true, removed: r1.rowCount + r2.rowCount });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ── TEAM ──
 app.get('/api/team', async (req, res) => {
   try {
@@ -528,7 +578,7 @@ app.delete('/api/team/:id', async (req, res) => {
 
 // ── n8n WEBHOOK ──────────────────────────────────────────────
 app.post('/webhook/leads', async (req, res) => {
-  const { school_name, address, phone, website, rating, reviews } = req.body;
+  const { school_name, address, phone, website, rating, reviews, domain } = req.body;
   try {
     const cleanedPhone = cleanPhone(phone);
     const base = calcBaseScore({ rating, reviews, phone: cleanedPhone, website, address });
@@ -537,7 +587,7 @@ app.post('/webhook/leads', async (req, res) => {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'n8n','new',$9)
        ON CONFLICT DO NOTHING
        RETURNING *`,
-      [school_name || 'Unknown', address || '', cleanedPhone, website || '', rating || null, reviews || null, base, base, global.lastN8nDomain || 'school']
+      [school_name || 'Unknown', address || '', cleanedPhone, website || '', rating || null, reviews || null, base, base, domain || global.lastN8nDomain || 'school']
     );
     if (!result.rows.length) {
       return res.json({ success: true, skipped: true, message: 'Duplicate lead, skipped.' });
@@ -661,6 +711,13 @@ app.get('/api/leads/:id/notes', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM lead_notes WHERE lead_id=$1 ORDER BY created_at DESC', [req.params.id]);
     res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+app.delete('/api/leads/:id/notes/:noteId', async (req, res) => {
+  try {
+    const result = await pool.query('DELETE FROM lead_notes WHERE id=$1 AND lead_id=$2 RETURNING id', [req.params.noteId, req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ error: 'Note not found' });
+    res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -809,9 +866,10 @@ app.get('/api/fix-phones', async (req, res) => {
 app.post('/api/trigger-scrape', async (req, res) => {
   const query = req.body?.query || process.env.N8N_QUERY || 'preschools in Bengaluru';
   try {
-    console.log(`\n⚡ Scrape triggered for: "${query}"`);
-    const results = await scrapeAndSave(query);
-    res.json({ success: true, query, saved: results.saved.length, skipped: results.skipped.length, errors: results.errors.length, leads: results.saved });
+    const domain = req.body?.domain || 'school';
+    console.log(`\n⚡ Scrape triggered for: "${query}" (domain: ${domain})`);
+    const results = await scrapeAndSave(query, domain);
+    res.json({ success: true, query, domain, saved: results.saved.length, skipped: results.skipped.length, errors: results.errors.length, leads: results.saved });
   } catch (err) {
     console.error('Scrape trigger error:', err.message);
     res.status(500).json({ error: err.message });
@@ -834,8 +892,9 @@ app.post('/api/trigger-score', async (req, res) => {
 app.post('/api/trigger-all', async (req, res) => {
   const query = req.body?.query || process.env.N8N_QUERY || 'preschools in Bengaluru';
   try {
-    console.log(`\n🚀 FULL PIPELINE triggered for: "${query}"`);
-    const scrapeResults = await scrapeAndSave(query);
+    const domain = req.body?.domain || 'school';
+    console.log(`\n🚀 FULL PIPELINE triggered for: "${query}" (domain: ${domain})`);
+    const scrapeResults = await scrapeAndSave(query, domain);
     const scored = await scoreAllPendingLeads();
     const { rows: allLeads } = await pool.query(
       `SELECT id, school_name, score, priority, website_status, gaps_found FROM leads WHERE search_query=$1 ORDER BY score DESC`,
@@ -851,13 +910,20 @@ app.post('/api/trigger-all', async (req, res) => {
 // ── Stats summary ─────────────────────────────────────────────
 app.get('/api/stats', async (req, res) => {
   try {
-    const [total, byStatus, byPriority, avgScore] = await Promise.all([
+    const [total, byStatus, byPriority, avgScore, byDomain] = await Promise.all([
       pool.query('SELECT COUNT(*) FROM leads'),
       pool.query('SELECT status, COUNT(*) FROM leads GROUP BY status'),
       pool.query('SELECT priority, COUNT(*) FROM leads WHERE priority IS NOT NULL GROUP BY priority'),
       pool.query('SELECT AVG(score)::numeric(5,1) as avg_score FROM leads WHERE score > 0'),
+      pool.query("SELECT COALESCE(domain, 'school') as domain, COUNT(*) FROM leads GROUP BY domain"),
     ]);
-    res.json({ total: parseInt(total.rows[0].count), by_status: byStatus.rows, by_priority: byPriority.rows, avg_score: avgScore.rows[0]?.avg_score || 0 });
+    res.json({ 
+      total: parseInt(total.rows[0].count), 
+      by_status: byStatus.rows, 
+      by_priority: byPriority.rows, 
+      avg_score: avgScore.rows[0]?.avg_score || 0,
+      by_domain: byDomain.rows
+    });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -868,10 +934,27 @@ app.post('/api/trigger-n8n', requireAuth(['admin', 'salesperson']), async (req, 
   if (domain) global.lastN8nDomain = domain;
 
   try {
+    let target_term = 'customers';
+    let type_term = 'business';
+    
+    if (domain) {
+      const { rows } = await pool.query('SELECT target_term, type_term FROM domains WHERE name = $1', [domain]);
+      if (rows.length > 0) {
+        target_term = rows[0].target_term || 'customers';
+        type_term = rows[0].type_term || 'business';
+      }
+    }
+
     const response = await fetch(process.env.N8N_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: custom_query || process.env.N8N_QUERY })
+      body: JSON.stringify({ 
+        query: custom_query || process.env.N8N_QUERY,
+        domain: domain,
+        target_term: target_term,
+        type_term: type_term,
+        generated_by: generated_by_name || 'Admin'
+      })
     });
     
     const data = await response.text();

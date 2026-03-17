@@ -1,0 +1,45 @@
+﻿Total leads: 419
+Leads with score > 0: 419
+Leads with scored_at IS NOT NULL: 419
+Example rows: [
+  {
+    "id": 2203,
+    "school_name": "Suhas & Co",
+    "score": 100,
+    "base_score": 53,
+    "scored_at": "2026-03-17T09:19:07.830Z",
+    "status": "scored"
+  },
+  {
+    "id": 2033,
+    "school_name": "Salem Hospital Visitors Parking Garage",
+    "score": 100,
+    "base_score": 40,
+    "scored_at": "2026-03-17T09:27:18.821Z",
+    "status": "scored"
+  },
+  {
+    "id": 2413,
+    "school_name": "NR road Bangalore",
+    "score": 100,
+    "base_score": 49,
+    "scored_at": "2026-03-17T10:58:27.823Z",
+    "status": "scored"
+  },
+  {
+    "id": 2186,
+    "school_name": "Mukunda Shiva & Associates: CA Firm Bangalore",
+    "score": 100,
+    "base_score": 76,
+    "scored_at": "2026-03-17T09:19:56.127Z",
+    "status": "scored"
+  },
+  {
+    "id": 2416,
+    "school_name": "M S Mart",
+    "score": 100,
+    "base_score": 56,
+    "scored_at": "2026-03-17T10:58:22.219Z",
+    "status": "scored"
+  }
+]

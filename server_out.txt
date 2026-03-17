@@ -4,5 +4,5 @@
 📊 Trigger score   → POST http://localhost:3001/api/trigger-score
 ⚡ Full pipeline   → POST http://localhost:3001/api/trigger-all
 📋 Leads API       → GET  http://localhost:3001/api/leads
-✅ Connected to PostgreSQL — exora_crm
+✅ Connected to PostgreSQL — exora_crm?sslmode=require
 ✅ Tables ready!

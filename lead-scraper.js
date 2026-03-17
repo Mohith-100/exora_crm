@@ -6,10 +6,11 @@
  */
 
 require('dotenv').config();
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const axios = require('axios');
 const { Pool } = require('pg');
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: false });
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 
 // ── BASE SCORE CALCULATOR ─────────────────────────────────────
 function calcBaseScore({ rating, reviews, phone, website, address }) {
@@ -58,7 +59,7 @@ function cleanWebsite(raw) {
 }
 
 // ── SCRAPE & SAVE ─────────────────────────────────────────────
-async function scrapeAndSave(query = 'preschools in Bengaluru') {
+async function scrapeAndSave(query = 'preschools in Bengaluru', domain = 'school') {
     const apiKey = process.env.SERPER_API_KEY;
     if (!apiKey) throw new Error('SERPER_API_KEY not set in .env');
 
@@ -87,11 +88,11 @@ async function scrapeAndSave(query = 'preschools in Bengaluru') {
 
             const result = await pool.query(
                 `INSERT INTO leads
-                   (school_name, address, phone, website, rating, reviews, base_score, score, source, status, search_query)
-                 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'serper','new',$9)
-                 ON CONFLICT (school_name, address) DO NOTHING
+                   (school_name, address, phone, website, rating, reviews, base_score, score, source, status, search_query, domain)
+                 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'serper','new',$9, $10)
+                 ON CONFLICT DO NOTHING
                  RETURNING *`,
-                [name, address, phone, website, rating, reviews, baseScore, baseScore, query]
+                [name, address, phone, website, rating, reviews, baseScore, baseScore, query, domain]
             );
 
             if (result.rows.length) {

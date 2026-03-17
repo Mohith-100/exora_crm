@@ -66,7 +66,12 @@
       flex-direction: column;
       padding: 24px 12px;
       z-index: 100;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(91,106,247,0.3) transparent;
     }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(91,106,247,0.3); border-radius: 4px; }
 
     .logo {
       font-family: 'Clash Display', sans-serif;
@@ -145,8 +150,24 @@
       line-height: 1;
     }
 
-    .ni-del {
+    .ni-count {
+      font-size: 10px;
+      padding: 2px 7px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--tx2);
+      border-radius: 20px;
+      font-weight: 700;
       margin-left: auto;
+      transition: all 0.2s;
+    }
+
+    .ni:hover .ni-count {
+      color: var(--tx);
+      background: rgba(91, 106, 247, 0.2);
+    }
+
+    .ni-del {
+      margin-left: 6px;
       opacity: 0;
       transition: all 0.2s;
       font-size: 11px;
@@ -2222,6 +2243,10 @@
         Pipeline</div>
     </div>
 
+    <div id="sector-count-box" style="margin: 15px 10px; padding: 10px; background: rgba(91,106,247,0.05); border: 1px dashed rgba(91,106,247,0.2); border-radius: 8px; font-size: 11px; color: var(--tx3);">
+      Total Sectors: <strong id="total-sectors-count" style="color: var(--acc);">0</strong>
+    </div>
+
     <div class="user-foot">
       <div class="live-pill" style="margin-bottom:10px">
         <div class="dot"></div>PostgreSQL live
@@ -2242,8 +2267,7 @@
     <div class="topbar">
       <div>
         <div class="page-title" id="ptitle">Dashboard</div>
-        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Backend: <span
-            style="font-family:monospace;color:var(--a3)">http://localhost:3001</span></div>
+
       </div>
       <div class="tb-right">
         <div class="srv-status srv-ok" id="srv-badge">● Server OK</div>
@@ -2252,26 +2276,19 @@
         </div>
         <input class="search" type="text" placeholder="🔍  Search schools..." oninput="doSearch(this.value)">
         <button class="btn bg" id="score-btn" onclick="runScoring()">📊 Score Leads</button>
-        <button class="btn bg" id="run-btn" onclick="runN8nWorkflow()">⚡ Run n8n Workflow</button>
+
         <button class="btn bp" onclick="openAddLead()">+ Add Lead</button>
       </div>
     </div>
 
-    <!-- WEBHOOK BAR -->
-    <div class="wbar">
-      <div class="wbar-lbl">🔗 n8n Webhook Endpoint</div>
-      <div class="wurl"><input type="text" value="http://localhost:3001/webhook/leads" readonly id="wh-url"><button
-          class="cpbtn" onclick="cpEl('wh-url')">📋</button></div>
-      <div style="font-size:11.5px;color:var(--tx3);">POST this URL from n8n HTTP Request node</div>
-      <button class="btn bg bsm" onclick="openM('wh-modal')">⚙ Setup Guide</button>
-    </div>
+
 
 
     <!-- STATS -->
     <div class="stats">
       <div class="sc c1">
         <div class="sc-ic">🏫</div>
-        <div class="sc-lbl">Total Schools</div>
+        <div class="sc-lbl">Total Leads</div>
         <div class="sc-val" id="s1">—</div>
         <div class="sc-sub up">all leads</div>
       </div>
@@ -2285,7 +2302,7 @@
         <div class="sc-ic">⭐</div>
         <div class="sc-lbl">Avg Rating</div>
         <div class="sc-val" id="s3">—</div>
-        <div class="sc-sub">across all schools</div>
+        <div class="sc-sub">across all leads</div>
       </div>
       <div class="sc c4">
         <div class="sc-ic">🏆</div>
@@ -2295,7 +2312,6 @@
       </div>
     </div>
 
-    <!-- DOMAIN GENERATOR WIDGET -->
     <div
       style="background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);padding:18px 22px;margin-bottom:20px;">
       <div style="font-family:'Clash Display',sans-serif;font-size:15px;font-weight:700;margin-bottom:14px;">⚡ Generate
@@ -2305,9 +2321,7 @@
           style="flex:1;min-width:220px;" onkeydown="if(event.key==='Enter')generateDomainLeads()">
         <button class="btn bp" onclick="generateDomainLeads()" id="domain-gen-btn">⚡ Generate Leads</button>
       </div>
-      <div style="font-size:11px;color:var(--tx3);margin-top:8px;">
-        Type any business type → a new tab will be created under Leads automatically
-      </div>
+
     </div>
 
     <div class="card" id="adm-activity-card" style="margin-bottom:20px;">
@@ -2336,8 +2350,9 @@
         <div class="page-title" id="leads-page-title">Leads</div>
         <div style="font-size:12px;color:var(--tx3);margin-top:2px;">All domain specific leads</div>
       </div>
-      <div class="tb-right">
+      <div class="tb-right" style="display:flex;gap:10px;align-items:center;">
         <input class="search" type="text" placeholder="🔍 Search leads..." oninput="doSearch(this.value)">
+        <button class="btn bp" onclick="triggerLeadsPageGen()" id="leads-gen-btn">⚡ Generate More Leads</button>
       </div>
     </div>
     <div class="card" style="margin-bottom:20px;">
@@ -2623,9 +2638,14 @@
           id="assign-submit-btn" onclick="submitAssignLeads()">✓ Submit Assignment</button></div>
     </div>
     <div class="alp-assignee" id="alp-assignee"></div>
-    <div style="padding: 12px 22px; display: flex; align-items: center; gap: 12px; border-bottom: 1.5px solid var(--bd); background: rgba(0,0,0,0.05);">
-      <span style="font-size: 11px; font-weight: 700; color: var(--tx3); text-transform: uppercase; letter-spacing: 0.5px;">Filter by Sector:</span>
-      <select id="alp-domain-filter" class="fi" style="width: auto; height: 32px; padding: 0 10px; font-size: 12px; margin: 0; min-width: 180px;" onchange="renderALLeads()">
+    <div
+      style="padding: 12px 22px; display: flex; align-items: center; gap: 12px; border-bottom: 1.5px solid var(--bd); background: rgba(0,0,0,0.05);">
+      <span
+        style="font-size: 11px; font-weight: 700; color: var(--tx3); text-transform: uppercase; letter-spacing: 0.5px;">Filter
+        by Sector:</span>
+      <select id="alp-domain-filter" class="fi"
+        style="width: auto; height: 32px; padding: 0 10px; font-size: 12px; margin: 0; min-width: 180px;"
+        onchange="renderALLeads()">
         <!-- Populated dynamically -->
       </select>
     </div>
@@ -2767,13 +2787,11 @@
         <div style="font-family:'Clash Display',sans-serif;font-size:15px;font-weight:700;margin-bottom:14px;">⚡
           Generate Leads for a Domain</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-          <input class="fi" id="sp-domain-search-input" placeholder="e.g. Hospitals, Gyms, IT Companies..."
+          <input class="fi" id="sp-domain-search-input" placeholder="e.g. Auditing Companies, Fitness Gyms..."
             style="flex:1;min-width:220px;" onkeydown="if(event.key==='Enter')generateDomainLeads('sp')">
           <button class="btn bp" onclick="generateDomainLeads('sp')" id="sp-domain-gen-btn">⚡ Generate Leads</button>
         </div>
-        <div style="font-size:11px;color:var(--tx3);margin-top:8px;">
-          Type any business type → a new tab will be created under Leads automatically
-        </div>
+
       </div>
 
       <div id="sp-activity"></div>
@@ -2815,6 +2833,9 @@
           <tbody id="sp-leads-body"></tbody>
         </table>
       </div>
+      <div id="sp-rescore-wrap" style="padding:15px;border-top:1px solid var(--bd);text-align:right;display:none;">
+        <button class="btn bg" style="font-size:12px;" onclick="rescoreSector('sp')">🔄 Re-score this Sector</button>
+      </div>
     </div>
   </div>
 
@@ -2825,12 +2846,23 @@
       <div style="flex:1;min-width:0">
         <div class="lp-school-name" id="lp-school-name"></div>
         <div class="lp-school-meta" id="lp-school-meta"></div>
+        <div id="lp-status-wrap" style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+           <span style="font-size:10px; font-weight:700; color:var(--tx3); text-transform:uppercase;">UPDATE STATUS:</span>
+           <select id="lp-status-select" class="badge bn" style="background:var(--s2); border:1.5px solid var(--bd); padding:4px 8px; border-radius:6px; cursor:pointer;" onchange="updStatus(currentPanelLeadId, this.value, this)">
+             <option value="new">🔵 New</option>
+             <option value="contacted">🟠 Contacted</option>
+             <option value="interested">🟡 Interested</option>
+             <option value="proposal">🟣 Proposal Sent</option>
+             <option value="won">🟢 Won</option>
+             <option value="lost">🔴 Lost</option>
+           </select>
+        </div>
       </div>
       <button class="lp-close" onclick="closeLeadPanel()">✕</button>
     </div>
     <div class="lp-tabs">
-      <div class="lp-tab active" id="lp-tab-log" onclick="switchLPTab('log')">📞 Log Call</div>
-      <div class="lp-tab" id="lp-tab-history" onclick="switchLPTab('history')">📋 Call History</div>
+      <div class="lp-tab active" id="lp-tab-log" onclick="switchLPTab('log')" style="display:none !important;">📞 Log Call</div>
+      <div class="lp-tab" id="lp-tab-history" onclick="switchLPTab('history')" style="display:none !important;">📋 Call History</div>
       <div class="lp-tab" id="lp-tab-notes" onclick="switchLPTab('notes')">📝 Notes</div>
       <div class="lp-tab" id="lp-tab-reminders" onclick="switchLPTab('reminders')">🔔 Reminders</div>
     </div>
@@ -2931,10 +2963,11 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const API = 'http://localhost:3001/api';
+    const API = window.location.origin + '/api';
     let leads = [], team = [], editId = null, filt = 'all', sq = '', currentDomain = 'school';
     let currentUser = null, authToken = null;
     let spLeads = [], spFilt = 'all', spSq = '', pendingNewSP = null, alpSelectedIds = [];
+    let domainCounts = {};
     let domains = [{ id: 'school', label: 'Schools', icon: '🏫' }];
 
     // ── Website column helper ─────────────────────────────────
@@ -2968,27 +3001,49 @@
       if (c1) {
         c1.innerHTML = domains.map(d => {
           const isSelected = currentDomain === d.id;
+          const normId = String(d.id).toLowerCase().replace(/s$/, '');
+          const count = domainCounts[normId] || domainCounts[String(d.id).toLowerCase()] || 0;
           const delBtn = d.id !== 'school' ? `<span class="ni-del" title="Delete Sector" onclick="event.stopPropagation();deleteDomain('${d.id}')">✕</span>` : '';
-          return `<div class="ni ${isSelected ? 'active' : ''}" onclick="showAdminPage('leads', this, '${d.id}')"><span class="ni-ic">${d.icon}</span>${d.label}${delBtn}</div>`;
+          return `<div class="ni ${isSelected ? 'active' : ''}" id="nav-leads-${d.id}" onclick="showAdminPage('leads', this, '${d.id}')">
+            <div style="display:flex;align-items:center;gap:9px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+              <span class="ni-ic">${d.icon}</span>${d.label}
+            </div>
+            <span class="ni-count">${count}</span>
+            ${delBtn}
+          </div>`;
         }).join('');
       }
 
       // Sales Person
       const c2 = document.getElementById('sp-leads-domains-list');
-      if (c2) c2.innerHTML = domains.map(d => `<div class="ni ${currentDomain === d.id ? 'active' : ''}" onclick="showSPPage('leads', this, '${d.id}')"><span class="ni-ic">${d.icon}</span>${d.label}</div>`).join('');
+      if (c2) {
+        c2.innerHTML = domains.map(d => {
+          const normId = String(d.id).toLowerCase().replace(/s$/, '');
+          const count = domainCounts[normId] || domainCounts[String(d.id).toLowerCase()] || 0;
+          return `<div class="ni ${currentDomain === d.id ? 'active' : ''}" onclick="showSPPage('leads', this, '${d.id}')">
+            <div style="display:flex;align-items:center;gap:9px;flex:1;">
+              <span class="ni-ic">${d.icon}</span>${d.label}
+            </div>
+            <span class="ni-count">${count}</span>
+          </div>`;
+        }).join('');
+      }
 
       // Pipeline Filters
       const c3 = document.getElementById('pipe-ftabs');
       if (c3) {
         c3.innerHTML = `<div class="ft ${pipeFilt === 'all' ? 'active' : ''}" onclick="setF('all', this)">All Domains</div>` +
-          domains.map(d => `<div class="ft ${pipeFilt === d.id ? 'active' : ''}" onclick="setF('${d.id}', this)">${d.icon} ${d.label}</div>`).join('');
+          domains.map(d => {
+            const count = domainCounts[d.id] || 0;
+            return `<div class="ft ${pipeFilt === d.id ? 'active' : ''}" onclick="setF('${d.id}', this)">${d.icon} ${d.label} <span style="opacity:0.6;font-size:10px;margin-left:4px;">(${count})</span></div>`;
+          }).join('');
       }
     }
 
     async function loadDomains() {
       try {
         const rows = await get('/domains');
-        domains = rows.map(r => ({ id: r.name, label: r.label, icon: r.icon }));
+        domains = rows.map(r => ({ id: r.name, label: r.label, icon: r.icon, query: r.query }));
         renderSidebarDomains();
       } catch (e) {
         console.error('Failed to load domains:', e);
@@ -2997,23 +3052,23 @@
 
     async function deleteDomain(domainId) {
       if (domainId === 'school') return;
-      
+
       const confirmed = confirm(`Are you sure you want to delete the "${domainId}" sector? \n\n⚠️ This will also delete ALL leads associated with this sector.`);
       if (!confirmed) return;
 
       try {
         await del(`/domains/${domainId}`);
         toast(`🗑️ Sector and its leads deleted.`, 'success');
-        
+
         // Remove from local list
         domains = domains.filter(d => d.id !== domainId);
-        
+
         // If we were on this domain, redirect to Schools
         if (currentDomain === domainId) {
           showAdminPage('dashboard', document.getElementById('nav-dash'));
           currentDomain = 'school';
         }
-        
+
         renderSidebarDomains();
         await loadAdminData(); // Refresh lead counts
       } catch (e) {
@@ -3024,15 +3079,25 @@
     async function generateDomainLeads(role = 'admin') {
       const inputId = role === 'admin' ? 'domain-search-input' : 'sp-domain-search-input';
       const btnId = role === 'admin' ? 'domain-gen-btn' : 'sp-domain-gen-btn';
+      const targetId = role === 'admin' ? 'target-term' : 'sp-target-term';
+      const typeId = role === 'admin' ? 'type-term' : 'sp-type-term';
+      
       const input = document.getElementById(inputId);
       const val = input.value.trim();
       if (!val) return toast('Please enter a business type or search query', 'info');
+
+      const targetEl = document.getElementById(targetId);
+      const typeEl = document.getElementById(typeId);
+      const targetTerm = (targetEl && targetEl.value.trim()) || 'customers';
+      const typeTerm = (typeEl && typeEl.value.trim()) || 'business';
 
       const btn = document.getElementById(btnId);
       btn.disabled = true;
       btn.innerHTML = '<span class="spin"></span> Generating...';
 
       try {
+        // Run dedup first to clean up any messy data
+        await post('/leads/dedup', {}, true).catch(err => console.log('Dedup pre-run err:', err));
         // Extract label (first word) and normalize ID
         const firstWord = val.split(' ')[0];
         const label = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase().replace(/s$/, '');
@@ -3052,6 +3117,8 @@
           label: label + 's',
           icon: icon,
           query: val,
+          target_term: targetTerm,
+          type_term: typeTerm,
           created_by: currentUser.name
         }, true);
 
@@ -3061,27 +3128,95 @@
         }
 
         // 2. Trigger n8n
-        await post('/api/trigger-n8n', {
+        await post('/trigger-n8n', {
           generated_by_name: currentUser.name,
           custom_query: val,
           domain: domainId
         }, true);
 
-        toast(`🚀 Generating leads for ${label}s... This may take ~30s.`, 'success');
+        // 3. Trigger immediate Serper backup (optional, but good for speed)
+        post('/trigger-all', { query: val, domain: domainId }, true).catch(err => console.log('Serper backup err:', err));
+
+        toast(`🚀 Generating leads for ${label}s... This may take ~45s.`, 'success');
         input.value = '';
 
-        // 3. Wait and refresh
+        // 4. Wait and refresh
         setTimeout(async () => {
           if (currentUser.role === 'admin') await loadAdminData();
           else await loadSPData();
           toast(`✅ ${label}s leads are now available!`, 'success');
-        }, 30000);
+        }, 45000);
 
       } catch (e) {
         toast('Error: ' + e.message, 'error');
       } finally {
         btn.disabled = false;
         btn.innerHTML = '⚡ Generate Leads';
+      }
+    }
+
+    async function triggerLeadsPageGen() {
+      const d = domains.find(d => d.id === currentDomain);
+      if (!d) return toast('Current domain not found', 'error');
+
+      const btn = document.getElementById('leads-gen-btn');
+      const oldTxt = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span> Generating...';
+
+      try {
+        // Run dedup first
+        await post('/leads/dedup', {}, true).catch(err => console.log('Dedup pre-run err:', err));
+        await post('/trigger-n8n', {
+          generated_by_name: currentUser.name,
+          custom_query: d.query,
+          domain: d.id
+        }, true);
+
+        // Immediate Serper backup
+        post('/trigger-all', { query: d.query, domain: d.id }, true).catch(e => console.log(e));
+
+        toast(`🚀 Generating more ${d.label}... This may take ~45s.`, 'success');
+        
+        // Refresh in 45s
+        setTimeout(async () => {
+          if (currentUser.role === 'admin') await loadAdminData();
+          else await loadSPData();
+          toast(`✅ New ${d.label} are now available!`, 'success');
+        }, 45000);
+        
+      } catch (e) {
+        toast('Error: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = oldTxt;
+      }
+    }
+
+    async function rescoreSector(role = 'admin') {
+      const confirmed = confirm("Are you sure? This will re-scan all leads in this sector and update their scores and pitches using the latest dynamic engine.");
+      if (!confirmed) return;
+
+      const btn = event.target;
+      const oldTxt = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span> Rescoring...';
+
+      try {
+        const sectorLeads = (role === 'admin' ? leads : spLeads).filter(l => (l.domain || 'school') === currentDomain);
+        toast(`🔄 Rescoring ${sectorLeads.length} leads...`, 'info');
+
+        for (const l of sectorLeads) {
+          await post(`/leads/${l.id}/score`, {}, true);
+        }
+
+        toast(`✅ Successfully updated ${sectorLeads.length} leads!`, 'success');
+        if (role === 'admin') await loadAdminData(); else await loadSPData();
+      } catch (e) {
+        toast('Error: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = oldTxt;
       }
     }
 
@@ -3115,10 +3250,34 @@
     function authHeaders() { return { Authorization: 'Bearer ' + authToken, 'Content-Type': 'application/json' }; }
 
     // ── API CALLS ──
-    async function get(path, auth = false) { const h = auth ? { Authorization: 'Bearer ' + authToken } : {}; const r = await fetch(API + path, { headers: h }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
-    async function post(path, data, auth = true) { const h = auth ? authHeaders() : { 'Content-Type': 'application/json' }; const r = await fetch(API + path, { method: 'POST', headers: h, body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
-    async function patch(path, data) { const r = await fetch(API + path, { method: 'PATCH', headers: authHeaders(), body: JSON.stringify(data) }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
-    async function del(path) { const r = await fetch(API + path, { method: 'DELETE', headers: authHeaders() }); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+    async function get(path, auth = false) { 
+      const h = { 'ngrok-skip-browser-warning': 'true' };
+      if (auth) h.Authorization = 'Bearer ' + authToken;
+      const r = await fetch(API + path, { headers: h }); 
+      if (!r.ok) throw new Error(await r.text()); 
+      return r.json(); 
+    }
+    async function post(path, data, auth = true) { 
+      const h = auth ? authHeaders() : { 'Content-Type': 'application/json' }; 
+      h['ngrok-skip-browser-warning'] = 'true';
+      const r = await fetch(API + path, { method: 'POST', headers: h, body: JSON.stringify(data) }); 
+      if (!r.ok) throw new Error(await r.text()); 
+      return r.json(); 
+    }
+    async function patch(path, data) { 
+      const h = authHeaders();
+      h['ngrok-skip-browser-warning'] = 'true';
+      const r = await fetch(API + path, { method: 'PATCH', headers: h, body: JSON.stringify(data) }); 
+      if (!r.ok) throw new Error(await r.text()); 
+      return r.json(); 
+    }
+    async function del(path) { 
+      const h = authHeaders();
+      h['ngrok-skip-browser-warning'] = 'true';
+      const r = await fetch(API + path, { method: 'DELETE', headers: h }); 
+      if (!r.ok) throw new Error(await r.text()); 
+      return r.json(); 
+    }
 
     // ── LOGIN ROLE SWITCH ──
     let loginRole = 'admin';
@@ -3140,7 +3299,7 @@
       if (!email || !pass) { showErr('Please enter email and password.'); return; }
       btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Signing in...';
       try {
-        const res = await post('/auth/login', { email, password: pass });
+        const res = await post('/auth/login', { email, password: pass }, false);
         if (loginRole !== 'all' && res.user.role !== loginRole) { showErr('This account is not a ' + (loginRole === 'admin' ? 'Admin' : 'Sales Person') + '. Please use the correct tab.'); btn.disabled = false; btn.textContent = 'Sign In →'; return; }
         saveAuth(res.token, res.user);
         document.getElementById('login-wrap').style.display = 'none';
@@ -3151,6 +3310,24 @@
     function showErr(msg) { const e = document.getElementById('login-err'); e.textContent = msg; e.style.display = 'block'; }
 
     function doLogout() { clearAuth(); location.reload(); }
+
+    function updateHeaderCount() {
+      const d = domains.find(d => d.id === currentDomain);
+      if (!d) return;
+      const normId = String(currentDomain).toLowerCase().replace(/s$/, '');
+      const count = domainCounts[normId] || domainCounts[String(currentDomain).toLowerCase()] || 0;
+      const ptitle = d.label + ' Leads';
+      const html = `${ptitle} <span style="font-size:14px;color:var(--tx3);margin-left:8px;font-weight:500;">(${count} leads)</span>`;
+      
+      const adminTitle = document.getElementById('leads-page-title');
+      if (adminTitle) adminTitle.innerHTML = html;
+      
+      const spTitle = document.getElementById('sp-leads-page-title');
+      if (spTitle) spTitle.innerHTML = html;
+
+      const dTableTitle = document.getElementById('domain-table-title');
+      if (dTableTitle) dTableTitle.textContent = ptitle;
+    }
 
     // ── BOOT APP ──
     async function bootApp() {
@@ -3196,12 +3373,13 @@
     // ── ADMIN DATA ──
     async function loadAdminData() {
       try {
+        const apiBase = API.replace('/api', '');
         document.getElementById('admin-main').style.display = 'block';
-        await fetch('http://localhost:3001/');
+        await fetch(apiBase + '/', { headers: { 'ngrok-skip-browser-warning': 'true' } });
         document.getElementById('srv-badge').className = 'srv-status srv-ok';
         document.getElementById('srv-badge').textContent = '● Server OK';
         [leads, team] = await Promise.all([get('/leads'), get('/team')]);
-        renderAll();
+        await renderAll();
       } catch (e) {
         document.getElementById('srv-badge').className = 'srv-status srv-err';
         document.getElementById('srv-badge').textContent = '● Server Offline';
@@ -3234,10 +3412,8 @@
       }
       else if (page === 'leads') {
         document.getElementById('leads-page').classList.add('visible');
-        const d = domains.find(d => d.id === param);
-        const ptitle = (d ? d.label : 'Domain') + ' Leads';
-        document.getElementById('leads-page-title').textContent = ptitle;
-        document.getElementById('domain-table-title').textContent = ptitle;
+        currentDomain = param;
+        updateHeaderCount();
       }
       else if (page === 'pipeline') {
         document.getElementById('pipeline-page').classList.add('visible');
@@ -3258,11 +3434,14 @@
       const acard = document.getElementById('adm-activity-card');
       if (tsec) tsec.style.display = (page === 'team' || page === 'dashboard') ? '' : 'none';
       if (stats) stats.style.display = page === 'dashboard' ? '' : 'none';
-      if (wbar) wbar.style.display = page === 'dashboard' ? '' : 'none';
+
       if (acard) acard.style.display = page === 'dashboard' ? '' : 'none';
 
       if (page === 'leads') {
         rLeads();
+        document.getElementById('rescore-wrap').style.display = 'block';
+      } else {
+        if (document.getElementById('rescore-wrap')) document.getElementById('rescore-wrap').style.display = 'none';
       }
     }
 
@@ -3412,10 +3591,8 @@
       }
       else if (page === 'leads') {
         document.getElementById('sp-leads-page').classList.add('visible');
-        const d = domains.find(d => d.id === param);
-        const ptitle = (d ? d.label : 'Domain') + ' Leads';
-        document.getElementById('sp-leads-page-title').textContent = ptitle;
-        document.getElementById('sp-domain-table-title').textContent = ptitle;
+        currentDomain = param;
+        updateHeaderCount();
       }
       else if (page === 'pipeline') {
         document.getElementById('pipeline-page').classList.add('visible');
@@ -3429,6 +3606,9 @@
 
       if (page === 'leads') {
         rMyLeads();
+        document.getElementById('sp-rescore-wrap').style.display = 'block';
+      } else {
+        if (document.getElementById('sp-rescore-wrap')) document.getElementById('sp-rescore-wrap').style.display = 'none';
       }
     }
 
@@ -3450,7 +3630,7 @@
         await patch(`/leads/${id}`, { status });
         const l = spLeads.find(l => l.id == id);
         if (l) l.status = status;
-        rSPStats(); rSPActivity(); renderAll(); toast('Status updated', 'success');
+        rSPStats(); rSPActivity(); await renderAll(); toast('Status updated', 'success');
       }
       catch (e) { toast('Error: ' + e.message, 'error'); }
     }
@@ -3507,10 +3687,10 @@
       document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
       document.getElementById('assignleads-page').classList.add('visible');
       document.getElementById('alp-assignee').innerHTML = `<div style="font-size:24px;width:36px;height:36px;background:${sp.color}18;color:${sp.color};border:2px solid ${sp.color}30;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:13px;">${sp.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</div><div><strong>${sp.name}</strong> &nbsp;·&nbsp; ${sp.email} &nbsp;·&nbsp; ${sp.territory || '—'}</div>`;
-      
+
       const filter = document.getElementById('alp-domain-filter');
       if (filter) {
-        filter.innerHTML = '<option value="all">🌐 All Sectors</option>' + 
+        filter.innerHTML = '<option value="all">🌐 All Sectors</option>' +
           domains.map(d => `<option value="${d.id}">${d.icon} ${d.label}</option>`).join('');
         filter.value = 'all';
       }
@@ -3522,7 +3702,7 @@
       const sp = pendingNewSP;
       if (!sp) return;
       const domainFilt = document.getElementById('alp-domain-filter')?.value || 'all';
-      
+
       const unassigned = leads.filter(l => !l.assigned_id);
       const assigned = leads.filter(l => l.assigned_id && l.assigned_id !== sp.id);
       let allLeads = [...unassigned, ...assigned];
@@ -3545,7 +3725,7 @@
       const idx = alpSelectedIds.indexOf(id);
       if (idx > -1) alpSelectedIds.splice(idx, 1);
       else alpSelectedIds.push(id);
-      
+
       const cb = document.getElementById('alp-cb-' + id);
       const row = document.getElementById('alp-r-' + id);
       if (cb) cb.checked = alpSelectedIds.includes(id);
@@ -3555,16 +3735,16 @@
     async function submitAssignLeads() {
       if (!pendingNewSP) { toast('No pending sales person.', 'error'); return; }
       if (alpSelectedIds.length === 0) { toast('No leads selected — skipping assignment.', ''); return; }
-      
-      const btn = document.getElementById('assign-submit-btn'); 
-      btn.disabled = true; 
+
+      const btn = document.getElementById('assign-submit-btn');
+      btn.disabled = true;
       btn.innerHTML = '<span class="spin"></span> Processing...';
-      
+
       try {
         await post('/leads/assign', { lead_ids: alpSelectedIds, team_id: pendingNewSP.id });
         leads.forEach(l => { if (alpSelectedIds.includes(l.id)) l.assigned_id = pendingNewSP.id; });
         toast(`✅ ${alpSelectedIds.length} lead${alpSelectedIds.length > 1 ? 's' : ''} assigned to ${pendingNewSP.name}!`, 'success');
-        
+
         alpSelectedIds = [];
         pendingNewSP = null;
         showAdminPage('team', document.getElementById('nav-team'));
@@ -3574,17 +3754,40 @@
     }
 
     // ── ADMIN RENDER ──
-    function renderAll() { rStats(); rLeads(); rPipe(); rTeam(); popAssign(); rActivity(); if (document.getElementById('pipeline-page').classList.contains('visible')) loadPipeline(); }
-    function rStats() {
-      const tot = leads.length;
-      const nw = leads.filter(l => !l.status || l.status.trim() === '' || l.status.trim().toLowerCase() === 'new').length;
-      const won = leads.filter(l => l.status && l.status.trim().toLowerCase() === 'won').length;
-      const ratings = leads.filter(l => l.rating);
-      const avgR = ratings.length ? (ratings.reduce((a, l) => a + Number(l.rating), 0) / ratings.length).toFixed(1) : '—';
-      document.getElementById('s1').textContent = tot;
-      document.getElementById('s2').textContent = nw;
-      document.getElementById('s3').textContent = avgR;
-      document.getElementById('s4').textContent = tot ? Math.round(won / tot * 100) + '%' : '0%';
+    async function renderAll() { await rStats(); rLeads(); rPipe(); rTeam(); popAssign(); rActivity(); if (document.getElementById('pipeline-page').classList.contains('visible')) loadPipeline(); }
+    async function rStats() {
+      try {
+        const stats = await get('/stats');
+        console.log('CRM Stats:', stats);
+        domainCounts = {};
+        if(stats.by_domain) {
+          stats.by_domain.forEach(row => {
+            if (row.domain) {
+              const dId = String(row.domain).toLowerCase().replace(/s$/, '');
+              domainCounts[dId] = parseInt(row.count) || 0;
+            }
+          });
+        }
+        
+        document.getElementById('s1').textContent = parseInt(stats.total) || 0;
+        
+        const newLeads = stats.by_status?.find(s => String(s.status).toLowerCase() === 'new')?.count;
+        document.getElementById('s2').textContent = parseInt(newLeads) || 0;
+        
+        document.getElementById('s3').textContent = stats.avg_score || '0.0';
+        
+        const wonLeads = stats.by_status?.find(s => String(s.status).toLowerCase() === 'won')?.count;
+        const wonCount = parseInt(wonLeads) || 0;
+        const totalCount = parseInt(stats.total) || 0;
+        document.getElementById('s4').textContent = totalCount ? Math.round(wonCount / totalCount * 100) + '%' : '0%';
+        
+        renderSidebarDomains();
+        updateHeaderCount();
+        const sectorCount = document.getElementById('total-sectors-count');
+        if(sectorCount) sectorCount.textContent = domains.length;
+      } catch (e) {
+        console.error('rStats failed:', e);
+      }
     }
     function getFiltered() {
       return leads.filter(l => {
@@ -3596,8 +3799,17 @@
       });
     }
     function rLeads() {
-      const tb = document.getElementById('leads-body'); const fl = getFiltered();
-      if (!fl.length) { tb.innerHTML = '<tr class="empty"><td colspan="8">No leads found. Run your n8n workflow or add manually!</td></tr>'; return; }
+      const tb = document.getElementById('leads-body'); 
+      const fl = getFiltered();
+      
+      // Update count badge if exists
+      const badge = document.getElementById('leads-count-badge');
+      if(badge) badge.textContent = fl.length;
+
+      if (!fl.length) { 
+        tb.innerHTML = '<tr class="empty"><td colspan="8">No leads found. Run your n8n workflow or add manually!</td></tr>'; 
+        return; 
+      }
       const bc = { new: 'bn', contacted: 'bc', interested: 'bi', proposal: 'bp', won: 'bw', lost: 'bl' };
 
       tb.innerHTML = fl.map(l => {
@@ -3655,17 +3867,28 @@
         el.innerHTML = logs.map(l => {
           const dt = new Date(l.created_at);
           const dtStr = dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+          const delActivity = `<button onclick="deleteActivity('${l.type}', ${l.id}, ${l.lead_id})" style="margin-left:auto; background:none; border:none; cursor:pointer; opacity:0.3;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3" title="Delete Activity">🗑️</button>`;
 
           if (l.type === 'note') {
-            return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'Note added'}</p><div class="act-meta"><span>👤 ${l.added_by}</span><span>📅 ${dtStr}</span></div></div><span class="badge bn" style="background:rgba(29, 233, 160, 0.1);color:var(--a3);">📝 Note</span></div>`;
+            return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'Note added'}</p><div class="act-meta"><span>👤 ${l.added_by}</span><span>📅 ${dtStr}</span></div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;"><span class="badge bn" style="background:rgba(29, 233, 160, 0.1);color:var(--a3);">📝 Note</span>${delActivity}</div></div>`;
           }
 
           const followup = l.next_followup ? `<div style="margin-top:5px;font-size:10.5px;color:var(--a3);font-weight:700;">📅 Follow-up: ${new Date(l.next_followup).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</div>` : '';
-          return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'No notes added'}</p>${followup}<div class="act-meta"><span>👤 ${l.added_by}</span><span>⏱ ${l.duration || 0} min</span><span>📅 ${dtStr}</span></div></div><span class="badge bn">${outcomeMap[l.outcome] || '📞 Call'}</span></div>`;
+          return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'No notes added'}</p>${followup}<div class="act-meta"><span>👤 ${l.added_by}</span><span>⏱ ${l.duration || 0} min</span><span>📅 ${dtStr}</span></div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;"><span class="badge bn">${outcomeMap[l.outcome] || '📞 Call'}</span>${delActivity}</div></div>`;
         }).join('');
       } catch (e) { el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--a2);font-size:13px;">Failed to load activity feed.</div>'; }
     }
 
+    async function deleteActivity(type, id, leadId) {
+      if(!confirm('Delete this activity log?')) return;
+      try {
+        const url = type === 'call' ? `/leads/${leadId}/calls/${id}` : `/leads/${leadId}/notes/${id}`;
+        await del(url);
+        toast('🗑️ Activity deleted.', 'success');
+        rActivity();
+      } catch (e) { toast('Error: ' + e.message, 'error'); }
+    }
+ 
     // Assign existing leads from team page
     function openAssignExisting(teamId) { const m = team.find(t => t.id === teamId); if (!m) return; pendingNewSP = m; leads = leads || []; showAssignLeadsPage(m); }
 
@@ -3964,11 +4187,15 @@
       metaParts.push('<span style="background:rgba(91,106,247,0.12);color:var(--acc);padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">' + (badge[l.status] || l.status) + '</span>');
       document.getElementById('lp-school-meta').innerHTML = metaParts.join(' &nbsp;&middot;&nbsp; ');
       if (currentUser && currentUser.role === 'admin') {
-        document.getElementById('lp-tab-log').style.display = 'none';
-        switchLPTab('history');
+        switchLPTab('notes');
       } else {
-        document.getElementById('lp-tab-log').style.display = '';
-        switchLPTab('log');
+        switchLPTab('notes');
+      }
+      const stEl = document.getElementById('lp-status-select');
+      if (stEl) {
+        stEl.value = l.status || 'new';
+        const bc = { new: 'bn', contacted: 'bc', interested: 'bi', proposal: 'bp', won: 'bw', lost: 'bl' };
+        stEl.className = `badge ${bc[l.status] || 'bn'}`;
       }
       document.getElementById('lp-overlay').classList.add('open');
       document.getElementById('lead-panel').classList.add('open');
@@ -4171,6 +4398,7 @@
         toast('✅ Status updated', 'success');
         await loadReminders();
         checkTodayReminders();
+        renderAll();
       } catch (e) { toast('Error: ' + e.message, 'error'); }
     }
 
