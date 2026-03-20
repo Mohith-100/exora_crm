@@ -285,9 +285,9 @@ app.post('/api/auth/login', async (req, res) => {
     );
     console.log(`✅ Login success: ${email} (${user.role})`);
     res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, team_id: user.team_id, territory: user.territory } });
-  } catch (err) { 
+  } catch (err) {
     console.error(`❌ Login error: ${err.message}`);
-    res.status(500).json({ error: err.message }); 
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -433,7 +433,7 @@ app.post('/api/domains', requireAuth(['admin']), async (req, res) => {
   try {
     const exists = await pool.query('SELECT id FROM domains WHERE name = $1', [name]);
     if (exists.rows.length > 0) return res.json({ exists: true });
-    
+
     const result = await pool.query(
       'INSERT INTO domains (name, label, icon, query, created_by, target_term, type_term) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
       [name, label, icon, query, created_by || 'Admin', target_term || 'customers', type_term || 'business']
@@ -448,10 +448,10 @@ app.delete('/api/domains/:name', requireAuth(['admin']), async (req, res) => {
   try {
     const result = await pool.query('DELETE FROM domains WHERE name = $1 RETURNING *', [name]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Sector not found' });
-    
+
     // Also delete leads associated with this domain
     const leadCount = await pool.query('DELETE FROM leads WHERE domain = $1', [name]);
-    
+
     console.log(`🗑️ Deleted sector: ${name} and ${leadCount.rowCount} associated leads`);
     res.json({ success: true, message: `Sector '${name}' and its leads deleted successfully.` });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -570,8 +570,11 @@ app.post('/api/team', async (req, res) => {
 });
 
 app.delete('/api/team/:id', async (req, res) => {
+  const { id } = req.params;
   try {
-    await pool.query('DELETE FROM team WHERE id=$1', [req.params.id]);
+    await pool.query('UPDATE leads SET assigned_id = NULL WHERE assigned_id = $1', [id]);
+    await pool.query('DELETE FROM users WHERE team_id = $1', [id]);
+    await pool.query('DELETE FROM team WHERE id = $1', [id]);
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -632,7 +635,7 @@ app.post('/api/leads/:id/calls', async (req, res) => {
         // Set reminder time to 09:00 AM on that day
         const remindAt = new Date(next_followup);
         remindAt.setHours(9, 0, 0, 0);
-        
+
         const outcomeLabel = { interested: 'Interested', callback: 'Call Back', no_answer: 'No Answer', voicemail: 'Left Voicemail', not_interested: 'Not Interested', closed: 'Deal Closed!' }[outcome] || outcome;
         const msg = `Follow up with ${schoolName} - outcome: ${outcomeLabel}`;
 
@@ -679,20 +682,29 @@ app.get('/api/activity', async (req, res) => {
         id, lead_id, added_by, created_at, 
         'note' as type, NULL as outcome, NULL as duration, note as notes, NULL as next_followup 
        FROM lead_notes)
+      UNION ALL
+      (SELECT 
+        id, lead_id, created_by as added_by, created_at, 
+        'reminder' as type, status as outcome, NULL as duration, message as notes, remind_at as next_followup 
+       FROM reminders)
       ORDER BY created_at DESC 
       LIMIT 30
     `);
-    
-    // Fetch school names for these activities
+
+    // Fetch school names and statuses for these activities
     const activities = result.rows;
     if (activities.length === 0) return res.json([]);
-    
+
     const leadIds = [...new Set(activities.map(a => a.lead_id))];
-    const leadsResult = await pool.query('SELECT id, school_name FROM leads WHERE id = ANY($1)', [leadIds]);
+    const leadsResult = await pool.query('SELECT id, school_name, status FROM leads WHERE id = ANY($1)', [leadIds]);
     const leadMap = {};
-    leadsResult.rows.forEach(l => leadMap[l.id] = l.school_name);
-    
-    res.json(activities.map(a => ({ ...a, school_name: leadMap[a.lead_id] || 'Unknown School' })));
+    leadsResult.rows.forEach(l => leadMap[l.id] = { school_name: l.school_name, status: l.status });
+
+    res.json(activities.map(a => ({
+      ...a,
+      school_name: leadMap[a.lead_id]?.school_name || 'Unknown School',
+      lead_status: leadMap[a.lead_id]?.status || ''
+    })));
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -737,17 +749,20 @@ app.post('/api/reminders', async (req, res) => {
 app.get('/api/reminders/today', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT r.*, 
-             l.school_name, 
-             l.phone,
-             u.email as rep_email,
-             u.name as rep_name
-      FROM reminders r
-      JOIN leads l ON r.lead_id = l.id
-      LEFT JOIN users u ON LOWER(r.created_by) = LOWER(u.name)
-      WHERE r.remind_at::date = CURRENT_DATE
-      AND r.status = 'pending'
-      ORDER BY r.created_by, r.remind_at ASC
+      SELECT 
+        reminders.*,
+        leads.school_name,
+        leads.phone,
+        assigned_team.email AS rep_email,
+        assigned_team.name AS rep_name,
+        creator_team.email AS created_by_email
+      FROM reminders
+      LEFT JOIN leads ON reminders.lead_id = leads.id
+      LEFT JOIN team assigned_team ON leads.assigned_id = assigned_team.id
+      LEFT JOIN team creator_team ON reminders.created_by = creator_team.name
+      WHERE DATE(reminders.remind_at) = CURRENT_DATE
+      AND reminders.status = 'pending'
+      ORDER BY reminders.remind_at ASC
     `);
     res.json(result.rows);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -796,6 +811,13 @@ app.patch('/api/reminders/:id', async (req, res) => {
   try {
     const result = await pool.query(`UPDATE reminders SET status=$1 WHERE id=$2 RETURNING *`, [status, req.params.id]);
     res.json(result.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/reminders/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM reminders WHERE id=$1', [req.params.id]);
+    res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -910,19 +932,21 @@ app.post('/api/trigger-all', async (req, res) => {
 // ── Stats summary ─────────────────────────────────────────────
 app.get('/api/stats', async (req, res) => {
   try {
-    const [total, byStatus, byPriority, avgScore, byDomain] = await Promise.all([
+    const [total, byStatus, byPriority, avgScore, byDomain, remindersToday] = await Promise.all([
       pool.query('SELECT COUNT(*) FROM leads'),
       pool.query('SELECT status, COUNT(*) FROM leads GROUP BY status'),
       pool.query('SELECT priority, COUNT(*) FROM leads WHERE priority IS NOT NULL GROUP BY priority'),
       pool.query('SELECT AVG(score)::numeric(5,1) as avg_score FROM leads WHERE score > 0'),
       pool.query("SELECT COALESCE(domain, 'school') as domain, COUNT(*) FROM leads GROUP BY domain"),
+      pool.query("SELECT COUNT(*) FROM reminders WHERE DATE(remind_at) = CURRENT_DATE AND status = 'pending'")
     ]);
-    res.json({ 
-      total: parseInt(total.rows[0].count), 
-      by_status: byStatus.rows, 
-      by_priority: byPriority.rows, 
+    res.json({
+      total: parseInt(total.rows[0].count),
+      by_status: byStatus.rows,
+      by_priority: byPriority.rows,
       avg_score: avgScore.rows[0]?.avg_score || 0,
-      by_domain: byDomain.rows
+      by_domain: byDomain.rows,
+      reminders_today: parseInt(remindersToday.rows[0].count)
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -936,7 +960,7 @@ app.post('/api/trigger-n8n', requireAuth(['admin', 'salesperson']), async (req, 
   try {
     let target_term = 'customers';
     let type_term = 'business';
-    
+
     if (domain) {
       const { rows } = await pool.query('SELECT target_term, type_term FROM domains WHERE name = $1', [domain]);
       if (rows.length > 0) {
@@ -948,7 +972,7 @@ app.post('/api/trigger-n8n', requireAuth(['admin', 'salesperson']), async (req, 
     const response = await fetch(process.env.N8N_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         query: custom_query || process.env.N8N_QUERY,
         domain: domain,
         target_term: target_term,
@@ -956,7 +980,7 @@ app.post('/api/trigger-n8n', requireAuth(['admin', 'salesperson']), async (req, 
         generated_by: generated_by_name || 'Admin'
       })
     });
-    
+
     const data = await response.text();
     console.log('⚡ n8n workflow triggered:', data);
     res.json({ success: true, message: 'n8n workflow triggered!' });
