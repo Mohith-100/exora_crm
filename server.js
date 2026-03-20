@@ -194,11 +194,11 @@ async function initDB() {
       await pool.query(`
         INSERT INTO domains (name, label, icon, query, target_term, type_term, created_by) 
         VALUES 
-          ('school', 'Schools', '🏫', 'Preschools in Bengaluru', 'parents', 'admissions', 'System'),
-          ('gym', 'Gyms', '💪', 'Gyms in Bengaluru', 'potential members', 'memberships', 'System'),
-          ('manufacturing', 'Manufacturing', '🏭', 'Manufacturing companies in Bengaluru', 'potential clients', 'deals', 'System'),
-          ('hospital', 'Hospitals', '🏥', 'Hospitals in Bengaluru', 'patients', 'consultations', 'System'),
-          ('salon', 'Salons', '✂️', 'Salons in Bengaluru', 'new clients', 'bookings', 'System')
+          ('school', 'Schools', 'school', 'Preschools in Bengaluru', 'parents', 'admissions', 'System'),
+          ('gym', 'Gyms', 'dumbbell', 'Gyms in Bengaluru', 'potential members', 'memberships', 'System'),
+          ('manufacturing', 'Manufacturing', 'factory', 'Manufacturing companies in Bengaluru', 'potential clients', 'deals', 'System'),
+          ('hospital', 'Hospitals', 'hospital', 'Hospitals in Bengaluru', 'patients', 'consultations', 'System'),
+          ('salon', 'Salons', 'scissors', 'Salons in Bengaluru', 'new clients', 'bookings', 'System')
         ON CONFLICT DO NOTHING;
       `);
       console.log('  ✅ Default domains seeded');

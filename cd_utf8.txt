@@ -1,0 +1,12 @@
+﻿[
+  { name: 'it', label: 'it' },
+  { name: 'auditing', label: 'Auditings' },
+  { name: 'restaurent', label: 'Restaurents' },
+  { name: 'supermarket', label: 'Supermarket' },
+  { name: 'college', label: 'Colleges' },
+  { name: 'school', label: 'Schools' },
+  { name: 'gym', label: 'gym' },
+  { name: 'manufacturing', label: 'Manufacturing' },
+  { name: 'hospital', label: 'Hospitals' },
+  { name: 'salon', label: 'Salons' }
+]

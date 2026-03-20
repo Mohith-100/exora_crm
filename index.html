@@ -8,10 +8,12 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;700&family=Press+Start+2P&display=swap"
     rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     :root {
       --bg: #07050f;
       --surface: #0d0a1a;
+      color-scheme: dark;
       --card: rgba(14, 10, 28, 0.45);
       --border: rgba(160, 80, 255, 0.18);
       --purple: #a050ff;
@@ -42,6 +44,17 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
+
+    svg {
+      width: 18px;
+      height: 18px;
+      vertical-align: middle;
+      display: inline-block;
+    }
+
+    .icon-sm { width: 14px; height: 14px; }
+    .icon-lg { width: 22px; height: 22px; }
+    .ni-ic svg { margin-right: 5px; }
 
     body::before {
       content: '';
@@ -998,19 +1011,29 @@
 
     .bell-dot {
       position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 8px;
-      height: 8px;
+      top: 2px;
+      right: 2px;
       background: #f25b7e;
-      border: 1.5px solid var(--s1);
+      color: white;
+      font-size: 8.5px;
+      font-weight: 900;
       border-radius: 50%;
-      display: none;
+      width: 13px;
+      height: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+      box-shadow: 0 0 10px rgba(242, 91, 126, 0.4);
+      z-index: 10;
     }
 
     .bell-dot.active {
-      display: block;
-      animation: pulse 2s infinite;
+      opacity: 1;
+      transform: scale(1);
     }
 
     @keyframes pulse {
@@ -2186,7 +2209,7 @@
       font-size: 10px;
       font-weight: 700;
       letter-spacing: 0.5px;
-      color: var(--tx2);
+      color: #ffffff;
       margin-bottom: 5px;
       display: block;
     }
@@ -2199,11 +2222,24 @@
       border: 1.5px solid var(--bd);
       border-radius: 8px;
       padding: 8px 11px;
-      color: var(--tx);
-      font-size: 12.5px;
+      color: #ffffff;
+      font-size: 13px;
       outline: none;
-      font-family: 'Cabinet Grotesk', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       transition: border-color 0.2s;
+      color-scheme: dark;
+    }
+
+    .lp-input::placeholder,
+    .lp-textarea::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .lp-input::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(500%) contrast(500%);
+      cursor: pointer;
+      opacity: 1;
+      -webkit-filter: invert(1) brightness(500%) contrast(500%);
     }
 
     .lp-input:focus,
@@ -2704,40 +2740,40 @@
   <div class="adm-only" id="adm-nav">
     <div class="nl">Main</div>
     <div class="ni active" id="nav-dash" onclick="showAdminPage('dashboard',this)"><span
-        class="ni-ic">📊</span>Dashboard</div>
+        class="ni-ic"><i data-lucide="layout-dashboard"></i></span>Dashboard</div>
     <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
-      <div><span class="ni-ic">📈</span>Leads</div>
+      <div><span class="ni-ic"><i data-lucide="layers"></i></span>Leads</div>
       <i class="arrow"></i>
     </div>
     <div class="dropdown-content" id="leads-domains-list"></div>
 
-    <div class="ni" id="nav-pipeline" onclick="showAdminPage('pipeline',this)"><span class="ni-ic">🛣️</span>Pipeline
+    <div class="ni" id="nav-pipeline" onclick="showAdminPage('pipeline',this)"><span class="ni-ic"><i data-lucide="map"></i></span>Pipeline
     </div>
     <div class="nl">Workspace</div>
-    <div class="ni" id="nav-team" onclick="showAdminPage('team',this)"><span class="ni-ic">🧑‍💼</span>Team</div>
-    <div class="ni" id="nav-addsp" onclick="showAdminPage('addsp',this)"><span class="ni-ic">👤</span>Add Sales Person
+    <div class="ni" id="nav-team" onclick="showAdminPage('team',this)"><span class="ni-ic"><i data-lucide="users"></i></span>Team</div>
+    <div class="ni" id="nav-addsp" onclick="showAdminPage('addsp',this)"><span class="ni-ic"><i data-lucide="user-plus"></i></span>Add Sales Person
     </div>
-    <div class="ni" id="nav-adminuser" onclick="showAdminPage('adminuser',this)"><span class="ni-ic">⚙️</span>Admin
+    <div class="ni" id="nav-adminuser" onclick="showAdminPage('adminuser',this)"><span class="ni-ic"><i data-lucide="settings"></i></span>Admin
       User</div>
-    <div class="ni" onclick="openM('wh-modal')"><span class="ni-ic">🔗</span>n8n Webhook</div>
-    <div class="ni" id="nav-score" onclick="showAdminPage('score',this)"><span class="ni-ic">⚡</span>Score Engine
+    <div class="ni" onclick="openM('wh-modal')"><span class="ni-ic"><i data-lucide="link"></i></span>n8n Webhook</div>
+    <div class="ni" id="nav-score" onclick="showAdminPage('score',this)"><span class="ni-ic"><i data-lucide="zap"></i></span>Score Engine
     </div>
   </div>
 
   <!-- SALESPERSON NAV -->
   <div class="sp-only" id="sp-nav">
     <div class="nl">My Work</div>
-    <div class="ni active" id="nav-spdash" onclick="showSPPage('spdash',this)"><span class="ni-ic">📊</span>My
+    <div class="ni active" id="nav-spdash" onclick="showSPPage('spdash',this)"><span class="ni-ic"><i data-lucide="layout-dashboard"></i></span>My
       Dashboard</div>
 
     <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
-      <div><span class="ni-ic">📋</span>My Leads <span class="ni-badge" id="my-leads-badge" style="display:none"></span>
+      <div><span class="ni-ic"><i data-lucide="clipboard-list"></i></span>My Leads <span class="ni-badge" id="my-leads-badge" style="display:none"></span>
       </div>
       <i class="arrow"></i>
     </div>
     <div class="dropdown-content" id="sp-leads-domains-list"></div>
 
-    <div class="ni" id="nav-sppipeline" onclick="showSPPage('pipeline',this)"><span class="ni-ic">🛣️</span>My
+    <div class="ni" id="nav-sppipeline" onclick="showSPPage('pipeline',this)"><span class="ni-ic"><i data-lucide="map"></i></span>My
       Pipeline</div>
   </div>
 
@@ -2771,7 +2807,7 @@
     <div class="tb-right">
       <div class="srv-status srv-ok" id="srv-badge">● Server OK</div>
       <div class="bell-btn" id="reminders-bell" onclick="toggleRemindersPanel()" title="Today's Reminders">
-        🔔 <span class="bell-dot" id="bell-dot"></span>
+        <i data-lucide="bell"></i> <span class="bell-dot" id="bell-dot"></span>
       </div>
       <input class="search" type="text" placeholder="🔍  Search schools..." oninput="doSearch(this.value)">
       <button class="btn bg" id="score-btn" onclick="runScoring()">📊 Score Leads</button>
@@ -3371,7 +3407,7 @@
     <div class="tb-right">
       <div class="srv-status srv-ok sp-badge active" style="margin-right:15px;">● Active</div>
       <div class="bell-btn" id="sp-reminders-bell" onclick="toggleRemindersPanel()" title="Today's Reminders">
-        🔔 <span class="bell-dot" id="sp-bell-dot"></span>
+        <i data-lucide="bell"></i> <span class="bell-dot" id="sp-bell-dot"></span>
       </div>
       <input class="search" type="text" placeholder="🔍 Search leads..." oninput="spSearch(this.value)">
     </div>
@@ -3427,13 +3463,13 @@
     <button class="lp-close" onclick="closeLeadPanel()">✕</button>
   </div>
   <div class="lp-tabs">
-    <div class="lp-tab active" id="lp-tab-log" onclick="switchLPTab('log')" style="display:none !important;">📞 Log
+    <div class="lp-tab active" id="lp-tab-log" onclick="switchLPTab('log')" style="display:none !important;"><i data-lucide="phone" class="icon-sm"></i> Log
       Call</div>
-    <div class="lp-tab" id="lp-tab-history" onclick="switchLPTab('history')" style="display:none !important;">📋 Call
+    <div class="lp-tab" id="lp-tab-history" onclick="switchLPTab('history')" style="display:none !important;"><i data-lucide="clipboard-list" class="icon-sm"></i> Call
       History</div>
-    <div class="lp-tab" id="lp-tab-notes" onclick="switchLPTab('notes')">📝 Notes</div>
-    <div class="lp-tab" id="lp-tab-reminders" onclick="switchLPTab('reminders')">🔔 Reminders</div>
-    <div class="lp-tab" id="lp-tab-pitch" onclick="switchLPTab('pitch')">🤖 AI Pitch</div>
+    <div class="lp-tab" id="lp-tab-notes" onclick="switchLPTab('notes')"><i data-lucide="sticky-note" class="icon-sm"></i> Notes</div>
+    <div class="lp-tab" id="lp-tab-reminders" onclick="switchLPTab('reminders')"><i data-lucide="bell" class="icon-sm"></i> Reminders</div>
+    <div class="lp-tab" id="lp-tab-pitch" onclick="switchLPTab('pitch')"><i data-lucide="bot" class="icon-sm"></i> AI Pitch</div>
   </div>
   <div class="lp-body">
     <!-- PITCH PANE -->
@@ -3569,6 +3605,16 @@
     }
   }
 
+  function icon(val) {
+    if (!val) return '';
+    if (val.length > 2) return `<i data-lucide="${val}"></i>`;
+    return val;
+  }
+
+  function reinitIcons() {
+    if (window.lucide) lucide.createIcons();
+  }
+
   function renderSidebarDomains() {
     // Admin
     const c1 = document.getElementById('leads-domains-list');
@@ -3580,7 +3626,7 @@
         const delBtn = d.id !== 'school' ? `<span class="ni-del" title="Delete Sector" onclick="event.stopPropagation();deleteDomain('${d.id}')">✕</span>` : '';
         return `<div class="ni ${isSelected ? 'active' : ''}" id="nav-leads-${d.id}" onclick="showAdminPage('leads', this, '${d.id}')">
             <div style="display:flex;align-items:center;gap:9px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-              <span class="ni-ic">${d.icon}</span>${d.label}
+              <span class="ni-ic">${icon(d.icon)}</span>${d.label}
             </div>
             <span class="ni-count">${count}</span>
             ${delBtn}
@@ -3605,7 +3651,7 @@
         if (currentUser.role !== 'admin' && count === 0) return '';
         return `<div class="ni ${currentDomain === d.id ? 'active' : ''}" onclick="showSPPage('leads', this, '${d.id}')">
             <div style="display:flex;align-items:center;gap:9px;flex:1;">
-              <span class="ni-ic">${d.icon}</span>${d.label}
+              <span class="ni-ic">${icon(d.icon)}</span>${d.label}
             </div>
             <span class="ni-count">${count}</span>
           </div>`;
@@ -3616,10 +3662,10 @@
     const c3 = document.getElementById('pipe-ftabs');
     if (c3) {
       let activeLabel = 'All Domains';
-      let activeIcon = '🌐';
+      let activeIcon = 'globe';
 
       let html = `<div class="sector-item ${pipeFilt === 'all' ? 'active' : ''}" onclick="setF('all', this); this.parentElement.classList.remove('open')">
-          <div class="sector-item-left"><span>🌐</span> All Domains</div>
+          <div class="sector-item-left"><span>${icon('globe')}</span> All Domains</div>
           <span class="sector-item-count">${leads.length}</span>
         </div>`;
 
@@ -3628,13 +3674,14 @@
         const isActive = pipeFilt === d.id;
         if (isActive) { activeLabel = d.label; activeIcon = d.icon; }
         html += `<div class="sector-item ${isActive ? 'active' : ''}" onclick="setF('${d.id}', this); this.parentElement.classList.remove('open')">
-            <div class="sector-item-left"><span>${d.icon}</span> ${d.label}</div>
+            <div class="sector-item-left"><span>${icon(d.icon)}</span> ${d.label}</div>
             <span class="sector-item-count">${count}</span>
           </div>`;
       });
       c3.innerHTML = html;
-      document.getElementById('current-sector-icon').textContent = activeIcon;
+      document.getElementById('current-sector-icon').innerHTML = icon(activeIcon);
       document.getElementById('current-sector-label').textContent = activeLabel;
+      reinitIcons();
     }
   }
 
@@ -4426,7 +4473,7 @@
 
         return `<div style="background:var(--s2); border:1.5px solid var(--bd); border-radius:12px; padding:15px; display:flex; flex-direction:column; gap:8px; cursor:pointer;" onclick="gotoSector('${d.id}')">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:20px;">${d.icon}</span>
+              <span style="font-size:20px;">${icon(d.icon)}</span>
               <span style="font-size:10px; font-weight:700; color:var(--tx3); text-transform:uppercase;">${d.id}</span>
             </div>
             <div style="font-family:'Clash Display',sans-serif; font-size:24px; font-weight:700; color:var(--tx);">${count}</div>
@@ -4438,6 +4485,7 @@
       if (grid) grid.innerHTML = sectorHtml;
       const spGrid = document.getElementById('sp-sectors-grid');
       if (spGrid) spGrid.innerHTML = sectorHtml;
+      reinitIcons();
     } catch (e) {
       console.error('rStats failed:', e);
     }
@@ -4539,29 +4587,46 @@
     try {
       const logs = await get('/activity', true);
       if (!logs.length) { el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--tx3);font-size:13px;">No team activity yet.</div>'; return; }
-      const outcomeMap = { interested: '✅ Interested', callback: '🔄 Call Back', not_interested: '❌ Not Interested', no_answer: '📵 No Answer', closed: '🎯 Closed', voicemail: '📼 Voicemail' };
+      const outcomeMap = { 
+        interested: '<i data-lucide="check-circle" class="icon-sm"></i> Interested', 
+        callback: '<i data-lucide="rotate-cw" class="icon-sm"></i> Call Back', 
+        not_interested: '<i data-lucide="x-circle" class="icon-sm"></i> Not Interested', 
+        no_answer: '<i data-lucide="phone-off" class="icon-sm"></i> No Answer', 
+        closed: '<i data-lucide="target" class="icon-sm"></i> Closed', 
+        voicemail: '<i data-lucide="mic" class="icon-sm"></i> Voicemail' 
+      };
       el.innerHTML = logs.map(l => {
         const dt = new Date(l.created_at);
         const dtStr = dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-        const delActivity = `<button onclick="deleteActivity('${l.type}', ${l.id}, ${l.lead_id})" style="margin-left:auto; background:none; border:none; cursor:pointer; opacity:0.3;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3" title="Delete Activity">🗑️</button>`;
+        const delActivity = `<button onclick="deleteActivity('${l.type}', ${l.id}, ${l.lead_id})" style="margin-left:auto; background:none; border:none; cursor:pointer; opacity:0.3;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3" title="Delete Activity"><i data-lucide="trash-2" class="icon-sm"></i></button>`;
         const statusColors = { new: 'rgba(91,106,247,0.15)', contacted: 'rgba(62,207,255,0.15)', interested: 'rgba(245,166,35,0.15)', proposal: 'rgba(160,80,255,0.15)', won: 'rgba(29,233,160,0.15)', lost: 'rgba(242,91,126,0.15)', qualified: 'rgba(29,233,160,0.15)', closed: 'rgba(29,233,160,0.15)' };
         const statusTextColors = { new: 'var(--acc)', contacted: 'var(--a5)', interested: 'var(--a4)', proposal: 'var(--purple)', won: 'var(--a3)', lost: 'var(--a2)', qualified: 'var(--a3)', closed: 'var(--a3)' };
-        const statusEmoji = { new: '🔵', contacted: '🟠', interested: '🟡', proposal: '🟣', won: '🟢', lost: '🔴', qualified: '🟢', closed: '🎯' };
+        const statusEmoji = { 
+          new: '<i data-lucide="circle" class="icon-sm" style="fill:var(--acc)"></i>', 
+          contacted: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a5)"></i>', 
+          interested: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a4)"></i>', 
+          proposal: '<i data-lucide="circle" class="icon-sm" style="fill:var(--purple)"></i>', 
+          won: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a3)"></i>', 
+          lost: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a2)"></i>', 
+          qualified: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a3)"></i>', 
+          closed: '<i data-lucide="target" class="icon-sm"></i>' 
+        };
         const status = l.lead_status || '';
         const statusBadge = status ? `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:${statusColors[status] || 'rgba(255,255,255,0.06)'};color:${statusTextColors[status] || 'var(--tx2)'};">${statusEmoji[status] || '●'} ${status.charAt(0).toUpperCase() + status.slice(1)}</span>` : '';
 
         if (l.type === 'note') {
-          return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'Note added'}</p><div class="act-meta"><span>👤 ${l.added_by}</span><span>📅 ${dtStr}</span></div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;">${statusBadge}<span class="badge bn" style="background:rgba(29, 233, 160, 0.1);color:var(--a3);">📝 Note</span>${delActivity}</div></div>`;
+          return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'Note added'}</p><div class="act-meta"><span><i data-lucide="user" class="icon-sm"></i> ${l.added_by}</span><span><i data-lucide="calendar" class="icon-sm"></i> ${dtStr}</span></div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;">${statusBadge}<span class="badge bn" style="background:rgba(29, 233, 160, 0.1);color:var(--a3);"><i data-lucide="sticky-note" class="icon-sm"></i> Note</span>${delActivity}</div></div>`;
         }
 
         if (l.type === 'reminder') {
           const remDt = new Date(l.next_followup).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-          return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'Reminder set'}</p><div style="margin-top:5px;font-size:10.5px;color:var(--a4);font-weight:700;">🔔 Scheduled for: ${remDt}</div><div class="act-meta"><span>👤 ${l.added_by}</span><span>📅 ${dtStr}</span></div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;">${statusBadge}<span class="badge bn" style="background:rgba(255, 166, 35, 0.1);color:var(--a4);">🔔 Remind${l.outcome === 'done' ? ' (Done)' : ''}</span>${delActivity}</div></div>`;
+          return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'Reminder set'}</p><div style="margin-top:5px;font-size:10.5px;color:var(--a4);font-weight:700;"><i data-lucide="bell" class="icon-sm"></i> Scheduled: ${remDt}</div><div class="act-meta"><span><i data-lucide="user" class="icon-sm"></i> ${l.added_by}</span><span><i data-lucide="calendar" class="icon-sm"></i> ${dtStr}</span></div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;">${statusBadge}<span class="badge bn" style="background:rgba(255, 166, 35, 0.1);color:var(--a4);"><i data-lucide="bell" class="icon-sm"></i> Remind${l.outcome === 'done' ? ' (Done)' : ''}</span>${delActivity}</div></div>`;
         }
 
-        const followup = l.next_followup ? `<div style="margin-top:5px;font-size:10.5px;color:var(--a3);font-weight:700;">📅 Follow-up: ${new Date(l.next_followup).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</div>` : '';
-        return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'No notes added'}</p>${followup}<div class="act-meta"><span>👤 ${l.added_by}</span><span>⏱ ${l.duration || 0} min</span><span>📅 ${dtStr}</span></div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;">${statusBadge}<span class="badge bn">${outcomeMap[l.outcome] || '📞 Call'}</span>${delActivity}</div></div>`;
+        const followup = l.next_followup ? `<div style="margin-top:5px;font-size:10.5px;color:var(--a3);font-weight:700;"><i data-lucide="calendar" class="icon-sm"></i> Follow-up: ${new Date(l.next_followup).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</div>` : '';
+        return `<div class="act-item"><div class="act-lft"><h4 style="cursor:pointer;color:var(--acc);" onclick="openLeadPanel(${l.lead_id})">${l.school_name}</h4><p>${l.notes || 'No notes added'}</p>${followup}<div class="act-meta"><span><i data-lucide="user" class="icon-sm"></i> ${l.added_by}</span><span><i data-lucide="clock" class="icon-sm"></i> ${l.duration || 0} min</span><span><i data-lucide="calendar" class="icon-sm"></i> ${dtStr}</span></div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;">${statusBadge}<span class="badge bn">${outcomeMap[l.outcome] || '<i data-lucide="phone" class="icon-sm"></i> Call'}</span>${delActivity}</div></div>`;
       }).join('');
+      reinitIcons();
     } catch (e) { el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--a2);font-size:13px;">Failed to load activity feed.</div>'; }
   }
 
@@ -4815,7 +4880,7 @@
     try {
       await updStatus(id, status);
     } catch (e) {
-      toast('❌ Move failed: ' + e.message, 'error');
+      toast('<i data-lucide="x-circle" class="icon-sm"></i> Move failed: ' + e.message, 'error');
     }
   }
 
@@ -4828,18 +4893,18 @@
     log.style.display = 'block'; log.innerHTML = `⏳ Scraping Google for: <b>${q}</b>...`;
     try {
       const res = await post('/trigger-all', { query: q });
-      log.innerHTML += `<br>✅ Found & Scraped <b>${res.pipeline.scraped}</b> leads.`;
-      log.innerHTML += `<br>⏳ Fetching websites, analyzing gaps & scoring...`;
-      log.innerHTML += `<br>✅ Analyzed & Scored <b>${res.pipeline.scored}</b> leads. AI Pitches generated.`;
-      log.innerHTML += `<br>🎉 Pipeline Complete!`;
-      toast('Pipeline Completed Successfully!', 'success');
+      log.innerHTML += `<br><i data-lucide="check-circle" class="icon-sm"></i> Found & Scraped <b>${res.pipeline.scraped}</b> leads.`;
+      log.innerHTML += `<br><i data-lucide="clock" class="icon-sm"></i> Fetching websites, analyzing gaps & scoring...`;
+      log.innerHTML += `<br><i data-lucide="check-circle" class="icon-sm"></i> Analyzed & Scored <b>${res.pipeline.scored}</b> leads. AI Pitches generated.`;
+      log.innerHTML += `<br><i data-lucide="party-popper" class="icon-sm"></i> Pipeline Complete!`;
+      toast('<i data-lucide="party-popper" class="icon-sm"></i> Pipeline Completed Successfully!', 'success');
       leads = await get('/leads'); renderAll();
-    } catch (e) { log.innerHTML += `<br>❌ Error: ` + e.message; }
-    btn.disabled = false; btn.innerHTML = '🚀 Run Pipeline';
+    } catch (e) { log.innerHTML += `<br><i data-lucide="x-circle" class="icon-sm"></i> Error: ` + e.message; }
+    btn.disabled = false; btn.innerHTML = '<i data-lucide="rocket"></i> Run Pipeline';
   }
 
   // ── N8N ──
-  async function runN8nWorkflow() { const btn = document.getElementById('run-btn'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Running...'; toast('⚡ Triggering n8n workflow...', 'success'); try { await post('/trigger-n8n', {}); toast('✅ Workflow triggered! Loading new leads in 10s...', 'success'); setTimeout(async () => { leads = await get('/leads'); renderAll(); toast('🎉 New leads loaded from n8n!', 'success'); btn.disabled = false; btn.innerHTML = '⚡ Run n8n Workflow'; }, 10000); } catch (e) { toast('⚠️ Error: ' + e.message, 'error'); btn.disabled = false; btn.innerHTML = '⚡ Run n8n Workflow'; } }
+  async function runN8nWorkflow() { const btn = document.getElementById('run-btn'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Running...'; toast('<i data-lucide="zap" class="icon-sm"></i> Triggering n8n workflow...', 'success'); try { await post('/trigger-n8n', {}); toast('<i data-lucide="check-circle" class="icon-sm"></i> Workflow triggered! Loading new leads in 10s...', 'success'); setTimeout(async () => { leads = await get('/leads'); renderAll(); toast('<i data-lucide="party-popper" class="icon-sm"></i> New leads loaded from n8n!', 'success'); btn.disabled = false; btn.innerHTML = '<i data-lucide="zap"></i> Run n8n Workflow'; }, 10000); } catch (e) { toast('<i data-lucide="alert-triangle" class="icon-sm"></i> Error: ' + e.message, 'error'); btn.disabled = false; btn.innerHTML = '<i data-lucide="zap"></i> Run n8n Workflow'; } }
 
   // ── UTILS ──
   let pipeFilt = 'all';
@@ -4860,10 +4925,10 @@
   function doSearch(q) { sq = q; rLeads(); }
   function openM(id) { document.getElementById(id).classList.add('open'); }
   function closeM(id) { document.getElementById(id).classList.remove('open'); }
-  function cpEl(id) { const el = document.getElementById(id); navigator.clipboard.writeText(el.value).then(() => toast('📋 Copied!', 'success')); }
+  function cpEl(id) { const el = document.getElementById(id); navigator.clipboard.writeText(el.value).then(() => toast('<i data-lucide="check" class="icon-sm"></i> Copied!', 'success')); }
   document.querySelectorAll('.ov').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
   let tT;
-  function toast(msg, type) { const t = document.getElementById('toast'); t.textContent = msg; t.className = `toast ${type} show`; clearTimeout(tT); tT = setTimeout(() => { t.className = 'toast'; }, 3200); }
+  function toast(msg, type) { const t = document.getElementById('toast'); t.innerHTML = msg; reinitIcons(); t.className = `toast ${type} show`; clearTimeout(tT); tT = setTimeout(() => { t.className = 'toast'; }, 3200); }
 
   init();
 
@@ -5045,11 +5110,11 @@
       document.getElementById('lp-duration').value = '';
       document.getElementById('lp-call-notes').value = '';
       document.getElementById('lp-followup').value = '';
-      toast('📞 Call logged successfully!', 'success');
+      toast('<i data-lucide="check-circle" class="icon-sm"></i> Call logged successfully!', 'success');
       await loadCallHistory();
       switchLPTab('history');
     } catch (e) { toast('Error logging call: ' + e.message, 'error'); }
-    btn.disabled = false; btn.innerHTML = '📞 Save Call Log';
+    btn.disabled = false; btn.innerHTML = '<i data-lucide="phone"></i> Save Call Log';
   }
 
   async function loadNotes() {
@@ -5067,7 +5132,7 @@
         return '<div class="note-card"><div class="note-card-header"><span class="note-author">✍️ ' + n.added_by + '</span><span class="note-time">' + dtStr + '</span></div><div class="note-text">' + n.note + '</div></div>';
       }).join('');
     } catch (e) {
-      container.innerHTML = '<div class="lp-empty">⚠️ Failed to load notes.</div>';
+      container.innerHTML = '<div class="lp-empty"><i data-lucide="alert-circle"></i> Failed to load notes.</div>';
     }
   }
 
@@ -5085,10 +5150,10 @@
         body: JSON.stringify({ added_by, note: noteText })
       });
       document.getElementById('lp-note-text').value = '';
-      toast('📝 Note added!', 'success');
+      toast('<i data-lucide="sticky-note" class="icon-sm"></i> Note added!', 'success');
       await loadNotes();
     } catch (e) { toast('Error saving note: ' + e.message, 'error'); }
-    btn.disabled = false; btn.innerHTML = '📝 Save Note';
+    btn.disabled = false; btn.innerHTML = '<i data-lucide="sticky-note"></i> Save Note';
   }
 
   async function loadReminders() {
@@ -5123,7 +5188,7 @@
           + '</div>';
       }).join('');
     } catch (e) {
-      container.innerHTML = '<div class="lp-empty">⚠️ Failed to load reminders.</div>';
+      container.innerHTML = '<div class="lp-empty"><i data-lucide="alert-circle"></i> Failed to load reminders.</div>';
     }
   }
 
@@ -5148,10 +5213,10 @@
       });
       document.getElementById('lp-remind-time').value = '';
       document.getElementById('lp-remind-note').value = '';
-      toast('🔔 Reminder set!', 'success');
+      toast('<i data-lucide="bell" class="icon-sm"></i> Reminder set!', 'success');
       await loadReminders();
     } catch (e) { toast('Error saving reminder: ' + e.message, 'error'); }
-    btn.disabled = false; btn.innerHTML = '🔔 Save Reminder';
+    btn.disabled = false; btn.innerHTML = '<i data-lucide="bell"></i> Save Reminder';
   }
 
   async function updateRemStatus(id, status) {
@@ -5161,7 +5226,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
       });
-      toast('✅ Status updated', 'success');
+      toast('<i data-lucide="check-circle" class="icon-sm"></i> Status updated', 'success');
       await loadReminders();
       checkTodayReminders();
       renderAll();
@@ -5188,7 +5253,10 @@
       const dots = ['bell-dot', 'sp-bell-dot', 'sp-prospects-bell-dot'];
       dots.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.classList.toggle('active', rows.length > 0);
+        if (el) {
+          el.classList.toggle('active', rows.length > 0);
+          el.textContent = rows.length > 0 ? rows.length : '';
+        }
       });
     } catch (e) { }
   }
