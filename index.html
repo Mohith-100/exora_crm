@@ -52,9 +52,22 @@
       display: inline-block;
     }
 
-    .icon-sm { width: 14px; height: 14px; }
-    .icon-lg { width: 22px; height: 22px; }
-    .ni-ic svg { margin-right: 5px; }
+    .icon-sm {
+      width: 14px;
+      height: 14px;
+    }
+
+    .icon-lg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .ni-ic svg {
+      margin-right: 5px;
+    }
+
+    .score-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .how-it-works-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
 
     body::before {
       content: '';
@@ -1034,6 +1047,57 @@
     .bell-dot.active {
       opacity: 1;
       transform: scale(1);
+    }
+
+    .hb-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--tx);
+      font-size: 22px;
+      cursor: pointer;
+      margin-right: 12px;
+      padding: 4px;
+      line-height: 1;
+      height: 40px;
+      width: 40px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+
+    .sb-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(2px);
+      z-index: 4999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .sb-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .sb-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #1a1733;
+      border: 1px solid rgba(160, 80, 255, 0.3);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      font-size: 18px;
     }
 
     @keyframes pulse {
@@ -2138,19 +2202,24 @@
       border-bottom: 1.5px solid var(--bd);
       flex-shrink: 0;
       background: var(--s1);
+      overflow-x: auto;
+      scrollbar-width: none;
     }
+    .lp-tabs::-webkit-scrollbar { display: none; }
 
     .lp-tab {
       flex: 1;
-      padding: 12px 10px;
+      padding: 12px 18px;
       text-align: center;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--tx2);
       cursor: pointer;
       border-bottom: 2.5px solid transparent;
       transition: all 0.18s;
       letter-spacing: 0.3px;
+      white-space: nowrap;
+      min-width: 100px;
     }
 
     .lp-tab:hover {
@@ -2562,6 +2631,55 @@
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     }
 
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 68px;
+      padding: 0 40px 0 24px; /* Move items little left by increasing right padding */
+      background: var(--s1);
+      border-bottom: 1px solid var(--bd);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .back-btn {
+      width: 44px;
+      height: 44px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: var(--s3);
+      border: 1px solid var(--acc)30;
+      border-radius: 12px;
+      color: var(--acc);
+      cursor: pointer;
+      margin-right: 12px;
+      font-size: 18px;
+      transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .back-btn:hover { background: var(--acc); color: white; transform: translateX(-2px); }
+    .page-section.show-back .back-btn { display: flex; }
+
+    .tb-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .tb-right .search {
+      width: 280px;
+      height: 38px;
+    }
+
+    .tb-right .btn {
+      height: 38px;
+      padding: 0 16px;
+    }
+
     .kc-top {
       display: flex;
       justify-content: space-between;
@@ -2657,6 +2775,477 @@
       color: white;
       border-color: var(--acc);
     }
+
+    .size-tabs {
+      display: flex;
+      gap: 5px;
+      background: var(--s2);
+      padding: 4px;
+      border-radius: 9px;
+    }
+
+    .size-tab {
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 6px;
+      color: rgba(255, 255, 255, 0.4);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .size-tab:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--tx);
+    }
+
+    .size-tab.active {
+      background: var(--acc);
+      color: white;
+    }
+
+    /* RESPONSIVE CSS */
+    .mobile-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--s1);
+      border-top: 1px solid var(--bd);
+      display: none;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 5px;
+      z-index: 2000;
+      height: 65px;
+      backdrop-filter: blur(10px);
+    }
+
+    .m-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--tx2);
+      cursor: pointer;
+      flex: 1;
+      padding: 5px;
+      transition: all 0.2s;
+    }
+
+    .m-nav-item.active {
+      color: var(--acc);
+    }
+
+    .m-nav-item span {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* TABLET (max-width: 768px) */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 70px;
+        padding: 20px 8px;
+        align-items: center;
+      }
+
+      .sidebar .logo,
+      .sidebar .nl,
+      .sidebar .ni div:not(.ni-ic),
+      .sidebar .ni span:not(.ni-ic),
+      .sidebar .ni-count,
+      .sidebar .ni-badge,
+      .sidebar .user-foot,
+      .sidebar #sector-count-box,
+      .sidebar .signout-btn,
+      .sidebar .user-row,
+      .sidebar .live-pill,
+      .sidebar .arrow {
+        display: none !important;
+      }
+
+      .sidebar .ni {
+        justify-content: center;
+        padding: 12px 0;
+        width: 100%;
+        border-radius: 12px;
+      }
+
+      .sidebar .ni-ic {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .sidebar .ni-ic svg {
+        margin: 0;
+        width: 20px;
+        height: 20px;
+      }
+
+      .main {
+        margin-left: 70px;
+        padding: 24px;
+      }
+
+      .stats {
+        grid-template-columns: repeat(3, 1fr) !important;
+      }
+
+      .tgrid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+
+      .modal {
+        width: 90% !important;
+        max-width: none !important;
+      }
+
+      .lp {
+        width: 85% !important;
+      }
+
+      .kanban-board {
+        flex-wrap: wrap;
+        justify-content: start;
+      }
+
+      .kan-col {
+        min-width: 45%;
+        flex: 1;
+      }
+    }
+
+    /* MOBILE (max-width: 500px) */
+    @media (max-width: 500px) {
+      #main-sidebar {
+        position: fixed !important;
+        left: -320px !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        width: 280px !important;
+        max-width: 85% !important;
+        z-index: 10000 !important;
+        display: flex !important;
+        box-shadow: 15px 0 50px rgba(0, 0, 0, 0.6);
+        background: #0d0a1a !important;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        margin-left: 0 !important;
+        padding: 20px 15px !important;
+      }
+
+      #main-sidebar.open {
+        left: 0 !important;
+      }
+
+      /* Reset Tablet Hiding */
+      #main-sidebar .logo,
+      #main-sidebar .nl,
+      #main-sidebar .user-foot,
+      #main-sidebar #sector-count-box,
+      #main-sidebar .signout-btn,
+      #main-sidebar .user-row,
+      #main-sidebar .live-pill,
+      #main-sidebar .arrow {
+        display: block !important;
+      }
+
+      #main-sidebar .ni div:not(.ni-ic),
+      #main-sidebar .ni span:not(.ni-ic) {
+        display: block !important;
+      }
+
+      #main-sidebar .ni-count,
+      #main-sidebar .ni-badge {
+        display: inline-block !important;
+      }
+
+      #main-sidebar .ni {
+        justify-content: flex-start !important;
+        padding: 12px 15px !important;
+        min-height: 44px !important;
+      }
+
+      #main-sidebar .ni-ic {
+        margin-right: 12px !important;
+      }
+
+      #main-sidebar .user-foot {
+        display: block !important;
+        padding: 20px 0 !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      #main-sidebar .user-row {
+        display: flex !important;
+      }
+
+      .sb-close {
+        display: flex !important;
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 20px !important;
+      }
+
+      .hb-btn {
+        display: flex !important;
+      }
+
+      .main,
+      .page-section {
+        margin-left: 0 !important;
+        padding: 16px !important;
+        padding-bottom: 40px !important;
+        width: 100% !important;
+        overflow-x: hidden !important;
+      }
+
+      .topbar {
+        display: flex !important;
+        flex-direction: row !important;
+        height: 64px !important;
+        padding: 0 15px !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        background: var(--s1);
+        border-bottom: 1px solid var(--bd);
+        margin-bottom: 20px !important;
+      }
+      .tb-row-1 {
+        display: contents !important;
+      }
+      .tb-row-2 {
+        display: none !important;
+      }
+      .topbar .search {
+        display: none !important; /* Keep original header search hidden on mobile to avoid overflow */
+      }
+      .topbar .srv-status {
+        display: none !important;
+      }
+
+      .hb-btn, .bell-btn, #tb-add-lead, #sp-tb-add-lead {
+        min-width: 44px !important;
+        min-height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      .page-title {
+        font-size: 16px !important;
+        flex: 1;
+        text-align: center;
+        margin: 0 !important;
+        padding: 0 10px !important;
+      }
+      .tb-right {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+      }
+      .tb-right > *:not(.bell-btn):not(.btn.bp):not(#tb-add-lead):not(#sp-tb-add-lead) { display: none !important; }
+      
+      #tb-add-lead, #sp-tb-add-lead {
+        background: var(--acc) !important;
+        color: transparent !important;
+        position: relative !important;
+        border-radius: 12px !important;
+        width: 44px !important;
+        height: 44px !important;
+        padding: 0 !important;
+        min-width: 44px !important;
+      }
+      #tb-add-lead::after, #sp-tb-add-lead::after {
+        content: '+';
+        position: absolute !important;
+        color: white !important;
+        font-size: 24px !important;
+        font-weight: 400 !important;
+      }
+      .mobile-search { 
+        width: 100% !important; 
+        max-width: none !important; 
+        margin: 0 !important;
+        background: var(--s3) !important;
+      }
+      .mobile-status {
+        display: inline-flex !important;
+        width: fit-content !important;
+        margin-bottom: 5px !important;
+      }
+      .score-grid, .how-it-works-grid { grid-template-columns: 1fr !important; }
+
+      .lead-panel {
+        width: 100% !important;
+        right: -100% !important;
+        border-left: none !important;
+        z-index: 9999 !important;
+      }
+      .lead-panel.open {
+        right: 0 !important;
+      }
+      .lp-tabs {
+        overflow-x: auto !important;
+        scrollbar-width: none !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+      .lp-tabs::-webkit-scrollbar { display: none !important; }
+      .lp-tab {
+        flex: none !important;
+        min-width: 120px !important;
+        padding: 14px 10px !important;
+        text-align: center !important;
+      }
+
+      .page-title {
+        font-size: 18px !important;
+        flex: 1;
+      }
+
+      .stats,
+      #sectors-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+      }
+
+      .sc {
+        padding: 14px 12px !important;
+        min-height: 100px;
+      }
+
+      .tgrid {
+        grid-template-columns: 1fr !important;
+      }
+
+      .kanban-board {
+        flex-direction: column !important;
+        gap: 8px !important;
+        background: transparent !important;
+        padding: 0 !important;
+        overflow-x: hidden !important;
+      }
+      .kanban-col {
+        width: 100% !important;
+        min-width: 100% !important;
+        background: var(--s1) !important;
+        border-radius: 8px !important;
+        border-top: none !important;
+        padding: 0 !important;
+        margin-bottom: 6px !important;
+        overflow: hidden !important;
+        height: auto !important;
+        border-bottom: 1px solid var(--bd) !important;
+        border-left: 4px solid var(--s-color, #5b6af7) !important;
+      }
+      .kanban-hdr {
+        height: 52px !important;
+        padding: 0 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        cursor: pointer !important;
+        background: rgba(255,255,255,0.03) !important;
+        position: relative !important;
+        top: 0 !important;
+        border-bottom: none !important;
+      }
+      .kanban-hdr::after {
+        content: '▶';
+        font-size: 10px;
+        color: var(--tx3);
+        transition: transform 0.3s ease;
+        margin-left: 10px;
+      }
+      .kanban-col.open .kanban-hdr::after {
+        transform: rotate(90deg);
+      }
+      .kanban-list {
+        max-height: 0 !important;
+        overflow: hidden !important;
+        transition: max-height 0.3s ease-out !important;
+        padding: 0 !important;
+        display: block !important;
+        min-height: auto !important;
+      }
+      .kanban-col.open .kanban-list {
+        max-height: 10000px !important;
+        padding: 12px 0 !important;
+        border-top: 1px solid var(--bd);
+      }
+      .kc {
+        width: calc(100% - 24px) !important;
+        margin: 0 12px 12px !important;
+      }
+      .kanban-empty-msg {
+        margin: 12px !important;
+      }
+
+      .table-wrapper {
+        overflow-x: auto !important;
+        width: 100% !important;
+      }
+
+      table {
+        min-width: 600px;
+      }
+      /* Assign Leads Mobile Fixes */
+      #assignleads-page .alp-filter-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        padding: 16px !important;
+        height: auto !important;
+      }
+      #assignleads-page #alp-domain-filter {
+        width: 100% !important;
+        height: 44px !important;
+        min-width: 100% !important;
+      }
+      #assignleads-page .size-tabs {
+        width: 100% !important;
+        height: 48px !important;
+        display: flex !important;
+        background: rgba(0,0,0,0.05) !important;
+      }
+      #assignleads-page .size-tab {
+        flex: 1 !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 11px !important;
+        padding: 0 !important;
+      }
+      #alp-leads-list {
+        max-height: calc(100vh - 320px) !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-bottom: 100px !important;
+      }
+      #assignleads-page .topbar {
+        flex-wrap: wrap !important;
+        height: auto !important;
+        padding: 12px 16px !important;
+        gap: 10px !important;
+      }
+      #assignleads-page .topbar > div {
+        width: 100% !important;
+        justify-content: space-between !important;
+      }
+      #assignleads-page .tb-right {
+        width: 100% !important;
+        justify-content: flex-end !important;
+        padding-bottom: 8px !important;
+      }
+      #assignleads-page .lead-cb-row {
+        padding: 14px !important;
+        gap: 12px !important;
+      }
+    }
   </style>
 </head>
 
@@ -2731,49 +3320,66 @@
 </div>
 </div>
 
+<div class="sb-overlay" id="sb-overlay" onclick="toggleMSB()"></div>
+
 <aside class="sidebar" id="main-sidebar" style="display:none">
-  <div style="margin-bottom:24px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:12px;">
+  <button class="sb-close" onclick="toggleMSB()">✕</button>
+  <div
+    style="padding-top: 18px; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
     <div class="logo">EXORA LEADFORGE</div>
   </div>
 
+<!-- NOTIFICATION TOAST -->
   <!-- ADMIN NAV -->
   <div class="adm-only" id="adm-nav">
     <div class="nl">Main</div>
-    <div class="ni active" id="nav-dash" onclick="showAdminPage('dashboard',this)"><span
-        class="ni-ic"><i data-lucide="layout-dashboard"></i></span>Dashboard</div>
+    <div class="ni active" id="nav-dash" onclick="showAdminPage('dashboard',this)"><span class="ni-ic"><i
+          data-lucide="layout-dashboard"></i></span>Dashboard</div>
     <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
       <div><span class="ni-ic"><i data-lucide="layers"></i></span>Leads</div>
       <i class="arrow"></i>
     </div>
     <div class="dropdown-content" id="leads-domains-list"></div>
 
-    <div class="ni" id="nav-pipeline" onclick="showAdminPage('pipeline',this)"><span class="ni-ic"><i data-lucide="map"></i></span>Pipeline
+    <div class="ni" id="nav-pipeline" onclick="showAdminPage('pipeline',this)"><span class="ni-ic"><i
+          data-lucide="map"></i></span>Pipeline
     </div>
     <div class="nl">Workspace</div>
-    <div class="ni" id="nav-team" onclick="showAdminPage('team',this)"><span class="ni-ic"><i data-lucide="users"></i></span>Team</div>
-    <div class="ni" id="nav-addsp" onclick="showAdminPage('addsp',this)"><span class="ni-ic"><i data-lucide="user-plus"></i></span>Add Sales Person
+    <div class="ni" id="nav-team" onclick="showAdminPage('team',this)"><span class="ni-ic"><i
+          data-lucide="users"></i></span>Team</div>
+    <div class="ni" id="nav-addsp" onclick="showAdminPage('addsp',this)"><span class="ni-ic"><i
+          data-lucide="user-plus"></i></span>Add Sales Person
     </div>
-    <div class="ni" id="nav-adminuser" onclick="showAdminPage('adminuser',this)"><span class="ni-ic"><i data-lucide="settings"></i></span>Admin
+    <div class="ni" id="nav-adminuser" onclick="showAdminPage('adminuser',this)"><span class="ni-ic"><i
+          data-lucide="settings"></i></span>Admin
       User</div>
-    <div class="ni" onclick="openM('wh-modal')"><span class="ni-ic"><i data-lucide="link"></i></span>n8n Webhook</div>
-    <div class="ni" id="nav-score" onclick="showAdminPage('score',this)"><span class="ni-ic"><i data-lucide="zap"></i></span>Score Engine
+    <div class="ni" onclick="openM('wh-modal'); if(window.innerWidth<=480)toggleMSB(false)"><span class="ni-ic"><i
+          data-lucide="link"></i></span>n8n Webhook</div>
+    <div class="ni" id="nav-score-settings" onclick="showAdminPage('score',this)"><span class="ni-ic"><i
+          data-lucide="settings-2"></i></span>Score Settings
+    </div>
+    <div class="ni" id="nav-score-run" onclick="runScoring(); if(window.innerWidth<=480)toggleMSB(false)">
+      <span class="ni-ic"><i data-lucide="zap"></i></span>📊 Score Leads
     </div>
   </div>
 
   <!-- SALESPERSON NAV -->
   <div class="sp-only" id="sp-nav">
     <div class="nl">My Work</div>
-    <div class="ni active" id="nav-spdash" onclick="showSPPage('spdash',this)"><span class="ni-ic"><i data-lucide="layout-dashboard"></i></span>My
+    <div class="ni active" id="nav-spdash" onclick="showSPPage('spdash',this)"><span class="ni-ic"><i
+          data-lucide="layout-dashboard"></i></span>My
       Dashboard</div>
 
     <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
-      <div><span class="ni-ic"><i data-lucide="clipboard-list"></i></span>My Leads <span class="ni-badge" id="my-leads-badge" style="display:none"></span>
+      <div><span class="ni-ic"><i data-lucide="clipboard-list"></i></span>My Leads <span class="ni-badge"
+          id="my-leads-badge" style="display:none"></span>
       </div>
       <i class="arrow"></i>
     </div>
     <div class="dropdown-content" id="sp-leads-domains-list"></div>
 
-    <div class="ni" id="nav-sppipeline" onclick="showSPPage('pipeline',this)"><span class="ni-ic"><i data-lucide="map"></i></span>My
+    <div class="ni" id="nav-sppipeline" onclick="showSPPage('pipeline',this)"><span class="ni-ic"><i
+          data-lucide="map"></i></span>My
       Pipeline</div>
   </div>
 
@@ -2783,12 +3389,12 @@
   </div>
 
   <div class="user-foot">
-    <div class="live-pill" style="margin-bottom:10px">
+    <div class="live-pill" style="margin-bottom:12px">
       <div class="dot"></div>PostgreSQL live
     </div>
     <div class="user-row">
       <div class="u-av" id="u-av">A</div>
-      <div>
+      <div style="flex:1">
         <div class="u-name" id="u-name">Admin User</div>
         <div class="u-role" id="u-role">Administrator</div>
       </div>
@@ -2800,9 +3406,17 @@
 <!-- MAIN -->
 <main class="main" id="admin-main" style="display:none">
   <div class="topbar">
-    <div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button class="hb-btn" onclick="toggleMSB()"
+        style="background:var(--s3); border:1px solid var(--acc); color:var(--acc); box-shadow:0 0 10px rgba(160,80,255,0.2);">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
       <div class="page-title" id="ptitle">Dashboard</div>
-
     </div>
     <div class="tb-right">
       <div class="srv-status srv-ok" id="srv-badge">● Server OK</div>
@@ -2811,8 +3425,7 @@
       </div>
       <input class="search" type="text" placeholder="🔍  Search schools..." oninput="doSearch(this.value)">
       <button class="btn bg" id="score-btn" onclick="runScoring()">📊 Score Leads</button>
-
-      <button class="btn bp" onclick="openAddLead()">+ Add Lead</button>
+      <button class="btn bp" id="tb-add-lead" onclick="openAddLead()">+ Add Lead</button>
     </div>
   </div>
 
@@ -2896,31 +3509,54 @@
 </main>
 
 <!-- LEADS PAGE (ADMIN) -->
-<div class="page-section" id="leads-page">
+<div class="page-section show-back" id="leads-page">
   <div class="topbar">
-    <div>
-      <div class="page-title" id="leads-page-title">Leads</div>
-      <div style="font-size:12px;color:var(--tx3);margin-top:2px;">All domain specific leads</div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button class="back-btn" onclick="showAdminPage('dashboard',document.getElementById('nav-dash'))">←</button>
+      <button class="hb-btn" onclick="toggleMSB()"
+        style="background:var(--s3); border:1px solid var(--acc); color:var(--acc); box-shadow:0 0 10px rgba(160,80,255,0.2);">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div style="display:flex; flex-direction:column;">
+        <div class="page-title" id="leads-page-title">Leads</div>
+      </div>
     </div>
-    <div class="tb-right" style="display:flex;gap:10px;align-items:center;">
-      <input class="search" type="text" placeholder="🔍 Search leads..." oninput="doSearch(this.value)">
-      <button class="btn bp" onclick="triggerLeadsPageGen()" id="leads-gen-btn">⚡ Generate More Leads</button>
+    <div class="tb-right">
+      <div class="bell-btn" onclick="toggleRemindersPanel()"><i data-lucide="bell"></i><span class="bell-dot"></span></div>
+      <button class="btn bp" id="tb-add-lead" onclick="openAddLead()">+ Add Lead</button>
     </div>
   </div>
   <div class="card" style="margin-bottom:20px;">
-    <div class="ch">
+    <div class="ch" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
       <div class="ct" id="domain-table-title">Leads</div>
+      <div class="size-tabs">
+        <div class="size-tab active" onclick="setSizeFilter('all', this)">All Size</div>
+        <div class="size-tab" onclick="setSizeFilter('small', this)">Small Business</div>
+        <div class="size-tab" onclick="setSizeFilter('big', this)">Big Brand</div>
+      </div>
+      <div class="size-tabs" style="background:rgba(91,106,247,0.08); border-color:rgba(91,106,247,0.15);">
+        <div class="size-tab active" onclick="setAssignedFilter('all', this)">All Leads</div>
+        <div class="size-tab" onclick="setAssignedFilter('assigned', this)">Assigned</div>
+        <div class="size-tab" onclick="setAssignedFilter('unassigned', this)">Unassigned</div>
+      </div>
     </div>
     <div style="overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;">
         <thead>
           <tr>
-            <th>School Info</th>
+            <th id="leads-table-header-info">Lead Info</th>
             <th>Phone</th>
             <th>Website</th>
             <th>Rating</th>
             <th>Score & Priority</th>
             <th>Status</th>
+            <th id="th-assignee" style="display:none;">Assigned To</th>
+            <th id="th-ass-date" style="display:none;">Date</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -2931,11 +3567,23 @@
 </div>
 
 <!-- PIPELINE PAGE (ADMIN) -->
-<div class="page-section" id="pipeline-page">
+<div class="page-section show-back" id="pipeline-page">
   <div class="topbar">
-    <div>
-      <div class="page-title">Pipeline</div>
-      <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Drag & drop leads across stages</div>
+    <div style="display:flex; align-items:center;">
+      <button class="back-btn" onclick="showAdminPage('dashboard',document.getElementById('nav-dash'))">←</button>
+      <button class="hb-btn" onclick="toggleMSB()"
+        style="background:var(--s3); border:1px solid var(--acc); color:var(--acc); box-shadow:0 0 10px rgba(160,80,255,0.2);">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div style="display:flex; flex-direction:column; margin-left:12px;">
+        <div class="page-title">Pipeline</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Drag & drop leads across stages</div>
+      </div>
     </div>
     <div class="tb-right">
       <button class="btn bg" onclick="loadPipeline()" style="display:flex;align-items:center;gap:6px;">
@@ -3171,9 +3819,19 @@
 </div>
 
 <!-- ADD SALES PERSON PAGE -->
-<div class="page-section" id="addsp-page">
+<div class="page-section show-back" id="addsp-page">
   <div class="topbar">
-    <div>
+    <div style="display:flex; align-items:center;">
+      <button class="back-btn" onclick="showAdminPage('dashboard',document.getElementById('nav-dash'))">←</button>
+      <button class="hb-btn" onclick="toggleMSB()"
+        style="background:var(--s3); border:1px solid var(--acc); color:var(--acc); box-shadow:0 0 10px rgba(160,80,255,0.2);">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
       <div class="page-title">Add Sales Person</div>
       <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Register a new sales team member</div>
     </div>
@@ -3214,19 +3872,31 @@
 </div>
 
 <!-- ASSIGN LEADS PAGE -->
-<div class="page-section" id="assignleads-page">
+<div class="page-section show-back" id="assignleads-page">
   <div class="topbar">
-    <div>
-      <div class="page-title">Assign Leads</div>
-      <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Select leads to assign to the new sales person
+    <div style="display:flex; align-items:center;">
+      <button class="back-btn" onclick="showAdminPage('dashboard',document.getElementById('nav-dash'))">←</button>
+      <button class="hb-btn" onclick="toggleMSB()"
+        style="background:var(--s3); border:1px solid var(--acc); color:var(--acc); box-shadow:0 0 10px rgba(160,80,255,0.2);">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div style="display:flex; flex-direction:column; margin-left:12px;">
+        <div class="page-title">Assign Leads</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Select leads to assign to the new sales person</div>
       </div>
     </div>
-    <div class="tb-right"><button class="btn bg"
-        onclick="showAdminPage('team',document.getElementById('nav-team'))">Skip</button><button class="btn bp"
-        id="assign-submit-btn" onclick="submitAssignLeads()">✓ Submit Assignment</button></div>
+    <div class="tb-right">
+      <button class="btn bg" onclick="showAdminPage('team',document.getElementById('nav-team'))">Skip</button>
+      <button class="btn bp" id="assign-submit-btn" onclick="submitAssignLeads()">✓ Submit Assignment</button>
+    </div>
   </div>
   <div class="alp-assignee" id="alp-assignee"></div>
-  <div
+  <div class="alp-filter-row"
     style="padding: 12px 22px; display: flex; align-items: center; gap: 12px; border-bottom: 1.5px solid var(--bd); background: rgba(0,0,0,0.05);">
     <span
       style="font-size: 11px; font-weight: 700; color: var(--tx3); text-transform: uppercase; letter-spacing: 0.5px;">Filter
@@ -3236,21 +3906,37 @@
       onchange="renderALLeads()">
       <!-- Populated dynamically -->
     </select>
+    <div class="size-tabs" style="height:32px; background:rgba(91,106,247,0.05); border-color:rgba(91,106,247,0.12);">
+      <div class="size-tab active" style="padding:0 12px; font-size:10.5px;" onclick="setAL_AssignedFilter('all', this)">All Leads</div>
+      <div class="size-tab" style="padding:0 12px; font-size:10.5px;" onclick="setAL_AssignedFilter('assigned', this)">Assigned</div>
+      <div class="size-tab" style="padding:0 12px; font-size:10.5px;" onclick="setAL_AssignedFilter('unassigned', this)">Unassigned</div>
+    </div>
   </div>
   <div id="alp-leads-list"></div>
 </div>
 
 <!-- SCORE ENGINE SETTINGS PAGE -->
-<div class="page-section" id="score-page">
+<div class="page-section show-back" id="score-page">
   <div class="topbar">
-    <div>
-      <div class="page-title">⚡ Score Engine Settings</div>
-      <div style="font-size:12px;color:var(--tx3);margin-top:2px;">All scoring rules are saved in your database —
-        changes apply to future scoring runs immediately</div>
+    <div style="display:flex; align-items:center;">
+      <button class="back-btn" onclick="showAdminPage('dashboard',document.getElementById('nav-dash'))">←</button>
+      <button class="hb-btn" onclick="toggleMSB()"
+        style="background:var(--s3); border:1px solid var(--acc); color:var(--acc); box-shadow:0 0 10px rgba(160,80,255,0.2);">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div style="display:flex; flex-direction:column; margin-left:12px;">
+        <div class="page-title">⚡ Score Engine Settings</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Scoring rules are saved in your database</div>
+      </div>
     </div>
     <button class="btn bp" onclick="loadScoreSettings()" style="font-size:12px;">🔄 Refresh</button>
   </div>
-  <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+  <div class="score-grid" style="padding:20px; gap:18px;">
     <!-- BASE SCORE CARD -->
     <div style="background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);padding:20px;">
       <div
@@ -3274,7 +3960,7 @@
   <div
     style="margin:0 20px 20px;background:rgba(91,106,247,0.06);border:1.5px solid rgba(91,106,247,0.2);border-radius:var(--r);padding:18px;">
     <div style="font-size:11px;font-weight:700;color:var(--acc);margin-bottom:10px;">🔍 HOW GAP DETECTION WORKS</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+    <div class="how-it-works-grid" style="gap:12px;">
       <div style="font-size:11.5px;color:var(--tx2);"><strong style="color:var(--tx);">CRM / Enquiry</strong><br>Scans
         for HubSpot, LeadSquared, Zoho, Meritto scripts in webpage code</div>
       <div style="font-size:11.5px;color:var(--tx2);"><strong style="color:var(--tx);">Fee Payment</strong><br>Looks
@@ -3302,11 +3988,23 @@
 </div>
 
 <!-- ADMIN USER SETTINGS PAGE -->
-<div class="page-section" id="adminuser-page">
+<div class="page-section show-back" id="adminuser-page">
   <div class="topbar">
-    <div>
-      <div class="page-title">Admin Settings</div>
-      <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Update your credentials</div>
+    <div style="display:flex; align-items:center;">
+      <button class="back-btn" onclick="showAdminPage('dashboard',document.getElementById('nav-dash'))" title="Back to Dashboard">←</button>
+      <button class="hb-btn" onclick="toggleMSB()"
+        style="background:var(--s3); border:1px solid var(--acc); color:var(--acc); box-shadow:0 0 10px rgba(160,80,255,0.2);">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div style="display:flex; flex-direction:column; margin-left:12px;">
+        <div class="page-title">Admin Settings</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Update your credentials</div>
+      </div>
     </div>
   </div>
   <div class="asp-card">
@@ -3326,12 +4024,52 @@
   </div>
 </div>
 
+<!-- TEAM PAGE -->
+<div class="page-section show-back" id="team-page">
+  <div class="topbar">
+    <div style="display:flex; align-items:center;">
+      <button class="back-btn" onclick="showAdminPage('dashboard',document.getElementById('nav-dash'))" title="Back to Dashboard">←</button>
+      <button class="hb-btn" onclick="toggleMSB()"
+        style="background:var(--s3); border:1px solid var(--acc); color:var(--acc); box-shadow:0 0 10px rgba(160,80,255,0.2);">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div style="display:flex; flex-direction:column; margin-left:12px;">
+        <div class="page-title">Sales Team</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Manage your sales representatives</div>
+      </div>
+    </div>
+  </div>
+  <div class="tsec">
+    <div class="tsec-head">
+      <div class="tsec-title">Sales Representatives</div>
+      <button class="btn bp" onclick="showAdminPage('addsp')">Add Sales Person →</button>
+    </div>
+    <div id="team-list"></div>
+  </div>
+</div>
+
 <!-- SALESPERSON — MY DASHBOARD -->
 <div class="page-section" id="spdash-page">
   <div class="topbar">
-    <div>
-      <div class="page-title" id="sp-welcome-title">My Dashboard</div>
-      <div style="font-size:12px;color:var(--tx3);margin-top:2px;" id="sp-welcome-sub">Welcome! Here's your activity.
+    <div style="display:flex; align-items:center;">
+      <button class="hb-btn" onclick="toggleMSB()"
+        style="background:var(--s3); border:1px solid var(--acc); color:var(--acc); box-shadow:0 0-10px rgba(160,80,255,0.2);">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div style="display:flex; flex-direction:column; margin-left:12px;">
+        <div class="page-title" id="sp-welcome-title">My Dashboard</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;" id="sp-welcome-sub">Welcome! Here's your activity.
+        </div>
       </div>
     </div>
     <div class="tb-right">
@@ -3398,11 +4136,23 @@
 </div>
 
 <!-- SALESPERSON — MY LEADS PAGE -->
-<div class="page-section" id="sp-leads-page">
+<div class="page-section show-back" id="sp-leads-page">
   <div class="topbar">
-    <div>
-      <div class="page-title" id="sp-leads-page-title">My Leads</div>
-      <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Your assigned leads in this domain</div>
+    <div style="display:flex; align-items:center;">
+      <button class="back-btn" onclick="showSPPage('spdash', document.getElementById('nav-spdash'))">←</button>
+      <button class="hb-btn" onclick="toggleMSB()"
+        style="background:var(--s3); border:1px solid var(--acc); color:var(--acc); box-shadow:0 0 10px rgba(160,80,255,0.2);">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div style="display:flex; flex-direction:column; margin-left:12px;">
+        <div class="page-title" id="sp-leads-page-title">My Leads</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Your assigned leads in this domain</div>
+      </div>
     </div>
     <div class="tb-right">
       <div class="srv-status srv-ok sp-badge active" style="margin-right:15px;">● Active</div>
@@ -3420,7 +4170,7 @@
       <table style="width:100%;border-collapse:collapse;">
         <thead>
           <tr>
-            <th>School Info</th>
+            <th id="sp-leads-table-header-info">Lead Info</th>
             <th>Phone</th>
             <th>Website</th>
             <th>Rating</th>
@@ -3463,13 +4213,18 @@
     <button class="lp-close" onclick="closeLeadPanel()">✕</button>
   </div>
   <div class="lp-tabs">
-    <div class="lp-tab active" id="lp-tab-log" onclick="switchLPTab('log')" style="display:none !important;"><i data-lucide="phone" class="icon-sm"></i> Log
+    <div class="lp-tab active" id="lp-tab-log" onclick="switchLPTab('log')" style="display:none !important;"><i
+        data-lucide="phone" class="icon-sm"></i> Log
       Call</div>
-    <div class="lp-tab" id="lp-tab-history" onclick="switchLPTab('history')" style="display:none !important;"><i data-lucide="clipboard-list" class="icon-sm"></i> Call
+    <div class="lp-tab" id="lp-tab-history" onclick="switchLPTab('history')" style="display:none !important;"><i
+        data-lucide="clipboard-list" class="icon-sm"></i> Call
       History</div>
-    <div class="lp-tab" id="lp-tab-notes" onclick="switchLPTab('notes')"><i data-lucide="sticky-note" class="icon-sm"></i> Notes</div>
-    <div class="lp-tab" id="lp-tab-reminders" onclick="switchLPTab('reminders')"><i data-lucide="bell" class="icon-sm"></i> Reminders</div>
-    <div class="lp-tab" id="lp-tab-pitch" onclick="switchLPTab('pitch')"><i data-lucide="bot" class="icon-sm"></i> AI Pitch</div>
+    <div class="lp-tab" id="lp-tab-notes" onclick="switchLPTab('notes')"><i data-lucide="sticky-note"
+        class="icon-sm"></i> Notes</div>
+    <div class="lp-tab" id="lp-tab-reminders" onclick="switchLPTab('reminders')"><i data-lucide="bell"
+        class="icon-sm"></i> Reminders</div>
+    <div class="lp-tab" id="lp-tab-pitch" onclick="switchLPTab('pitch')"><i data-lucide="bot" class="icon-sm"></i> AI
+      Pitch</div>
   </div>
   <div class="lp-body">
     <!-- PITCH PANE -->
@@ -3599,10 +4354,9 @@
   const statuses = ['new', 'contacted', 'interested', 'proposal', 'won', 'lost'];
 
   function toggleDropdown(el) {
-    el.classList.toggle('open');
-    if (el.nextElementSibling) {
-      el.nextElementSibling.classList.toggle('open');
-    }
+    const c = el.nextElementSibling;
+    c.classList.toggle('open');
+    el.classList.toggle('active');
   }
 
   function icon(val) {
@@ -3747,6 +4501,11 @@
       const firstWord = val.split(' ')[0];
       const label = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase().replace(/s$/, '');
       const domainId = label.toLowerCase();
+
+      // Scroll to top
+      window.scrollTo(0, 0);
+      // Mobile: close sidebar
+      if (window.innerWidth <= 480) toggleMSB(false);
 
       // Icon Map
       const iconMap = {
@@ -3958,18 +4717,31 @@
     const d = domains.find(d => d.id === currentDomain);
     if (!d) return;
     const normId = String(currentDomain).toLowerCase().replace(/s$/, '');
-    const count = domainCounts[normId] || domainCounts[String(currentDomain).toLowerCase()] || 0;
+    
+    // Use role-specific counts if possible
+    let count = 0;
+    if (currentUser && currentUser.role !== 'admin' && spLeads.length > 0) {
+      count = spLeads.filter(l => {
+        const lDom = (l.domain || 'school').toLowerCase().replace(/s$/, '');
+        return lDom === normId || (l.domain || 'school').toLowerCase() === String(currentDomain).toLowerCase();
+      }).length;
+    } else {
+      count = domainCounts[normId] || domainCounts[String(currentDomain).toLowerCase()] || 0;
+    }
+
     const ptitle = d.label + ' Leads';
     const html = `${ptitle} <span style="font-size:14px;color:var(--tx3);margin-left:8px;font-weight:500;">(${count} leads)</span>`;
 
-    const adminTitle = document.getElementById('leads-page-title');
-    if (adminTitle) adminTitle.innerHTML = html;
+    if (document.getElementById('leads-page-title')) document.getElementById('leads-page-title').innerHTML = html;
+    if (document.getElementById('sp-leads-page-title')) document.getElementById('sp-leads-page-title').innerHTML = html;
+    
+    if (document.getElementById('domain-table-title')) document.getElementById('domain-table-title').textContent = ptitle;
+    if (document.getElementById('sp-domain-table-title')) document.getElementById('sp-domain-table-title').textContent = ptitle;
 
-    const spTitle = document.getElementById('sp-leads-page-title');
-    if (spTitle) spTitle.innerHTML = html;
-
-    const dTableTitle = document.getElementById('domain-table-title');
-    if (dTableTitle) dTableTitle.textContent = ptitle;
+    const infoHeader = document.getElementById('leads-table-header-info');
+    if (infoHeader) infoHeader.textContent = d.label + ' Info';
+    const spInfoHeader = document.getElementById('sp-leads-table-header-info');
+    if (spInfoHeader) spInfoHeader.textContent = d.label + ' Info';
   }
 
   // ── BOOT APP ──
@@ -3989,12 +4761,12 @@
       document.getElementById('adm-nav').style.display = 'block';
       document.getElementById('sp-nav').style.display = 'none';
       await loadAdminData();
-      showAdminPage('dashboard', document.getElementById('nav-dash'));
+      showAdminPage('dashboard', document.getElementById('nav-dash'), null, true);
     } else {
       document.getElementById('adm-nav').style.display = 'none';
       document.getElementById('sp-nav').style.display = 'block';
       await loadSPData();
-      showSPPage('spdash', document.getElementById('nav-spdash'));
+      showSPPage('spdash', document.getElementById('nav-spdash'), null, true);
     }
   }
 
@@ -4030,43 +4802,38 @@
     }
   }
 
-  function showAdminPage(page, el, param = null) {
+  function showAdminPage(page, el, param = null, updateHistory = true) {
+    if (updateHistory) {
+      history.pushState({ role: 'admin', page, param, elId: el ? el.id : null }, "", "#" + page);
+    }
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
+    
+    const isDash = (page === 'dashboard');
+    document.getElementById('admin-main').style.display = isDash ? 'block' : 'none';
+
     if (page === 'leads') {
       currentDomain = param;
       renderSidebarDomains();
-    }
-
-    const isMainPage = page === 'dashboard' || page === 'team';
-    document.getElementById('admin-main').style.display = isMainPage ? 'block' : 'none';
-    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
-
-    if (page === 'addsp') document.getElementById('addsp-page').classList.add('visible');
-    else if (page === 'assignleads') document.getElementById('assignleads-page').classList.add('visible');
-    else if (page === 'adminuser') {
-      document.getElementById('adminuser-page').classList.add('visible');
-      document.getElementById('au-name').value = currentUser.name || '';
-      document.getElementById('au-email').value = currentUser.email || '';
-      document.getElementById('au-pass').value = '';
-      document.getElementById('au-err').style.display = 'none';
-    }
-    else if (page === 'score') {
-      document.getElementById('score-page').classList.add('visible');
-      loadScoreSettings();
-    }
-    else if (page === 'leads') {
       document.getElementById('leads-page').classList.add('visible');
-      currentDomain = param;
-      updateHeaderCount();
-    }
-    else if (page === 'pipeline') {
+    } else if (page === 'pipeline') {
       document.getElementById('pipeline-page').classList.add('visible');
-      pipeFilt = currentDomain;
       renderSidebarDomains();
       loadPipeline();
+    } else if (page === 'team') {
+      document.getElementById('team-page').classList.add('visible');
+    } else if (page === 'addsp') {
+      document.getElementById('addsp-page').classList.add('visible');
+    } else if (page === 'score') {
+      document.getElementById('score-page').classList.add('visible');
+    } else if (page === 'adminuser') {
+      document.getElementById('adminuser-page').classList.add('visible');
+    } else if (page === 'assignleads') {
+      document.getElementById('assignleads-page').classList.add('visible');
     }
 
     if (page === 'dashboard') document.getElementById('ptitle').textContent = 'Dashboard';
     else if (page === 'team') document.getElementById('ptitle').textContent = 'Sales Team';
+    else if (page === 'pipeline') document.getElementById('ptitle').textContent = 'Pipeline';
 
     document.querySelectorAll('.ni:not(.dropdown-btn)').forEach(n => n.classList.remove('active'));
     if (el) el.classList.add('active');
@@ -4077,7 +4844,6 @@
     const acard = document.getElementById('adm-activity-card');
     if (tsec) tsec.style.display = (page === 'team' || page === 'dashboard') ? '' : 'none';
     if (stats) stats.style.display = page === 'dashboard' ? '' : 'none';
-
     if (acard) acard.style.display = page === 'dashboard' ? '' : 'none';
 
     if (page === 'leads') {
@@ -4086,6 +4852,9 @@
     } else {
       if (document.getElementById('rescore-wrap')) document.getElementById('rescore-wrap').style.display = 'none';
     }
+
+    // Mobile: auto-close sidebar
+    toggleMSB(false);
   }
 
   // ── ADMIN CREDENTIALS UPDATE ──
@@ -4240,12 +5009,22 @@
     renderSPTable('sp-status-leads-body', statusLeads);
   }
 
-  function showSPPage(page, el, param = null) {
-    if (page === 'leads') {
-      currentDomain = param;
-      renderSidebarDomains();
+  window.onpopstate = function (event) {
+    if (event.state) {
+      const { role, page, param, elId } = event.state;
+      const el = elId ? document.getElementById(elId) : null;
+      if (role === 'admin') showAdminPage(page, el, param, false);
+      else showSPPage(page, el, param, false);
+    } else {
+      if (currentUser.role === 'admin') showAdminPage('dashboard', document.getElementById('nav-dash'), null, false);
+      else showSPPage('spdash', document.getElementById('nav-spdash'), null, false);
     }
+  };
 
+  function showSPPage(page, el, param = null, updateHistory = true) {
+    if (updateHistory) {
+      history.pushState({ role: 'sp', page, param, elId: el ? el.id : null }, "", "#" + page);
+    }
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
     if (page === 'spdash') {
       document.getElementById('spdash-page').classList.add('visible');
@@ -4271,6 +5050,9 @@
     } else {
       if (document.getElementById('sp-rescore-wrap')) document.getElementById('sp-rescore-wrap').style.display = 'none';
     }
+
+    // Mobile: auto-close sidebar
+    toggleMSB(false);
   }
 
   function renderAll() {
@@ -4351,8 +5133,15 @@
 
     const filter = document.getElementById('alp-domain-filter');
     if (filter) {
+      const eMap = { 
+        school: '🏫', hospital: '🏥', gym: '💪', dumbbell: '💪', it: '💻', monitor: '💻', 
+        manufacturing: '🏭', factory: '🏭', salon: '✂️', scissors: '✂️', auditing: '📋', 
+        'clipboard-check': '📋', restaurant: '🍽️', 'utensils-crossed': '🍽️', 
+        supermarket: '🛒', 'shopping-cart': '🛒', college: '🎓', 'graduation-cap': '🎓',
+        company: '💼', hotel: '🏨', pharmacy: '💊', clinic: '🏥', tech: '💻', software: '💻' 
+      };
       filter.innerHTML = '<option value="all">🌐 All Sectors</option>' +
-        domains.map(d => `<option value="${d.id}">${d.icon} ${d.label}</option>`).join('');
+        domains.map(d => `<option value="${d.id}">${eMap[d.icon] || '📋'} ${d.label}</option>`).join('');
       filter.value = 'all';
     }
 
@@ -4364,9 +5153,14 @@
     if (!sp) return;
     const domainFilt = document.getElementById('alp-domain-filter')?.value || 'all';
 
-    const unassigned = leads.filter(l => !l.assigned_id);
-    const assigned = leads.filter(l => l.assigned_id && l.assigned_id !== sp.id);
-    let allLeads = [...unassigned, ...assigned];
+    let allLeads = leads;
+    
+    // Applying Assignment Filter
+    if (currentALAssignment === 'unassigned') {
+      allLeads = allLeads.filter(l => !l.assigned_id);
+    } else if (currentALAssignment === 'assigned') {
+      allLeads = allLeads.filter(l => l.assigned_id === sp.id);
+    }
 
     if (domainFilt !== 'all') {
       allLeads = allLeads.filter(l => (l.domain || 'school') === domainFilt);
@@ -4376,7 +5170,12 @@
     document.getElementById('alp-leads-list').innerHTML = allLeads.length
       ? allLeads.map(l => {
         const isSel = alpSelectedIds.includes(l.id);
-        return `<div class="lead-cb-row ${isSel ? 'sel' : ''}" id="alp-r-${l.id}" onclick="toggleCB(${l.id})"><input type="checkbox" id="alp-cb-${l.id}" ${isSel ? 'checked' : ''} onclick="event.stopPropagation();toggleCB(${l.id})"><div style="flex:1"><div style="font-weight:700;font-size:13px;">${l.school_name || '—'}</div><div style="font-size:11.5px;color:var(--tx2);">${l.address || ''} ${l.phone ? '· ' + l.phone : ''}</div></div><span class="badge ${bc[l.status] || 'bn'}">${l.status}</span></div>`;
+        const assignedTo = l.assigned_id ? team.find(t => t.id === l.assigned_id) : null;
+        const dObj = l.assigned_at ? new Date(l.assigned_at) : null;
+        const dStr = (dObj && !isNaN(dObj.getTime())) ? dObj.toLocaleDateString() : 'N/A';
+        const assInfo = assignedTo ? `<div style="font-size:10.5px;color:${assignedTo.color};margin-top:4px;background:${assignedTo.color}10;padding:3px 8px;border-radius:4px;display:inline-block;border:1px solid ${assignedTo.color}20;">📅 ${assignedTo.name} · ${dStr}</div>` : '';
+        const qBtn = (!l.assigned_id && sp) ? `<button class="btn bp" style="height:28px; padding:0 12px; font-size:11px; border-radius:6px; box-shadow:0 4px 12px var(--acc)30; white-space:nowrap;" onclick="quickAssign(${l.id}, event)">Assign Now</button>` : '';
+        return `<div class="lead-cb-row ${isSel ? 'sel' : ''}" id="alp-r-${l.id}" onclick="toggleCB(${l.id})"><input type="checkbox" id="alp-cb-${l.id}" ${isSel ? 'checked' : ''} onclick="event.stopPropagation();toggleCB(${l.id})"><div style="flex:1"><div style="font-weight:700;font-size:13px;">${l.school_name || '—'}</div><div style="font-size:11.5px;color:var(--tx2);">${l.address || ''} ${l.phone ? '· ' + l.phone : ''}</div>${assInfo}</div><div style="display:flex; align-items:center; gap:12px;">${qBtn}<span class="badge ${bc[l.status] || 'bn'}">${l.status}</span></div></div>`;
       }).join('')
       : `<div style="padding:40px 24px;text-align:center;color:var(--tx3);"><div style="font-size:24px;margin-bottom:10px;opacity:0.5;">📋</div>No leads found for this sector.</div>`;
     popAssign();
@@ -4393,6 +5192,20 @@
     if (row) row.classList.toggle('sel', alpSelectedIds.includes(id));
   }
 
+  async function quickAssign(id, ev) {
+    if (ev) ev.stopPropagation();
+    if (!pendingNewSP) { toast('No target salesperson selected.', 'error'); return; }
+    try {
+      const now = new Date().toISOString();
+      await post('/leads/assign', { lead_ids: [id], team_id: pendingNewSP.id });
+      leads.forEach(l => { 
+        if (l.id === id) { l.assigned_id = pendingNewSP.id; l.assigned_at = now; } 
+      });
+      toast('✅ Lead assigned successfully!', 'success');
+      renderALLeads(); // Refresh to show the assignment info
+    } catch (e) { toast('Error: ' + e.message, 'error'); }
+  }
+
   async function submitAssignLeads() {
     if (!pendingNewSP) { toast('No pending sales person.', 'error'); return; }
     if (alpSelectedIds.length === 0) { toast('No leads selected — skipping assignment.', ''); return; }
@@ -4402,8 +5215,14 @@
     btn.innerHTML = '<span class="spin"></span> Processing...';
 
     try {
+      const now = new Date().toISOString();
       await post('/leads/assign', { lead_ids: alpSelectedIds, team_id: pendingNewSP.id });
-      leads.forEach(l => { if (alpSelectedIds.includes(l.id)) l.assigned_id = pendingNewSP.id; });
+      leads.forEach(l => { 
+        if (alpSelectedIds.includes(l.id)) {
+          l.assigned_id = pendingNewSP.id; 
+          l.assigned_at = now;
+        } 
+      });
       toast(`✅ ${alpSelectedIds.length} lead${alpSelectedIds.length > 1 ? 's' : ''} assigned to ${pendingNewSP.name}!`, 'success');
 
       alpSelectedIds = [];
@@ -4454,7 +5273,21 @@
       renderSidebarDomains();
       updateHeaderCount();
       const sectorCount = document.getElementById('total-sectors-count');
-      if (sectorCount) sectorCount.textContent = domains.length;
+      if (sectorCount) {
+        if (currentUser && currentUser.role !== 'admin') {
+          const myDoms = domains.filter(d => {
+            const normId = String(d.id).toLowerCase().replace(/s$/, '');
+            const count = spLeads.filter(l => {
+              const lDom = (l.domain || 'school').toLowerCase().replace(/s$/, '');
+              return lDom === normId || (l.domain || 'school').toLowerCase() === String(d.id).toLowerCase();
+            }).length;
+            return count > 0;
+          });
+          sectorCount.textContent = myDoms.length;
+        } else {
+          sectorCount.textContent = domains.length;
+        }
+      }
 
       // Render sector grids
       const sectorHtml = domains.map(d => {
@@ -4490,25 +5323,63 @@
       console.error('rStats failed:', e);
     }
   }
+  let currentSize = 'all';
+  let currentALAssignment = 'all';
+  function setAL_AssignedFilter(v, el) {
+    currentALAssignment = v;
+    el.parentNode.querySelectorAll('.size-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderALLeads();
+  }
+
+  function setSizeFilter(val, el) {
+    currentSize = val;
+    el.parentNode.querySelectorAll('.size-tab').forEach(t => t.classList.remove('active'));
+    if (el) el.classList.add('active');
+    rLeads();
+  }
+
+  let currentAssignment = 'all';
+  function setAssignedFilter(val, el) {
+    currentAssignment = val;
+    el.parentNode.querySelectorAll('.size-tab').forEach(t => t.classList.remove('active'));
+    if (el) el.classList.add('active');
+    
+    // Toggle table headers visibility
+    const showAss = val === 'assigned';
+    if(document.getElementById('th-assignee')) document.getElementById('th-assignee').style.display = showAss ? 'table-cell' : 'none';
+    if(document.getElementById('th-ass-date')) document.getElementById('th-ass-date').style.display = showAss ? 'table-cell' : 'none';
+    
+    rLeads();
+  }
+
   function getFiltered() {
     return leads.filter(l => {
       const fm = filt === 'all' || (l.status && l.status.trim().toLowerCase() === filt);
       const dm = (l.domain || 'school') === currentDomain;
+      const zm = currentSize === 'all' || (l.size && l.size === currentSize);
+      
+      let am = true;
+      if (currentAssignment === 'assigned') {
+        am = !!l.assigned_id;
+      }
+      else if (currentAssignment === 'unassigned') am = !l.assigned_id;
+
       const q = sq.toLowerCase();
       const sm = !q || (l.school_name || '').toLowerCase().includes(q) || (l.address || '').toLowerCase().includes(q) || (l.phone || '').toLowerCase().includes(q);
-      return fm && dm && sm;
+      return fm && dm && zm && sm && am;
     });
   }
+
   function rLeads() {
     const tb = document.getElementById('leads-body');
+    if (!tb) return;
     const fl = getFiltered();
-
-    // Update count badge if exists
-    const badge = document.getElementById('leads-count-badge');
-    if (badge) badge.textContent = fl.length;
+    
+    if (document.getElementById('leads-count-badge')) document.getElementById('leads-count-badge').textContent = fl.length;
 
     if (!fl.length) {
-      tb.innerHTML = '<tr class="empty"><td colspan="8">No leads found. Run your n8n workflow or add manually!</td></tr>';
+      tb.innerHTML = `<tr class="empty"><td colspan="10">No ${currentAssignment === 'assigned' ? 'assigned ' : ''}leads found.</td></tr>`;
       return;
     }
     const bc = { new: 'bn', contacted: 'bc', interested: 'bi', proposal: 'bp', won: 'bw', lost: 'bl' };
@@ -4518,6 +5389,7 @@
       const m = team.find(t => t.id === l.assigned_id);
       const init = m ? m.name.split(' ').map(n => n[0]).join('').slice(0, 2) : '?';
       const pStr = (l.phone && l.phone.trim() && l.phone !== 'undefined' && l.phone !== 'null') ? l.phone : '—';
+      const assCell = (currentAssignment === 'assigned') ? `<td style="white-space:nowrap;"><div style="background:${m?.color}15; color:${m?.color}; border:1px solid ${m?.color}30; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700;">${m?.name || '—'}</div></td><td style="font-size:11px; color:var(--tx3);">${l.assigned_at ? new Date(l.assigned_at).toLocaleDateString() : '—'}</td>` : '';
       return `<tr><td><div class="sn">${l.school_name || '—'}</div><div class="sa">${l.address || ''}</div>${l.pitch ? `<div style="margin-top:6px;"><a class="wb-link" style="cursor:pointer;white-space:nowrap;" onclick="showPitch(${l.id})">💬 View Pitch</a></div>` : ''}</td><td><div style="font-size:12px;color:var(--tx2);white-space:nowrap;">${pStr}</div></td><td style="white-space:nowrap;">${websiteCell(l)}</td><td><div style="color:var(--a4);font-size:12.5px;">${l.rating || '—'} ⭐</div></td><td><div style="display:flex;align-items:center;gap:12px;"><div class="score-pill"><strong>${l.score || 0}</strong> /100</div><div style="font-size:14px;">${l.priority == '🔥 high' ? '🔥' : l.priority == '⚡ medium' ? '⚡' : '📋'}</div></div></td><td><select class="badge ${bc[curStatus] || 'bn'}" onchange="updStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;font-weight:700;">
           <option value="new" ${curStatus === 'new' ? 'selected' : ''}>🔵 New</option>
           <option value="contacted" ${curStatus === 'contacted' ? 'selected' : ''}>🟠 Contacted</option>
@@ -4525,7 +5397,7 @@
           <option value="proposal" ${curStatus === 'proposal' ? 'selected' : ''}>🟣 Proposal Sent</option>
           <option value="won" ${curStatus === 'won' ? 'selected' : ''}>🟢 Won</option>
           <option value="lost" ${curStatus === 'lost' ? 'selected' : ''}>🔴 Lost</option>
-        </select></td><td><div class="abts"><button class="ib view-details" onclick="openLeadPanel(${l.id})" title="Calls & Notes">📋 Details</button><button class="ib" onclick="editLead(${l.id})" title="Edit">✏️</button><button class="ib del" onclick="delLead(${l.id})" title="Delete">🗑️</button></div></td></tr>`;
+        </select></td>${assCell}<td><div class="abts"><button class="ib view-details" onclick="openLeadPanel(${l.id})" title="Calls & Notes">📋 Details</button><button class="ib" onclick="editLead(${l.id})" title="Edit">✏️</button><button class="ib del" onclick="delLead(${l.id})" title="Delete">🗑️</button></div></td></tr>`;
     }).join('');
   }
   function rPipe() {
@@ -4576,9 +5448,36 @@
               <div style="font-size:10px;color:var(--tx3);margin-top:2px;">${l}</div>
             </div>`).join('')}
         </div>
-        <button class="btn bp" style="width:100%;font-size:12px;" onclick="openAssignExisting(${m.id})">📋 Assign Leads</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn bp bsm" style="flex:1;font-size:11px;padding:10px 0;" onclick="openAssignExisting(${m.id})">📋 Assign Leads</button>
+          <button class="btn bg bsm" style="flex:1;font-size:11px;padding:10px 0;" onclick="viewTeamLeads(${m.id})">🔍 View Leads</button>
+        </div>
       </div>`;
     }).join('') + `<div style="background:var(--s1);border:1.5px dashed var(--bd);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;cursor:pointer;gap:8px;" onclick="showAdminPage('addsp',document.getElementById('nav-addsp'))"><div style="font-size:28px;opacity:0.2">+</div><div style="font-size:12px;color:var(--tx3)">Add Sales Person</div></div>`;
+  }
+  function viewTeamLeads(tid) {
+    const m = team.find(x => x.id === tid);
+    if(!m) return;
+    document.getElementById('team-leads-title').textContent = `Assigned to ${m.name}`;
+    const fl = leads.filter(l => l.assigned_id === tid);
+    fl.sort((a,b) => new Date(b.assigned_at || 0) - new Date(a.assigned_at || 0));
+    const tb = document.getElementById('team-leads-body');
+    if(!fl.length) {
+      tb.innerHTML = '<tr><td colspan="4" style="padding:40px; text-align:center; color:var(--tx3); font-size:13px; background:var(--s2); border-radius:12px; border:1px dashed var(--bd);">No leads assigned yet. Click "Assign Leads" to distribute prospects.</td></tr>';
+    } else {
+      tb.innerHTML = fl.map(l => `
+        <tr style="background:var(--s2);">
+          <td style="padding:14px 12px; border-radius:10px 0 0 10px;">
+            <div style="font-weight:700; font-size:13.5px; color:var(--tx);">${l.school_name}</div>
+            <div style="font-size:11px; color:var(--tx3); margin-top:2px;">${l.address || '—'}</div>
+          </td>
+          <td style="padding:14px 12px; font-size:12px; color:var(--tx2); text-transform:capitalize;">${l.domain || 'school'}</td>
+          <td style="padding:14px 12px;"><span class="badge ${ (l.status||'new').toLowerCase() === 'contacted' ? 'bc' : (l.status||'new').toLowerCase() === 'won' ? 'bw' : 'bn' }">${l.status || 'new'}</span></td>
+          <td style="padding:14px 12px; border-radius:0 10px 10px 0; font-size:11px; color:var(--tx3);">${l.assigned_at ? new Date(l.assigned_at).toLocaleDateString() : '—'}</td>
+        </tr>
+      `).join('');
+    }
+    openM('team-leads-ov');
   }
   function popAssign() { const s = document.getElementById('f-assign'); if (!s) return; s.innerHTML = '<option value="">Unassigned</option>' + team.map(m => `<option value="${m.id}">${m.name}</option>`).join(''); }
   async function rActivity() {
@@ -4587,13 +5486,13 @@
     try {
       const logs = await get('/activity', true);
       if (!logs.length) { el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--tx3);font-size:13px;">No team activity yet.</div>'; return; }
-      const outcomeMap = { 
-        interested: '<i data-lucide="check-circle" class="icon-sm"></i> Interested', 
-        callback: '<i data-lucide="rotate-cw" class="icon-sm"></i> Call Back', 
-        not_interested: '<i data-lucide="x-circle" class="icon-sm"></i> Not Interested', 
-        no_answer: '<i data-lucide="phone-off" class="icon-sm"></i> No Answer', 
-        closed: '<i data-lucide="target" class="icon-sm"></i> Closed', 
-        voicemail: '<i data-lucide="mic" class="icon-sm"></i> Voicemail' 
+      const outcomeMap = {
+        interested: '<i data-lucide="check-circle" class="icon-sm"></i> Interested',
+        callback: '<i data-lucide="rotate-cw" class="icon-sm"></i> Call Back',
+        not_interested: '<i data-lucide="x-circle" class="icon-sm"></i> Not Interested',
+        no_answer: '<i data-lucide="phone-off" class="icon-sm"></i> No Answer',
+        closed: '<i data-lucide="target" class="icon-sm"></i> Closed',
+        voicemail: '<i data-lucide="mic" class="icon-sm"></i> Voicemail'
       };
       el.innerHTML = logs.map(l => {
         const dt = new Date(l.created_at);
@@ -4601,15 +5500,15 @@
         const delActivity = `<button onclick="deleteActivity('${l.type}', ${l.id}, ${l.lead_id})" style="margin-left:auto; background:none; border:none; cursor:pointer; opacity:0.3;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3" title="Delete Activity"><i data-lucide="trash-2" class="icon-sm"></i></button>`;
         const statusColors = { new: 'rgba(91,106,247,0.15)', contacted: 'rgba(62,207,255,0.15)', interested: 'rgba(245,166,35,0.15)', proposal: 'rgba(160,80,255,0.15)', won: 'rgba(29,233,160,0.15)', lost: 'rgba(242,91,126,0.15)', qualified: 'rgba(29,233,160,0.15)', closed: 'rgba(29,233,160,0.15)' };
         const statusTextColors = { new: 'var(--acc)', contacted: 'var(--a5)', interested: 'var(--a4)', proposal: 'var(--purple)', won: 'var(--a3)', lost: 'var(--a2)', qualified: 'var(--a3)', closed: 'var(--a3)' };
-        const statusEmoji = { 
-          new: '<i data-lucide="circle" class="icon-sm" style="fill:var(--acc)"></i>', 
-          contacted: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a5)"></i>', 
-          interested: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a4)"></i>', 
-          proposal: '<i data-lucide="circle" class="icon-sm" style="fill:var(--purple)"></i>', 
-          won: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a3)"></i>', 
-          lost: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a2)"></i>', 
-          qualified: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a3)"></i>', 
-          closed: '<i data-lucide="target" class="icon-sm"></i>' 
+        const statusEmoji = {
+          new: '<i data-lucide="circle" class="icon-sm" style="fill:var(--acc)"></i>',
+          contacted: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a5)"></i>',
+          interested: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a4)"></i>',
+          proposal: '<i data-lucide="circle" class="icon-sm" style="fill:var(--purple)"></i>',
+          won: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a3)"></i>',
+          lost: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a2)"></i>',
+          qualified: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a3)"></i>',
+          closed: '<i data-lucide="target" class="icon-sm"></i>'
         };
         const status = l.lead_status || '';
         const statusBadge = status ? `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:${statusColors[status] || 'rgba(255,255,255,0.06)'};color:${statusTextColors[status] || 'var(--tx2)'};">${statusEmoji[status] || '●'} ${status.charAt(0).toUpperCase() + status.slice(1)}</span>` : '';
@@ -4816,6 +5715,7 @@
     document.getElementById('pkpi-warm').textContent = warmCount;
     document.getElementById('pkpi-won').textContent = wonCount;
 
+    let openedOne = false;
     board.innerHTML = stages.map(s => {
       const stageLeads = filteredLeads.filter(l => {
         let st = (l.status || 'new').trim().toLowerCase();
@@ -4850,8 +5750,11 @@
         cardsHtml = `<div class="kanban-empty-msg">Drop cards here</div>`;
       }
 
-      return `<div class="kanban-col" style="border-top: 3px solid ${s.c}" ondragover="allowDrop(event)" ondrop="drop(event, '${s.k}')" ondragenter="dragEnter(this)" ondragleave="dragLeave(this)">
-          <div class="kanban-hdr">
+      const isOpen = !openedOne && stageLeads.length > 0;
+      if (isOpen) openedOne = true;
+
+      return `<div class="kanban-col ${isOpen ? 'open' : ''}" style="--s-color:${s.c}; border-top: 3px solid ${s.c}" ondragover="allowDrop(event)" ondrop="drop(event, '${s.k}')" ondragenter="dragEnter(this)" ondragleave="dragLeave(this)">
+          <div class="kanban-hdr" onclick="if(window.innerWidth <= 480) this.parentElement.classList.toggle('open')">
             <div class="kanban-title-wrap">
               <div class="kanban-dot" style="color:${s.c}; background:${s.c}"></div>
               <div class="kanban-title">${s.l}</div>
@@ -5434,6 +6337,57 @@
   });
 </script>
 
+
+
+<script>
+  function toggleMSB(forceOpen = null) {
+    const sb = document.getElementById('main-sidebar');
+    const ov = document.getElementById('sb-overlay');
+    const isOpen = sb.classList.contains('open');
+    const toOpen = (forceOpen !== null) ? forceOpen : !isOpen;
+
+    if (toOpen) {
+      sb.classList.add('open');
+      ov.classList.add('active');
+      sb.style.display = 'flex';
+    } else {
+      sb.classList.remove('open');
+      ov.classList.remove('active');
+    }
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function handleMobileNav(page, el) {
+    if (currentUser.role === 'admin') {
+      showAdminPage(page, el);
+    } else {
+      const pMap = { dashboard: 'spdash', pipeline: 'pipeline', team: 'team' };
+      showSPPage(pMap[page] || page, el);
+    }
+    toggleMSB(false); // Force close
+  }
+</script>
+<div class="ov" id="team-leads-ov" onclick="closeM('team-leads-ov')">
+  <div class="modal wide" style="max-width:800px; padding:0; overflow:hidden;" onclick="event.stopPropagation()">
+    <div class="mh" style="padding:24px 28px; border-bottom:1.5px solid var(--bd); background:linear-gradient(to right, rgba(91,106,247,0.05), transparent);">
+      <div id="team-leads-title" style="font-family:'Clash Display'; font-size:20px; font-weight:700;">Assigned Leads</div>
+      <button class="close-modal" onclick="closeM('team-leads-ov')" style="background:var(--s3); border:1px solid var(--bd); width:32px; height:32px; border-radius:8px;">✕</button>
+    </div>
+    <div style="max-height:65vh; overflow-y:auto; padding:0 28px 28px;">
+      <table style="width:100%; border-collapse:separate; border-spacing:0 8px;">
+        <thead style="position:sticky; top:0; background:var(--s1); z-index:10;">
+          <tr style="text-align:left;">
+            <th style="padding:15px 12px; font-size:10px; color:var(--tx3); text-transform:uppercase; letter-spacing:1px; font-weight:800;">Lead Information</th>
+            <th style="padding:15px 12px; font-size:10px; color:var(--tx3); text-transform:uppercase; letter-spacing:1px; font-weight:800;">Sector</th>
+            <th style="padding:15px 12px; font-size:10px; color:var(--tx3); text-transform:uppercase; letter-spacing:1px; font-weight:800;">Status</th>
+            <th style="padding:15px 12px; font-size:10px; color:var(--tx3); text-transform:uppercase; letter-spacing:1px; font-weight:800;">Assigned On</th>
+          </tr>
+        </thead>
+        <tbody id="team-leads-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 </body>
 
 </html>

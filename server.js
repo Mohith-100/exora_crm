@@ -47,6 +47,7 @@ async function initDB() {
         deal_value NUMERIC DEFAULT 0,
         domain TEXT DEFAULT 'school',
         notes TEXT,
+        assigned_at TIMESTAMPTZ,
         created_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT unique_lead_name_addr UNIQUE (school_name, address),
         CONSTRAINT unique_lead_name_phone UNIQUE (school_name, phone)
@@ -171,6 +172,7 @@ async function initDB() {
       ALTER TABLE leads ADD COLUMN IF NOT EXISTS missing_services TEXT;
       ALTER TABLE leads ADD COLUMN IF NOT EXISTS sales_pitch    TEXT;
       ALTER TABLE leads ADD COLUMN IF NOT EXISTS domain         TEXT DEFAULT 'school';
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS size           TEXT DEFAULT 'small';
     `);
 
     // ── Domains table ──
@@ -392,13 +394,17 @@ app.patch('/api/score-config/:id', async (req, res) => {
 
 // ── LEADS ──
 app.get('/api/leads', async (req, res) => {
-  const { domain } = req.query;
+  const { domain, size } = req.query;
   try {
-    let q = 'SELECT * FROM leads';
+    let q = 'SELECT * FROM leads WHERE 1=1';
     let params = [];
     if (domain && domain !== 'all') {
-      q += ' WHERE domain = $1';
       params.push(domain);
+      q += ` AND domain = $${params.length}`;
+    }
+    if (size && size !== 'all') {
+      params.push(size);
+      q += ` AND size = $${params.length}`;
     }
     q += ' ORDER BY school_name ASC';
     const result = await pool.query(q, params);
@@ -525,7 +531,7 @@ app.post('/api/leads/assign', async (req, res) => {
   if (!lead_ids || !lead_ids.length) return res.status(400).json({ error: 'lead_ids required' });
   try {
     await pool.query(
-      `UPDATE leads SET assigned_id=$1 WHERE id = ANY($2::int[])`,
+      `UPDATE leads SET assigned_id=$1, assigned_at=NOW() WHERE id = ANY($2::int[])`,
       [team_id, lead_ids]
     );
     res.json({ success: true, updated: lead_ids.length });
@@ -585,17 +591,25 @@ app.post('/webhook/leads', async (req, res) => {
   try {
     const cleanedPhone = cleanPhone(phone);
     const base = calcBaseScore({ rating, reviews, phone: cleanedPhone, website, address });
+    
+    // Auto-tag big vs small
+    let size = 'small';
+    if (parseInt(reviews) > 500) size = 'big';
+    const bigNames = ['apollo', 'fortis', 'sparsh', 'manipal', 'cult.fit', 'gold\'s gym', 'lakme', 'naturals', 'dps', 'podar', 'tata', 'wipro'];
+    const lowerName = (school_name || '').toLowerCase();
+    if (bigNames.some(bn => lowerName.includes(bn))) size = 'big';
+
     const result = await pool.query(
-      `INSERT INTO leads (school_name, address, phone, website, rating, reviews, base_score, score, source, status, domain)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'n8n','new',$9)
+      `INSERT INTO leads (school_name, address, phone, website, rating, reviews, base_score, score, source, status, domain, size)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'n8n','new',$9,$10)
        ON CONFLICT DO NOTHING
        RETURNING *`,
-      [school_name || 'Unknown', address || '', cleanedPhone, website || '', rating || null, reviews || null, base, base, domain || global.lastN8nDomain || 'school']
+      [school_name || 'Unknown', address || '', cleanedPhone, website || '', rating || null, reviews || null, base, base, domain || global.lastN8nDomain || 'school', size]
     );
     if (!result.rows.length) {
       return res.json({ success: true, skipped: true, message: 'Duplicate lead, skipped.' });
     }
-    console.log('⚡ New lead from n8n:', school_name, '| base_score:', base);
+    console.log('⚡ New lead from n8n:', school_name, '| size:', size, '| base_score:', base);
     res.json({ success: true, lead: result.rows[0] });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
