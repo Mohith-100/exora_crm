@@ -130,6 +130,17 @@
       background: rgba(7, 5, 15, 0.45);
       backdrop-filter: blur(18px);
       border-bottom: 0.5px solid var(--border);
+      overflow: visible;
+    }
+
+    /* Large monitor fix */
+    @media (min-width: 1400px) {
+      #navbar {
+        padding: 18px 60px;
+      }
+      .nav-logo {
+        font-size: 18px !important;
+      }
     }
 
     .nav-logo {
@@ -139,10 +150,23 @@
       letter-spacing: 0px;
       word-spacing: -3px;
       text-shadow: 0 0 10px rgba(160, 80, 255, 0.4);
-      white-space: pre;
-      overflow: hidden;
-      clip-path: inset(0 100% 0 0);
-      animation: typing-mask 5s steps(15, end) infinite;
+      white-space: nowrap;
+      overflow: visible !important;
+      display: block;
+      width: auto;
+      min-width: max-content;
+    }
+
+    .typing-cursor::after {
+      content: '|';
+      animation: blink-cursor 0.8s infinite;
+      margin-left: 2px;
+      color: inherit;
+    }
+
+    @keyframes blink-cursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
     }
 
     @keyframes typing-mask {
@@ -461,14 +485,14 @@
       display: none;
       opacity: 0;
       transition: opacity 0.4s;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
-    #signup-canvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-    }
+
+
+
 
     .signup-overlay {
       position: relative;
@@ -511,18 +535,14 @@
     .logo {
       font-family: 'Press Start 2P', cursive;
       font-size: 11px;
-      margin-bottom: 24px;
-      display: inline-flex;
-      align-items: center;
-      letter-spacing: 0px;
-      word-spacing: -3px;
-      text-transform: uppercase;
       color: #a050ff;
-      text-shadow: 0 0 10px rgba(160, 80, 255, 0.4);
-      white-space: pre;
-      overflow: hidden;
-      clip-path: inset(0 100% 0 0);
-      animation: typing-mask 5s steps(15, end) infinite;
+      white-space: nowrap;
+      overflow: visible !important;
+      clip-path: none !important;
+      animation: none !important;
+      width: auto;
+      min-width: max-content;
+      display: block;
       padding-left: 2px;
     }
 
@@ -748,13 +768,34 @@
       background: var(--s1);
       border: 1.5px solid var(--bd);
       border-radius: 9px;
-      padding: 8px 13px;
+      padding: 8px 32px 8px 13px;
       color: var(--tx);
       font-size: 13px;
       outline: none;
       font-family: 'Cabinet Grotesk', sans-serif;
       width: 210px;
       transition: border-color 0.2s;
+    }
+
+    .search-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 8px;
+      cursor: pointer;
+      color: var(--tx3);
+      font-size: 14px;
+      display: none;
+      user-select: none;
+      font-weight: 800;
+    }
+
+    .search-clear:hover {
+      color: var(--tx);
     }
 
     .search:focus {
@@ -1024,15 +1065,16 @@
 
     .bell-dot {
       position: absolute;
-      top: 2px;
-      right: 2px;
+      top: -4px;
+      right: -4px;
       background: #f25b7e;
       color: white;
-      font-size: 8.5px;
-      font-weight: 900;
+      font-size: 10px;
+      font-weight: 800;
       border-radius: 50%;
-      width: 13px;
-      height: 13px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 4px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1040,8 +1082,9 @@
       transform: scale(0.5);
       transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       pointer-events: none;
-      box-shadow: 0 0 10px rgba(242, 91, 126, 0.4);
+      box-shadow: 0 0 12px rgba(242, 91, 126, 0.5);
       z-index: 10;
+      border: 2px solid var(--s2);
     }
 
     .bell-dot.active {
@@ -2028,7 +2071,7 @@
     /* SALESPERSON PORTAL */
     .sp-stats {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 13px;
       margin-bottom: 20px;
     }
@@ -2631,6 +2674,51 @@
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     }
 
+    .move-to-wrap { position: relative; margin-top: 12px; display: none; }
+    @media (max-width: 500px) { .move-to-wrap { display: block; } }
+    .move-to-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(91,106,247,0.1);
+      border: 1px solid rgba(91,106,247,0.3);
+      color: var(--acc);
+      border-radius: 20px;
+      font-size: 11px;
+      padding: 5px 12px;
+      cursor: pointer;
+    }
+    .move-menu {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      width: 170px;
+      background: #1a1e2e;
+      border: 1px solid #2e3250;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      display: none;
+      flex-direction: column;
+      padding: 6px;
+      margin-bottom: 10px;
+      z-index: 2000;
+    }
+    .move-menu.open { display: flex; }
+    .move-opt {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 6px;
+      color: var(--tx2);
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .move-opt:hover { background: rgba(255,255,255,0.06); color: var(--tx); }
+    .move-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+
     .topbar {
       display: flex;
       justify-content: space-between;
@@ -3002,18 +3090,23 @@
         padding-bottom: 40px !important;
         width: 100% !important;
         overflow-x: hidden !important;
+        height: auto !important;
+        overflow-y: visible !important;
       }
 
       .topbar {
         display: flex !important;
         flex-direction: row !important;
-        height: 64px !important;
-        padding: 0 15px !important;
+        flex-wrap: wrap !important;
+        height: auto !important;
+        min-height: 64px !important;
+        padding: 12px 15px !important;
         align-items: center !important;
         justify-content: space-between !important;
         background: var(--s1);
         border-bottom: 1px solid var(--bd);
         margin-bottom: 20px !important;
+        gap: 10px !important;
       }
       .tb-row-1 {
         display: contents !important;
@@ -3046,8 +3139,33 @@
         display: flex !important;
         align-items: center !important;
         gap: 8px !important;
+        flex-wrap: wrap;
+        justify-content: flex-end;
       }
-      .tb-right > *:not(.bell-btn):not(.btn.bp):not(#tb-add-lead):not(#sp-tb-add-lead) { display: none !important; }
+
+      /* On mobile, for Leads pages, allow search and all buttons to show */
+      .page-section .tb-right {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        margin-top: 5px;
+      }
+
+      .page-section .tb-right > * {
+        display: flex !important;
+      }
+
+      .page-section .search-wrap {
+        flex: 1;
+        min-width: 150px;
+      }
+
+      .page-section .search {
+        width: 100% !important;
+      }
+
+      .tb-right > *:not(.bell-btn):not(.btn.bp):not(#tb-add-lead):not(#sp-tb-add-lead):not(.search-wrap):not(.btn.bg) {
+        display: none !important;
+      }
       
       #tb-add-lead, #sp-tb-add-lead {
         background: var(--acc) !important;
@@ -3127,6 +3245,7 @@
         background: transparent !important;
         padding: 0 !important;
         overflow-x: hidden !important;
+        overflow-y: auto !important;
       }
       .kanban-col {
         width: 100% !important;
@@ -3136,7 +3255,7 @@
         border-top: none !important;
         padding: 0 !important;
         margin-bottom: 6px !important;
-        overflow: hidden !important;
+        overflow: visible !important;
         height: auto !important;
         border-bottom: 1px solid var(--bd) !important;
         border-left: 4px solid var(--s-color, #5b6af7) !important;
@@ -3263,6 +3382,7 @@
 
   <!-- HERO -->
   <section id="hero">
+    <canvas id="hero-stars-canvas" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.6;"></canvas>
     <canvas id="hero-canvas"></canvas>
     <div class="hero-content">
       <span class="hero-tag">Next-gen CRM Platform</span>
@@ -3275,13 +3395,15 @@
   </section>
 
   <div id="login-wrap">
-    <canvas id="signup-canvas"></canvas>
+    <canvas id="signup-stars-canvas" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.6;"></canvas>
+    <canvas id="signup-canvas" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
+
     <div class="signup-overlay">
       <div class="login-box">
         <button class="signup-close" onclick="closeSignup()">✕</button>
 
-        <h2 style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:#d0bfff;margin-bottom:6px;">
-          Welcome back</h2>
+        <h2 id="login-title" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#d0bfff;margin-bottom:12px;height:42px;line-height:1.2;display:block;">
+          LOGIN</h2>
         <p style="font-size:14px;color:rgba(208,191,255,0.45);margin-bottom:36px;">Sign in to access your CRM dashboard
         </p>
 
@@ -3356,7 +3478,7 @@
     <div class="ni" onclick="openM('wh-modal'); if(window.innerWidth<=480)toggleMSB(false)"><span class="ni-ic"><i
           data-lucide="link"></i></span>n8n Webhook</div>
     <div class="ni" id="nav-score-settings" onclick="showAdminPage('score',this)"><span class="ni-ic"><i
-          data-lucide="settings-2"></i></span>Score Settings
+          data-lucide="sliders"></i></span>Score Engine
     </div>
     <div class="ni" id="nav-score-run" onclick="runScoring(); if(window.innerWidth<=480)toggleMSB(false)">
       <span class="ni-ic"><i data-lucide="zap"></i></span>📊 Score Leads
@@ -3423,7 +3545,6 @@
       <div class="bell-btn" id="reminders-bell" onclick="toggleRemindersPanel()" title="Today's Reminders">
         <i data-lucide="bell"></i> <span class="bell-dot" id="bell-dot"></span>
       </div>
-      <input class="search" type="text" placeholder="🔍  Search schools..." oninput="doSearch(this.value)">
       <button class="btn bg" id="score-btn" onclick="runScoring()">📊 Score Leads</button>
       <button class="btn bp" id="tb-add-lead" onclick="openAddLead()">+ Add Lead</button>
     </div>
@@ -3526,10 +3647,15 @@
         <div class="page-title" id="leads-page-title">Leads</div>
       </div>
     </div>
-    <div class="tb-right">
-      <div class="bell-btn" onclick="toggleRemindersPanel()"><i data-lucide="bell"></i><span class="bell-dot"></span></div>
-      <button class="btn bp" id="tb-add-lead" onclick="openAddLead()">+ Add Lead</button>
-    </div>
+      <div class="tb-right">
+        <div class="search-wrap" style="margin-right:12px;">
+          <input class="search" type="text" placeholder="🔍 Search sector leads..." oninput="doSearch(this.value); this.nextElementSibling.style.display = this.value ? 'block' : 'none';" style="width:200px;">
+          <span class="search-clear" onclick="this.previousElementSibling.value=''; this.style.display='none'; doSearch('');">✕</span>
+        </div>
+        <button onclick="refreshBrands()" id="refresh-brands-btn" class="btn bg" style="font-size:12px; margin-right:10px;">🔍 Refresh Brands</button>
+        <div class="bell-btn" onclick="toggleRemindersPanel()"><i data-lucide="bell"></i><span class="bell-dot" id="bell-dot-leads"></span></div>
+        <button class="btn bp" id="tb-add-lead" onclick="openAddLead()">+ Add Lead</button>
+      </div>
   </div>
   <div class="card" style="margin-bottom:20px;">
     <div class="ch" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
@@ -3538,11 +3664,6 @@
         <div class="size-tab active" onclick="setSizeFilter('all', this)">All Size</div>
         <div class="size-tab" onclick="setSizeFilter('small', this)">Small Business</div>
         <div class="size-tab" onclick="setSizeFilter('big', this)">Big Brand</div>
-      </div>
-      <div class="size-tabs" style="background:rgba(91,106,247,0.08); border-color:rgba(91,106,247,0.15);">
-        <div class="size-tab active" onclick="setAssignedFilter('all', this)">All Leads</div>
-        <div class="size-tab" onclick="setAssignedFilter('assigned', this)">Assigned</div>
-        <div class="size-tab" onclick="setAssignedFilter('unassigned', this)">Unassigned</div>
       </div>
     </div>
     <div style="overflow-x:auto;">
@@ -3892,7 +4013,8 @@
     </div>
     <div class="tb-right">
       <button class="btn bg" onclick="showAdminPage('team',document.getElementById('nav-team'))">Skip</button>
-      <button class="btn bp" id="assign-submit-btn" onclick="submitAssignLeads()">✓ Submit Assignment</button>
+      <button class="btn bp" id="assign-all-btn" onclick="assignAllLeads()" style="margin-left: 10px; background: rgba(160,80,255,0.08); border: 1.5px solid rgba(160,80,255,0.3); color: var(--acc); box-shadow: 0 4px 15px rgba(160,80,255,0.1);">⚡ Assign All</button>
+      <button class="btn bp" id="assign-submit-btn" onclick="submitAssignLeads()" style="margin-left: 10px;">✓ Submit Assignment</button>
     </div>
   </div>
   <div class="alp-assignee" id="alp-assignee"></div>
@@ -3901,11 +4023,16 @@
     <span
       style="font-size: 11px; font-weight: 700; color: var(--tx3); text-transform: uppercase; letter-spacing: 0.5px;">Filter
       by Sector:</span>
-    <select id="alp-domain-filter" class="fi"
-      style="width: auto; height: 32px; padding: 0 10px; font-size: 12px; margin: 0; min-width: 180px;"
-      onchange="renderALLeads()">
-      <!-- Populated dynamically -->
-    </select>
+    <div class="sector-dropdown" style="margin: 0;">
+      <div class="sector-drop-btn" style="height: 32px; min-width: 180px; padding: 0 12px; font-size: 12px;" onclick="this.nextElementSibling.classList.toggle('open')">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span id="alp-sector-icon"></span>
+          <span id="alp-sector-label">All Sectors</span>
+        </div>
+        <i data-lucide="chevron-down" class="icon-sm" style="opacity:0.5;"></i>
+      </div>
+      <div class="sector-drop-content" id="alp-domain-ftabs"></div>
+    </div>
     <div class="size-tabs" style="height:32px; background:rgba(91,106,247,0.05); border-color:rgba(91,106,247,0.12);">
       <div class="size-tab active" style="padding:0 12px; font-size:10.5px;" onclick="setAL_AssignedFilter('all', this)">All Leads</div>
       <div class="size-tab" style="padding:0 12px; font-size:10.5px;" onclick="setAL_AssignedFilter('assigned', this)">Assigned</div>
@@ -3951,8 +4078,7 @@
       <div
         style="font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--tx3);text-transform:uppercase;margin-bottom:4px;">
         GAP BOOST RULES</div>
-      <div style="font-size:12px;color:var(--tx2);margin-bottom:16px;">Bonus points added when a gap is detected on
-        the school's website</div>
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:16px;">Bonus points added when a gap is detected on the leads' website</div>
       <div id="gap-config-list"></div>
     </div>
   </div>
@@ -3978,11 +4104,8 @@
       <div style="font-size:11.5px;color:var(--tx2);"><strong style="color:var(--tx);">ERP /
           Attendance</strong><br>Detects Fedena, Entab, MyClassboard, SchoolPad</div>
     </div>
-    <div
-      style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(91,106,247,0.15);font-size:11px;color:var(--tx3);">
-      ⚠️ <strong>Limitation:</strong> Only the school's public website is scanned. If a tool is used internally
-      (separate app/portal not embedded in the website), it won't be detected. Gap = "not found on website" not
-      "doesn't exist".
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(91,106,247,0.15);font-size:11px;color:var(--tx3);">
+      ⚠️ <strong>Limitation:</strong> Only the direct public website is scanned. If a tool is used internally (separate app/portal not embedded in the website), it won't be detected. Gap = "not found on website" not "doesn't exist".
     </div>
   </div>
 </div>
@@ -4047,9 +4170,8 @@
   <div class="tsec">
     <div class="tsec-head">
       <div class="tsec-title">Sales Representatives</div>
-      <button class="btn bp" onclick="showAdminPage('addsp')">Add Sales Person →</button>
     </div>
-    <div id="team-list"></div>
+    <div class="tgrid" id="team-list"></div>
   </div>
 </div>
 
@@ -4073,6 +4195,9 @@
       </div>
     </div>
     <div class="tb-right">
+      <div class="bell-btn" id="sp-reminders-bell" onclick="toggleRemindersPanel()" title="My Reminders Today">
+        <i data-lucide="bell"></i> <span class="bell-dot" id="sp-bell-dot"></span>
+      </div>
       <div class="srv-status srv-ok sp-badge active">● Active</div>
     </div>
   </div>
@@ -4100,6 +4225,12 @@
       <div class="sc-lbl">Won</div>
       <div class="sc-val" id="sp-s4">—</div>
       <div class="sc-sub">successfully won</div>
+    </div>
+    <div class="sc c5" style="background:rgba(242,91,126,0.08); border-color:rgba(242,91,126,0.2);">
+      <div class="sc-ic">🔔</div>
+      <div class="sc-lbl" style="color:var(--a2)">Reminders Today</div>
+      <div class="sc-val" id="sp-s5" style="color:var(--a2)">0</div>
+      <div class="sc-sub">due for follow-up</div>
     </div>
   </div>
 
@@ -4159,12 +4290,20 @@
       <div class="bell-btn" id="sp-reminders-bell" onclick="toggleRemindersPanel()" title="Today's Reminders">
         <i data-lucide="bell"></i> <span class="bell-dot" id="sp-bell-dot"></span>
       </div>
-      <input class="search" type="text" placeholder="🔍 Search leads..." oninput="spSearch(this.value)">
+      <div class="search-wrap">
+        <input class="search" type="text" placeholder="🔍 Search leads..." oninput="spSearch(this.value); this.nextElementSibling.style.display = this.value ? 'block' : 'none';">
+        <span class="search-clear" onclick="this.previousElementSibling.value=''; this.style.display='none'; spSearch('');">✕</span>
+      </div>
     </div>
   </div>
   <div class="card">
-    <div class="ch">
-      <div class="ct" id="sp-domain-table-title">School Leads</div>
+    <div class="ch" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div class="ct" id="sp-domain-table-title">Leads</div>
+      <div class="size-tabs">
+        <div class="size-tab active" onclick="setSizeFilter('all', this)">All Size</div>
+        <div class="size-tab" onclick="setSizeFilter('small', this)">Small Business</div>
+        <div class="size-tab" onclick="setSizeFilter('big', this)">Big Brand</div>
+      </div>
     </div>
     <div style="overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;">
@@ -4328,12 +4467,26 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const API = window.location.origin + '/api';
-  let leads = [], team = [], editId = null, filt = 'all', sq = '', currentDomain = 'school';
+  const API = (window.location.protocol === 'file:' || window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') ? 'http://localhost:3001/api' : window.location.origin + '/api';
+  let leads = [], team = [], editId = null, filt = 'all', sq = '', currentDomain = 'school', alpFilt = 'all';
   let currentUser = null, authToken = null;
   let spLeads = [], spFilt = 'all', spSq = '', pendingNewSP = null, alpSelectedIds = [];
   let domainCounts = {};
-  let domains = [{ id: 'school', label: 'Schools', icon: '🏫' }];
+  let domains = [{ id: 'school', label: 'Schools', icon: 'school' }];
+  let detectedBigBrands = [];
+  let brandStatsLoaded = false;
+
+  async function loadBrandStats() {
+    try {
+      const data = await get('/leads/brand-stats', true);
+      detectedBigBrands = data.bigBrands || [];
+      brandStatsLoaded = true;
+      console.log('Detected chains:', detectedBigBrands);
+    } catch(e) {
+      console.log('Brand stats failed:', e);
+      detectedBigBrands = [];
+    }
+  }
 
   // ── Website column helper ─────────────────────────────────
   function websiteCell(l) {
@@ -4361,12 +4514,24 @@
 
   function icon(val) {
     if (!val) return '';
-    if (val.length > 2) return `<i data-lucide="${val}"></i>`;
-    return val;
+    const eMap = {
+      '🏫': 'school', '🏥': 'hospital', '💪': 'dumbbell', '💻': 'monitor',
+      '🏭': 'factory', '✂️': 'scissors', '📋': 'clipboard', '🍽️': 'utensils',
+      '🛒': 'shopping-cart', '🎓': 'graduation-cap', '🎭': 'clapperboard', '🎬': 'clapperboard'
+    };
+    const mapped = eMap[val] || val;
+    if (mapped.length > 2) return `<i data-lucide="${mapped}"></i>`;
+    return mapped;
   }
-
   function reinitIcons() {
     if (window.lucide) lucide.createIcons();
+  }
+
+  function fd(d) {
+    if (!d) return '—';
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return '—';
+    return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   function renderSidebarDomains() {
@@ -4490,6 +4655,20 @@
     const targetTerm = (targetEl && targetEl.value.trim()) || 'customers';
     const typeTerm = (typeEl && typeEl.value.trim()) || 'business';
 
+    // Scroll to top
+    window.scrollTo(0, 0);
+    // Mobile: close sidebar
+    if (window.innerWidth <= 480) toggleMSB(false);
+
+    // Icon Map (Lucide names)
+    const iconMap = {
+      hospital: 'hospital', gym: 'dumbbell', school: 'school', it: 'monitor', restaurant: 'utensils',
+      hotel: 'hotel', pharmacy: 'pill', clinic: 'hospital', college: 'graduation-cap', factory: 'factory',
+      company: 'briefcase', manufacturing: 'factory', tech: 'monitor', software: 'code', salon: 'scissors',
+      theatre: 'clapperboard'
+    };
+    const iconName = iconMap[domainId] || 'clipboard';
+
     const btn = document.getElementById(btnId);
     btn.disabled = true;
     btn.innerHTML = '<span class="spin"></span> Generating...';
@@ -4505,21 +4684,16 @@
       // Scroll to top
       window.scrollTo(0, 0);
       // Mobile: close sidebar
-      if (window.innerWidth <= 480) toggleMSB(false);
 
-      // Icon Map
-      const iconMap = {
-        hospital: '🏥', gym: '💪', school: '🏫', it: '💻', restaurant: '🍽️',
-        hotel: '🏨', pharmacy: '💊', clinic: '🏥', college: '🎓', factory: '🏭',
-        company: '💼', manufacturing: '🏭', tech: '💻', software: '💻', salon: '✂️'
-      };
-      const icon = iconMap[domainId] || '📋';
+
+      // Icon Map (Lucide names)
+
 
       // 1. Create domain in DB
       const res = await post('/domains', {
         name: domainId,
         label: label + 's',
-        icon: icon,
+        icon: iconName,
         query: val,
         target_term: targetTerm,
         type_term: typeTerm,
@@ -4527,7 +4701,7 @@
       }, true);
 
       if (!res.exists) {
-        domains.push({ id: domainId, label: label + 's', icon: icon });
+        domains.push({ id: domainId, label: label + 's', icon: iconName });
         renderSidebarDomains();
       }
 
@@ -4548,6 +4722,7 @@
       setTimeout(async () => {
         if (currentUser.role === 'admin') await loadAdminData();
         else await loadSPData();
+        await loadBrandStats();
         toast(`✅ ${label}s leads are now available!`, 'success');
       }, 45000);
 
@@ -4755,6 +4930,7 @@
     document.getElementById('main-sidebar').style.display = 'flex';
 
     await loadDomains();
+    await loadBrandStats();
     renderStatusFilters();
 
     if (user.role === 'admin') {
@@ -4781,24 +4957,36 @@
         currentUser = me.user;
         document.getElementById('home-page').style.display = 'none';
         await bootApp();
+        checkTodayReminders();
       } catch (e) { clearAuth(); }
     }
   }
 
   // ── ADMIN DATA ──
   async function loadAdminData() {
+    document.getElementById('admin-main').style.display = 'block';
+
     try {
-      const apiBase = API.replace('/api', '');
-      document.getElementById('admin-main').style.display = 'block';
-      await fetch(apiBase + '/', { headers: { 'ngrok-skip-browser-warning': 'true' } });
+      await fetch(API + '/stats', {
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          'Authorization': 'Bearer ' + authToken
+        }
+      });
       document.getElementById('srv-badge').className = 'srv-status srv-ok';
       document.getElementById('srv-badge').textContent = '● Server OK';
-      [leads, team] = await Promise.all([get('/leads'), get('/team')]);
-      await renderAll();
     } catch (e) {
       document.getElementById('srv-badge').className = 'srv-status srv-err';
       document.getElementById('srv-badge').textContent = '● Server Offline';
       toast('⚠️ Backend offline — run: node server.js', 'error');
+      return;
+    }
+
+    try {
+      [leads, team] = await Promise.all([get('/leads'), get('/team')]);
+      await renderAll();
+    } catch (e) {
+      console.error('Data load error:', e);
     }
   }
 
@@ -4812,7 +5000,14 @@
     document.getElementById('admin-main').style.display = isDash ? 'block' : 'none';
 
     if (page === 'leads') {
+      if (param !== lastDomain) {
+        currentSize = 'all';
+        lastDomain = param;
+      }
       currentDomain = param;
+      updateHeaderCount();
+      syncFilterUI();
+      rLeads();
       renderSidebarDomains();
       document.getElementById('leads-page').classList.add('visible');
     } else if (page === 'pipeline') {
@@ -4825,6 +5020,7 @@
       document.getElementById('addsp-page').classList.add('visible');
     } else if (page === 'score') {
       document.getElementById('score-page').classList.add('visible');
+      loadScoreSettings();
     } else if (page === 'adminuser') {
       document.getElementById('adminuser-page').classList.add('visible');
     } else if (page === 'assignleads') {
@@ -4838,13 +5034,16 @@
     document.querySelectorAll('.ni:not(.dropdown-btn)').forEach(n => n.classList.remove('active'));
     if (el) el.classList.add('active');
 
-    const tsec = document.querySelector('.tsec');
+    document.querySelectorAll('.tsec').forEach(s => {
+      s.style.display = (page === 'team' || page === 'dashboard') ? '' : 'none';
+    });
     const stats = document.querySelector('.stats');
     const wbar = document.querySelector('.wbar');
     const acard = document.getElementById('adm-activity-card');
-    if (tsec) tsec.style.display = (page === 'team' || page === 'dashboard') ? '' : 'none';
     if (stats) stats.style.display = page === 'dashboard' ? '' : 'none';
     if (acard) acard.style.display = page === 'dashboard' ? '' : 'none';
+    
+    if (page === 'team') rTeam();
 
     if (page === 'leads') {
       rLeads();
@@ -4947,11 +5146,18 @@
     } catch (e) { toast('Error loading your leads: ' + e.message, 'error'); }
   }
 
-  function rSPStats() {
+  async function rSPStats() {
     document.getElementById('sp-s1').textContent = spLeads.length;
     document.getElementById('sp-s2').textContent = spLeads.filter(l => l.status === 'new').length;
     document.getElementById('sp-s3').textContent = spLeads.filter(l => ['contacted', 'interested', 'proposal'].includes(l.status)).length;
     document.getElementById('sp-s4').textContent = spLeads.filter(l => l.status === 'won').length;
+    
+    // Also update the reminders count for SP
+    try {
+      const rows = await get('/reminders/today', true);
+      const el = document.getElementById('sp-s5');
+      if (el) el.textContent = rows.length;
+    } catch(e) {}
   }
 
   function rSPActivity() {
@@ -4963,13 +5169,86 @@
 
   function getSpFiltered() {
     return spLeads.filter(l => {
-      const fm = spFilt === 'all' || l.status === spFilt;
-      const dm = (l.domain || 'school') === currentDomain;
-      const q = spSq.toLowerCase();
-      const sm = !q || (l.school_name || '').toLowerCase().includes(q) || (l.address || '').toLowerCase().includes(q);
-      return fm && dm && sm;
-    });
-  }
+
+    // 1. DOMAIN filter — must match current sector
+    const domainMatch = (() => {
+      const leadDom = String(l.domain || 'school')
+        .toLowerCase()
+        .trim()
+        .replace(/s$/, '');        // remove trailing 's'
+      
+      const curDom = String(currentDomain || 'school')
+        .toLowerCase()
+        .trim()
+        .replace(/s$/, '');        // remove trailing 's'
+      
+      return leadDom === curDom;
+    })();
+
+    // 2. STATUS filter
+    const statusMatch = spFilt === 'all' || l.status === spFilt;
+
+    // 3. SEARCH filter
+    const q = spSq.toLowerCase();
+    const searchMatch = !q 
+      || (l.school_name || '').toLowerCase().includes(q) 
+      || (l.address || '').toLowerCase().includes(q);
+
+    // 4. SIZE filter
+    const sizeMatch = (() => {
+      if (currentSize === 'all') return true;
+      const big = isBigBrand(l);
+      if (currentSize === 'big')   return big === true;
+      if (currentSize === 'small') return big === false;
+      return true;
+    })();
+
+    // 5. CHAIN filter
+    const chainMatch = (() => {
+      if (currentChain === 'all') return true;
+      const name = (l.school_name || '').toLowerCase();
+      const chainWords = ['group','pvt ltd','pvt. ltd','& co',
+        'international','global','national','india','holdings',
+        'chain','enterprises','corporation','corp','limited',
+        'ltd','network','academy','institute','management',
+        'solutions','services'];
+      const isChain = chainWords.some(w => name.includes(w));
+      return currentChain === 'chain' ? isChain : !isChain;
+    })();
+
+    // 6. DIGITAL PRESENCE filter
+    const digitalMatch = (() => {
+      if (currentDigital === 'all') return true;
+      const w = (l.website || '').trim();
+      const hasNoWeb = !w || w === 'undefined' || w === 'null';
+      if (currentDigital === 'none') return hasNoWeb;
+      if (currentDigital === 'strong') return !hasNoWeb && w.startsWith('https://');
+      if (currentDigital === 'basic') return !hasNoWeb && !w.startsWith('https://');
+      return true;
+    })();
+
+    // 7. TEMPERATURE filter
+    const tempMatch = (() => {
+      if (currentTemp === 'all') return true;
+      const score = parseInt(l.score) || 0;
+      const status = (l.status || '').toLowerCase();
+      const isHot = score >= 80 && ['interested','proposal','won'].includes(status);
+      const isWarm = score >= 60 && ['contacted','interested'].includes(status);
+      if (currentTemp === 'hot') return isHot;
+      if (currentTemp === 'warm') return isWarm && !isHot;
+      if (currentTemp === 'cold') return !isHot && !isWarm;
+      return true;
+    })();
+
+    return domainMatch 
+        && statusMatch 
+        && searchMatch 
+        && sizeMatch 
+        && chainMatch 
+        && digitalMatch 
+        && tempMatch;
+  });
+}
 
   function renderSPTable(tbodyId, leadsArray) {
     const tb = document.getElementById(tbodyId);
@@ -5000,11 +5279,17 @@
     renderSPTable('sp-leads-body', fl);
 
     const statusLeads = spLeads.filter(l => {
+      const getNorm = (s) => String(s || '').toLowerCase().trim().replace(/s$/, '').replace(/,$/, '');
+      const dm = getNorm(l.domain || 'school') === getNorm(currentDomain);
       const fm = spFilt === 'all' || l.status === spFilt;
-      const dm = (l.domain || 'school') === currentDomain;
+      const zm = currentSize === 'all' || getBrandSize(l) === currentSize;
+      const cm = currentChain === 'all' || getChainType(l) === currentChain;
+      const digiM = currentDigital === 'all' || getDigitalPresence(l) === currentDigital;
+      const tm = currentTemp === 'all' || getTemperature(l) === currentTemp;
       const q = spSq.toLowerCase();
       const sm = !q || (l.school_name || '').toLowerCase().includes(q) || (l.address || '').toLowerCase().includes(q);
-      return fm && dm && sm;
+      
+      return fm && dm && sm && zm && cm && digiM && tm;
     });
     renderSPTable('sp-status-leads-body', statusLeads);
   }
@@ -5030,9 +5315,15 @@
       document.getElementById('spdash-page').classList.add('visible');
     }
     else if (page === 'leads') {
-      document.getElementById('sp-leads-page').classList.add('visible');
       currentDomain = param;
+      document.getElementById('sp-leads-page').classList.add('visible');
+      if (param !== lastDomain) {
+        currentSize = 'all';
+        lastDomain = param;
+      }
       updateHeaderCount();
+      syncFilterUI();
+      rMyLeads();
     }
     else if (page === 'pipeline') {
       document.getElementById('pipeline-page').classList.add('visible');
@@ -5131,27 +5422,42 @@
     document.getElementById('assignleads-page').classList.add('visible');
     document.getElementById('alp-assignee').innerHTML = `<div style="font-size:24px;width:36px;height:36px;background:${sp.color}18;color:${sp.color};border:2px solid ${sp.color}30;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:13px;">${sp.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</div><div><strong>${sp.name}</strong> &nbsp;·&nbsp; ${sp.email} &nbsp;·&nbsp; ${sp.territory || '—'}</div>`;
 
-    const filter = document.getElementById('alp-domain-filter');
-    if (filter) {
-      const eMap = { 
-        school: '🏫', hospital: '🏥', gym: '💪', dumbbell: '💪', it: '💻', monitor: '💻', 
-        manufacturing: '🏭', factory: '🏭', salon: '✂️', scissors: '✂️', auditing: '📋', 
-        'clipboard-check': '📋', restaurant: '🍽️', 'utensils-crossed': '🍽️', 
-        supermarket: '🛒', 'shopping-cart': '🛒', college: '🎓', 'graduation-cap': '🎓',
-        company: '💼', hotel: '🏨', pharmacy: '💊', clinic: '🏥', tech: '💻', software: '💻' 
-      };
-      filter.innerHTML = '<option value="all">🌐 All Sectors</option>' +
-        domains.map(d => `<option value="${d.id}">${eMap[d.icon] || '📋'} ${d.label}</option>`).join('');
-      filter.value = 'all';
+    const ftabs = document.getElementById('alp-domain-ftabs');
+    if (ftabs) {
+      alpFilt = 'all';
+      let html = `<div class="sector-item active" onclick="setALF('all', this, 'globe', 'All Sectors')">
+          <div class="sector-item-left"><span>${icon('globe')}</span> All Sectors</div>
+        </div>`;
+      
+      domains.forEach(d => {
+        html += `<div class="sector-item" onclick="setALF('${d.id}', this, '${d.icon}', '${d.label}')">
+            <div class="sector-item-left"><span>${icon(d.icon)}</span> ${d.label}</div>
+          </div>`;
+      });
+      ftabs.innerHTML = html;
+      document.getElementById('alp-sector-icon').innerHTML = icon('globe');
+      document.getElementById('alp-sector-label').textContent = 'All Sectors';
+      reinitIcons();
     }
 
+    renderALLeads();
+  }
+
+  function setALF(f, el, ic, lbl) {
+    alpFilt = f;
+    document.querySelectorAll('#alp-domain-ftabs .sector-item').forEach(t => t.classList.remove('active'));
+    if (el) el.classList.add('active');
+    document.getElementById('alp-sector-icon').innerHTML = icon(ic);
+    document.getElementById('alp-sector-label').textContent = lbl;
+    document.getElementById('alp-domain-ftabs').classList.remove('open');
+    reinitIcons();
     renderALLeads();
   }
 
   function renderALLeads() {
     const sp = pendingNewSP;
     if (!sp) return;
-    const domainFilt = document.getElementById('alp-domain-filter')?.value || 'all';
+    const domainFilt = alpFilt;
 
     let allLeads = leads;
     
@@ -5171,8 +5477,7 @@
       ? allLeads.map(l => {
         const isSel = alpSelectedIds.includes(l.id);
         const assignedTo = l.assigned_id ? team.find(t => t.id === l.assigned_id) : null;
-        const dObj = l.assigned_at ? new Date(l.assigned_at) : null;
-        const dStr = (dObj && !isNaN(dObj.getTime())) ? dObj.toLocaleDateString() : 'N/A';
+        const dStr = fd(l.assigned_at);
         const assInfo = assignedTo ? `<div style="font-size:10.5px;color:${assignedTo.color};margin-top:4px;background:${assignedTo.color}10;padding:3px 8px;border-radius:4px;display:inline-block;border:1px solid ${assignedTo.color}20;">📅 ${assignedTo.name} · ${dStr}</div>` : '';
         const qBtn = (!l.assigned_id && sp) ? `<button class="btn bp" style="height:28px; padding:0 12px; font-size:11px; border-radius:6px; box-shadow:0 4px 12px var(--acc)30; white-space:nowrap;" onclick="quickAssign(${l.id}, event)">Assign Now</button>` : '';
         return `<div class="lead-cb-row ${isSel ? 'sel' : ''}" id="alp-r-${l.id}" onclick="toggleCB(${l.id})"><input type="checkbox" id="alp-cb-${l.id}" ${isSel ? 'checked' : ''} onclick="event.stopPropagation();toggleCB(${l.id})"><div style="flex:1"><div style="font-weight:700;font-size:13px;">${l.school_name || '—'}</div><div style="font-size:11.5px;color:var(--tx2);">${l.address || ''} ${l.phone ? '· ' + l.phone : ''}</div>${assInfo}</div><div style="display:flex; align-items:center; gap:12px;">${qBtn}<span class="badge ${bc[l.status] || 'bn'}">${l.status}</span></div></div>`;
@@ -5185,11 +5490,22 @@
     const idx = alpSelectedIds.indexOf(id);
     if (idx > -1) alpSelectedIds.splice(idx, 1);
     else alpSelectedIds.push(id);
-
     const cb = document.getElementById('alp-cb-' + id);
     const row = document.getElementById('alp-r-' + id);
     if (cb) cb.checked = alpSelectedIds.includes(id);
     if (row) row.classList.toggle('sel', alpSelectedIds.includes(id));
+  }  async function assignAllLeads() {
+    const sp = pendingNewSP; if (!sp) return;
+    const domainFilt = alpFilt;
+    let vis = leads.filter(l => !l.assigned_id);
+    if (domainFilt !== 'all') vis = vis.filter(l => (l.domain||'school') === domainFilt);
+    if (vis.length === 0) return toast('No unassigned leads here.', 'info');
+    const b = document.getElementById('assign-all-btn'); const oh = b.innerHTML; b.disabled = true; b.innerHTML = '<span class="spin"></span> Assigning...';
+    try {
+      const ids = vis.map(l => l.id); await post('/leads/assign', { lead_ids: ids, team_id: sp.id });
+      const now = new Date().toISOString(); leads.forEach(l => { if (ids.includes(l.id)) { l.assigned_id = sp.id; l.assigned_at = now; } });
+      toast(`✅ Assigned ${ids.length} leads to ${sp.name}!`, 'success'); renderALLeads();
+    } catch (e) { toast('Error: ' + e.message, 'error'); } finally { b.disabled = false; b.innerHTML = oh; }
   }
 
   async function quickAssign(id, ev) {
@@ -5323,7 +5639,51 @@
       console.error('rStats failed:', e);
     }
   }
-  let currentSize = 'all';
+  let currentSize = 'all', currentChain = 'all', currentDigital = 'all', currentTemp = 'all', lastDomain = null;
+  function isBigBrand(l) {
+    const r = parseFloat(l.rating) || 0;
+    const rev = parseInt(l.reviews) || 0;
+    const name = (l.school_name || '').toLowerCase().trim();
+
+    // Signal 1: Name matches a detected chain
+    const firstWord = name.split(' ')[0];
+    const firstTwoWords = name.split(' ').slice(0, 2).join(' ');
+
+    const isDetectedChain = detectedBigBrands.some(brand =>
+      firstWord === brand ||
+      firstTwoWords.startsWith(brand) ||
+      name.includes(brand)
+    );
+
+    // Signal 2: High rating
+    const isHighRating = r >= 4.7;
+
+    // Signal 3: Many reviews
+    const isManyReviews = rev >= 500;
+
+    return isDetectedChain || isHighRating || isManyReviews;
+  }
+
+  function getBrandSize(l) {
+    return isBigBrand(l) ? 'big' : 'small';
+  }
+  function getChainType(l) {
+    const bigNames = ['apollo', 'fortis', 'sparsh', 'manipal', 'cult.fit', 'gold\'s gym', 'lakme', 'naturals', 'dps', 'podar', 'tata', 'wipro'];
+    const lowerName = (l.school_name || '').toLowerCase();
+    if (bigNames.some(bn => lowerName.includes(bn))) return 'chain';
+    return 'independent';
+  }
+  function getDigitalPresence(l) {
+    const w = (l.website && l.website.trim() && l.website !== 'undefined' && l.website !== 'null') ? l.website : '';
+    if (w) return 'high';
+    return 'low';
+  }
+  function getTemperature(l) {
+    const s = parseInt(l.score) || 0;
+    if (s >= 75) return 'hot';
+    if (s >= 40) return 'warm';
+    return 'cold';
+  }
   let currentALAssignment = 'all';
   function setAL_AssignedFilter(v, el) {
     currentALAssignment = v;
@@ -5332,11 +5692,22 @@
     renderALLeads();
   }
 
+  function syncFilterUI() {
+    const target = currentSize || 'all';
+    document.querySelectorAll('.size-tabs').forEach(g => {
+      g.querySelectorAll('.size-tab').forEach(t => {
+        const onclick = t.getAttribute('onclick') || '';
+        const isActive = onclick.includes("setSizeFilter('" + target + "'");
+        t.classList.toggle('active', isActive);
+      });
+    });
+  }
+
   function setSizeFilter(val, el) {
     currentSize = val;
     el.parentNode.querySelectorAll('.size-tab').forEach(t => t.classList.remove('active'));
     if (el) el.classList.add('active');
-    rLeads();
+    rLeads(); rMyLeads();
   }
 
   let currentAssignment = 'all';
@@ -5354,22 +5725,85 @@
   }
 
   function getFiltered() {
-    return leads.filter(l => {
-      const fm = filt === 'all' || (l.status && l.status.trim().toLowerCase() === filt);
-      const dm = (l.domain || 'school') === currentDomain;
-      const zm = currentSize === 'all' || (l.size && l.size === currentSize);
-      
-      let am = true;
-      if (currentAssignment === 'assigned') {
-        am = !!l.assigned_id;
-      }
-      else if (currentAssignment === 'unassigned') am = !l.assigned_id;
+  return leads.filter(l => {
 
-      const q = sq.toLowerCase();
-      const sm = !q || (l.school_name || '').toLowerCase().includes(q) || (l.address || '').toLowerCase().includes(q) || (l.phone || '').toLowerCase().includes(q);
-      return fm && dm && zm && sm && am;
-    });
-  }
+    // 1. DOMAIN filter
+    const domainMatch = (l.domain || 'school') === currentDomain;
+
+    // 2. STATUS filter
+    const statusMatch = filt === 'all' 
+      || (l.status && l.status.trim().toLowerCase() === filt);
+
+    // 3. SEARCH filter
+    const q = sq.toLowerCase();
+    const searchMatch = !q 
+      || (l.school_name || '').toLowerCase().includes(q) 
+      || (l.address || '').toLowerCase().includes(q) 
+      || (l.phone || '').toLowerCase().includes(q);
+
+    // 4. SIZE filter
+    const sizeMatch = (() => {
+      if (currentSize === 'all') return true;
+      const big = isBigBrand(l);
+      if (currentSize === 'big')   return big === true;
+      if (currentSize === 'small') return big === false;
+      return true;
+    })();
+
+    // 5. CHAIN filter
+    const chainMatch = (() => {
+      if (currentChain === 'all') return true;
+      const name = (l.school_name || '').toLowerCase();
+      const chainWords = ['group','pvt ltd','pvt. ltd','& co',
+        'international','global','national','india','holdings',
+        'chain','enterprises','corporation','corp','limited',
+        'ltd','network','academy','institute','management',
+        'solutions','services'];
+      const isChain = chainWords.some(w => name.includes(w));
+      return currentChain === 'chain' ? isChain : !isChain;
+    })();
+
+    // 6. DIGITAL PRESENCE filter
+    const digitalMatch = (() => {
+      if (currentDigital === 'all') return true;
+      const w = (l.website || '').trim();
+      const hasNoWeb = !w || w === 'undefined' || w === 'null';
+      if (currentDigital === 'none') return hasNoWeb;
+      if (currentDigital === 'strong') return !hasNoWeb && w.startsWith('https://');
+      if (currentDigital === 'basic') return !hasNoWeb && !w.startsWith('https://');
+      return true;
+    })();
+
+    // 7. TEMPERATURE filter
+    const tempMatch = (() => {
+      if (currentTemp === 'all') return true;
+      const score = parseInt(l.score) || 0;
+      const status = (l.status || '').toLowerCase();
+      const isHot = score >= 80 && ['interested','proposal','won'].includes(status);
+      const isWarm = score >= 60 && ['contacted','interested'].includes(status);
+      if (currentTemp === 'hot') return isHot;
+      if (currentTemp === 'warm') return isWarm && !isHot;
+      if (currentTemp === 'cold') return !isHot && !isWarm;
+      return true;
+    })();
+
+    // 8. ASSIGNMENT filter
+    const assignMatch = (() => {
+      if (currentAssignment === 'assigned') return !!l.assigned_id;
+      if (currentAssignment === 'unassigned') return !l.assigned_id;
+      return true;
+    })();
+
+    return domainMatch 
+        && statusMatch 
+        && searchMatch 
+        && sizeMatch 
+        && chainMatch 
+        && digitalMatch 
+        && tempMatch
+        && assignMatch;
+  });
+}
 
   function rLeads() {
     const tb = document.getElementById('leads-body');
@@ -5389,7 +5823,7 @@
       const m = team.find(t => t.id === l.assigned_id);
       const init = m ? m.name.split(' ').map(n => n[0]).join('').slice(0, 2) : '?';
       const pStr = (l.phone && l.phone.trim() && l.phone !== 'undefined' && l.phone !== 'null') ? l.phone : '—';
-      const assCell = (currentAssignment === 'assigned') ? `<td style="white-space:nowrap;"><div style="background:${m?.color}15; color:${m?.color}; border:1px solid ${m?.color}30; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700;">${m?.name || '—'}</div></td><td style="font-size:11px; color:var(--tx3);">${l.assigned_at ? new Date(l.assigned_at).toLocaleDateString() : '—'}</td>` : '';
+      const assCell = (currentAssignment === 'assigned') ? `<td style="white-space:nowrap;"><div style="background:${m?.color}15; color:${m?.color}; border:1px solid ${m?.color}30; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700;">${m?.name || '—'}</div></td><td style="font-size:11px; color:var(--tx3);">${fd(l.assigned_at)}</td>` : '';
       return `<tr><td><div class="sn">${l.school_name || '—'}</div><div class="sa">${l.address || ''}</div>${l.pitch ? `<div style="margin-top:6px;"><a class="wb-link" style="cursor:pointer;white-space:nowrap;" onclick="showPitch(${l.id})">💬 View Pitch</a></div>` : ''}</td><td><div style="font-size:12px;color:var(--tx2);white-space:nowrap;">${pStr}</div></td><td style="white-space:nowrap;">${websiteCell(l)}</td><td><div style="color:var(--a4);font-size:12.5px;">${l.rating || '—'} ⭐</div></td><td><div style="display:flex;align-items:center;gap:12px;"><div class="score-pill"><strong>${l.score || 0}</strong> /100</div><div style="font-size:14px;">${l.priority == '🔥 high' ? '🔥' : l.priority == '⚡ medium' ? '⚡' : '📋'}</div></div></td><td><select class="badge ${bc[curStatus] || 'bn'}" onchange="updStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;font-weight:700;">
           <option value="new" ${curStatus === 'new' ? 'selected' : ''}>🔵 New</option>
           <option value="contacted" ${curStatus === 'contacted' ? 'selected' : ''}>🟠 Contacted</option>
@@ -5424,21 +5858,27 @@
       }).join('');
     }
   }
+
   function rTeam() {
     const g = document.getElementById('team-grid');
-    g.innerHTML = team.map(m => {
+    const list = document.getElementById('team-list');
+    const html = team.map(m => {
       const cnt = leads.filter(l => l.assigned_id === m.id).length;
       const q = leads.filter(l => l.assigned_id === m.id && l.status === 'qualified').length;
       const cl = leads.filter(l => l.assigned_id === m.id && l.status === 'closed').length;
-      const init = m.name.split(' ').map(n => n[0]).join('').slice(0, 2);
+      const mName = m.name || 'Unknown';
+      const mEmail = m.email || '';
+      const mColor = m.color || '#5b6af7';
+      const mRole = m.territory || m.role || '';
+      const init = mName.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2);
       return `<div style="position:relative; background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);padding:18px;">
         <button onclick="delTeam(${m.id})" style="position:absolute; top:12px; right:12px; background:none; border:none; cursor:pointer; opacity:0.3; font-size:14px;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3" title="Delete Team Member">🗑️</button>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-          <div style="width:44px;height:44px;border-radius:50%;background:${m.color}18;color:${m.color};border:2px solid ${m.color}30;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:14px;">${init}</div>
+          <div style="width:44px;height:44px;border-radius:50%;background:${mColor}18;color:${mColor};border:2px solid ${mColor}30;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:14px;">${init}</div>
           <div style="flex:1">
-            <div style="font-weight:700;font-size:14px;">${m.name}</div>
-            <div style="font-size:11.5px;color:var(--tx3);">${m.email}</div>
-            <div style="font-size:11px;color:var(--tx3);">📍 ${m.territory || m.role}</div>
+            <div style="font-weight:700;font-size:14px;text-transform:capitalize;">${mName}</div>
+            <div style="font-size:11.5px;color:var(--tx3);">${mEmail}</div>
+            <div style="font-size:11px;color:var(--tx3);">📍 ${mRole}</div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
@@ -5453,7 +5893,9 @@
           <button class="btn bg bsm" style="flex:1;font-size:11px;padding:10px 0;" onclick="viewTeamLeads(${m.id})">🔍 View Leads</button>
         </div>
       </div>`;
-    }).join('') + `<div style="background:var(--s1);border:1.5px dashed var(--bd);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;cursor:pointer;gap:8px;" onclick="showAdminPage('addsp',document.getElementById('nav-addsp'))"><div style="font-size:28px;opacity:0.2">+</div><div style="font-size:12px;color:var(--tx3)">Add Sales Person</div></div>`;
+    }).join('');
+    if (g) g.innerHTML = html;
+    if (list) list.innerHTML = html;
   }
   function viewTeamLeads(tid) {
     const m = team.find(x => x.id === tid);
@@ -5473,7 +5915,7 @@
           </td>
           <td style="padding:14px 12px; font-size:12px; color:var(--tx2); text-transform:capitalize;">${l.domain || 'school'}</td>
           <td style="padding:14px 12px;"><span class="badge ${ (l.status||'new').toLowerCase() === 'contacted' ? 'bc' : (l.status||'new').toLowerCase() === 'won' ? 'bw' : 'bn' }">${l.status || 'new'}</span></td>
-          <td style="padding:14px 12px; border-radius:0 10px 10px 0; font-size:11px; color:var(--tx3);">${l.assigned_at ? new Date(l.assigned_at).toLocaleDateString() : '—'}</td>
+          <td style="padding:14px 12px; border-radius:0 10px 10px 0; font-size:11px; color:var(--tx3);">${fd(l.assigned_at)}</td>
         </tr>
       `).join('');
     }
@@ -5727,7 +6169,22 @@
 
       let cardsHtml = stageLeads.map(l => {
         const pStr = (l.phone && l.phone.trim() && l.phone !== 'undefined' && l.phone !== 'null') ? l.phone : '—';
-        return `<div class="kc" draggable="true" ondragstart="drag(event, ${l.id})">
+        const isMob = window.innerWidth <= 500;
+        const dragAttr = isMob ? '' : `draggable="true" ondragstart="drag(event, ${l.id})"`;
+        const moveBtn = isMob ? `
+          <div class="move-to-wrap">
+            <button class="move-to-btn" onclick="event.stopPropagation(); toggleMoveDropdown(this, ${l.id})">Move to →</button>
+            <div class="move-menu" id="move-menu-${l.id}">
+              ${stages.filter(st => st.k !== s.k).map(st => `
+                <div class="move-opt" onclick="event.stopPropagation(); moveLeadToStage(${l.id}, '${st.k}', '${st.l}')">
+                  <span class="move-dot" style="background:${st.c}"></span>
+                  ${st.l}
+                </div>
+              `).join('')}
+            </div>
+          </div>` : '';
+
+        return `<div class="kc" ${dragAttr}>
             <div class="kc-top">
               <div class="kc-name">${l.school_name || 'Unnamed school'}</div>
               <div class="kc-tag">${(domains.find(d => d.id === l.domain) || { label: 'Lead' }).label.replace(/s$/, '')}</div>
@@ -5743,6 +6200,7 @@
                 ${currentUser.role === 'admin' ? `<button class="kc-btn" onclick="delLead(${l.id})" title="Delete" style="color:var(--a2);">🗑️</button>` : ''}
               </div>
             </div>
+            ${moveBtn}
           </div>`;
       }).join('');
 
@@ -5779,13 +6237,37 @@
     const id = ev.dataTransfer.getData("leadId");
     const cols = document.querySelectorAll('.kanban-col');
     cols.forEach(c => c.classList.remove('drag-over'));
-
     try {
       await updStatus(id, status);
     } catch (e) {
       toast('<i data-lucide="x-circle" class="icon-sm"></i> Move failed: ' + e.message, 'error');
     }
   }
+
+  function toggleMoveDropdown(btn, id) {
+    const el = document.getElementById('move-menu-' + id);
+    if (!el) return;
+    const wasOpen = el.classList.contains('open');
+    document.querySelectorAll('.move-menu').forEach(m => m.classList.remove('open'));
+    if (!wasOpen) el.classList.add('open');
+  }
+
+  async function moveLeadToStage(id, stage, label) {
+    document.querySelectorAll('.move-menu').forEach(m => m.classList.remove('open'));
+    try {
+      await updStatus(id, stage);
+      toast('✅ Moved to ' + label, 'success');
+      loadPipeline();
+    } catch (e) {
+      toast('❌ Move failed: ' + e.message, 'error');
+    }
+  }
+
+  window.addEventListener('click', e => {
+    if (!e.target.closest('.move-to-wrap')) {
+      document.querySelectorAll('.move-menu').forEach(m => m.classList.remove('open'));
+    }
+  });
 
   async function runPipeline() {
     const q = document.getElementById('pipe-query').value.trim();
@@ -5795,7 +6277,7 @@
     btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Running...';
     log.style.display = 'block'; log.innerHTML = `⏳ Scraping Google for: <b>${q}</b>...`;
     try {
-      const res = await post('/trigger-all', { query: q });
+      const res = await post('/trigger-all', { query: q, domain: currentDomain });
       log.innerHTML += `<br><i data-lucide="check-circle" class="icon-sm"></i> Found & Scraped <b>${res.pipeline.scraped}</b> leads.`;
       log.innerHTML += `<br><i data-lucide="clock" class="icon-sm"></i> Fetching websites, analyzing gaps & scoring...`;
       log.innerHTML += `<br><i data-lucide="check-circle" class="icon-sm"></i> Analyzed & Scored <b>${res.pipeline.scored}</b> leads. AI Pitches generated.`;
@@ -5862,7 +6344,7 @@
         + '<div style="font-size:12.5px;font-weight:600;color:var(--tx);">' + label + '</div>'
         + '</div>'
         + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
-        + '<input type="number" min="0" max="50" value="' + r.points + '" id="cfg-pts-' + r.id + '" style="width:54px;background:var(--s2);border:1.5px solid var(--bd);border-radius:6px;padding:5px 7px;color:var(--tx);font-size:12px;text-align:center;outline:none;" onchange="saveScoreRule(' + r.id + ')" title="Points">'
+        + '<input type="number" min="0" max="1000" value="' + r.points + '" id="cfg-pts-' + r.id + '" style="width:54px;background:var(--s2);border:1.5px solid var(--bd);border-radius:var(--r);padding:5px 7px;color:var(--tx);font-size:12.5px;text-align:center;outline:none;font-weight:700;" onchange="saveScoreRule(' + r.id + ')" title="Points">'
         + '<span style="font-size:10px;color:var(--tx3);">pts</span>'
         + '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11.5px;color:var(--tx2);">'
         + '<input type="checkbox" id="cfg-en-' + r.id + '" ' + (r.enabled ? 'checked' : '') + ' onchange="saveScoreRule(' + r.id + ')" style="accent-color:var(--acc);width:14px;height:14px;">'
@@ -6015,6 +6497,7 @@
       document.getElementById('lp-followup').value = '';
       toast('<i data-lucide="check-circle" class="icon-sm"></i> Call logged successfully!', 'success');
       await loadCallHistory();
+      checkTodayReminders();
       switchLPTab('history');
     } catch (e) { toast('Error logging call: ' + e.message, 'error'); }
     btn.disabled = false; btn.innerHTML = '<i data-lucide="phone"></i> Save Call Log';
@@ -6118,6 +6601,7 @@
       document.getElementById('lp-remind-note').value = '';
       toast('<i data-lucide="bell" class="icon-sm"></i> Reminder set!', 'success');
       await loadReminders();
+      checkTodayReminders();
     } catch (e) { toast('Error saving reminder: ' + e.message, 'error'); }
     btn.disabled = false; btn.innerHTML = '<i data-lucide="bell"></i> Save Reminder';
   }
@@ -6152,14 +6636,11 @@
 
   async function checkTodayReminders() {
     try {
-      const rows = await fetch(API + '/reminders/today').then(r => r.json());
-      const dots = ['bell-dot', 'sp-bell-dot', 'sp-prospects-bell-dot'];
-      dots.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.classList.toggle('active', rows.length > 0);
-          el.textContent = rows.length > 0 ? rows.length : '';
-        }
+      const rows = await get('/reminders/today', true);
+      const count = rows.length;
+      document.querySelectorAll('.bell-dot').forEach(el => {
+        el.classList.toggle('active', count > 0);
+        el.textContent = count > 0 ? count : '';
       });
     } catch (e) { }
   }
@@ -6168,7 +6649,7 @@
     const container = document.getElementById('today-rem-list');
     container.innerHTML = '<div class="lp-loading"><span class="spin"></span>&nbsp; Loading...</div>';
     try {
-      const rows = await fetch(API + '/reminders/today').then(r => r.json());
+      const rows = await get('/reminders/today', true);
       if (!rows.length) {
         container.innerHTML = '<div class="lp-empty">☕ No pending reminders for today.</div>';
         return;
@@ -6294,9 +6775,64 @@
     return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
   }
 
+  function createStars(canvas, count = 80) {
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    let raf;
+
+    function resize() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      init();
+    }
+
+    function init() {
+      stars = [];
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 1.5 + 0.5,
+          vx: (Math.random() - 0.5) * 1.2, // Drifting "a bit fast"
+          vy: (Math.random() - 0.5) * 1.2,
+          opacity: Math.random()
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.x += s.vx;
+        s.y += s.vy;
+        if (s.x < 0) s.x = canvas.width;
+        if (s.x > canvas.width) s.x = 0;
+        if (s.y < 0) s.y = canvas.height;
+        if (s.y > canvas.height) s.y = 0;
+        
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(160, 80, 255, ${s.opacity * 0.5})`;
+        ctx.fill();
+        // subtle twinkle
+        s.opacity += (Math.random() - 0.5) * 0.05;
+        if (s.opacity < 0.2) s.opacity = 0.2;
+        if (s.opacity > 0.8) s.opacity = 0.8;
+      });
+      raf = requestAnimationFrame(draw);
+    }
+
+    resize();
+    draw();
+    window.addEventListener('resize', resize);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
+  }
+
   // ── LANDING CONTROLS ──
   let heroStop = createVortex(document.getElementById('hero-canvas'), { scale: 1.5 });
+  let heroStarsStop = createStars(document.getElementById('hero-stars-canvas'), 120);
   let signupStop = null;
+  let signupStarsStop = null;
 
   function openMenu(section) {
     const m = document.getElementById('mega-menu');
@@ -6319,12 +6855,27 @@
     const sp = document.getElementById('login-wrap');
     sp.style.display = 'flex';
     requestAnimationFrame(() => sp.style.opacity = '1');
+    if (heroStop) { heroStop(); heroStop = null; }
+    if (heroStarsStop) { heroStarsStop(); heroStarsStop = null; }
     if (!signupStop) signupStop = createVortex(document.getElementById('signup-canvas'), { scale: 1.8, rays: 26 });
+    if (!signupStarsStop) signupStarsStop = createStars(document.getElementById('signup-stars-canvas'), 100);
+    
+    // Typing animation for Login
+    const loginTitle = document.getElementById('login-title');
+    if (loginTitle) {
+      runTypewriter(loginTitle, "LOGIN", 100);
+    }
   }
   function closeSignup() {
     const sp = document.getElementById('login-wrap');
     sp.style.opacity = '0';
-    setTimeout(() => { sp.style.display = 'none'; }, 400);
+    setTimeout(() => { 
+      sp.style.display = 'none'; 
+      if (signupStop) { signupStop(); signupStop = null; }
+      if (signupStarsStop) { signupStarsStop(); signupStarsStop = null; }
+      if (!heroStop) heroStop = createVortex(document.getElementById('hero-canvas'), { scale: 1.5 });
+      if (!heroStarsStop) heroStarsStop = createStars(document.getElementById('hero-stars-canvas'), 120);
+    }, 400);
   }
   // Close dropdowns on outside click
   window.addEventListener('click', e => {
@@ -6335,6 +6886,26 @@
       document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
     }
   });
+  async function refreshBrands() {
+    const btn = document.getElementById('refresh-brands-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span> Detecting...';
+    }
+    await loadBrandStats();
+    rLeads();
+    rMyLeads();
+    toast(`✅ Detected ${detectedBigBrands.length} chain brands!`, 'success');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '🔍 Refresh Brands';
+    }
+  }
+
+  async function showDetectedBrands() {
+    await loadBrandStats();
+    toast(`🏢 Detected chains: ${detectedBigBrands.slice(0, 5).join(', ')} ... and ${detectedBigBrands.length - 5} more`, 'success');
+  }
 </script>
 
 
@@ -6388,6 +6959,45 @@
     </div>
   </div>
 </div>
+
+<script>
+  function runTypewriter(el, text, speed) {
+    if (el.dataset.typing === "true") return;
+    el.dataset.typing = "true";
+    
+    const startTyping = () => {
+      let i = 0;
+      el.textContent = "";
+      el.classList.add("typing-cursor");
+      const timer = setInterval(() => {
+        if (i < text.length) {
+          el.append(text.charAt(i));
+          i++;
+        } else {
+          clearInterval(timer);
+          el.classList.remove("typing-cursor");
+          setTimeout(startTyping, 2000);
+        }
+      }, speed);
+    };
+    startTyping();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Automatically target all branding elements
+    const targets = [
+      { selector: '.nav-logo', text: "EXORA LEADFORGE" },
+      { selector: '.logo', text: "EXORA LEADFORGE" },
+      { selector: '#login-title', text: "LOGIN" }
+    ];
+
+    targets.forEach(target => {
+      document.querySelectorAll(target.selector).forEach(el => {
+        runTypewriter(el, target.text, 100);
+      });
+    });
+  });
+</script>
 </body>
 
 </html>

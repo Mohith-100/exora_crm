@@ -263,6 +263,17 @@ function requireAuth(roles = []) {
   };
 }
 
+// ── ROOT & HEALTH ──
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'LeadForge server running'
+  });
+});
+app.get('/api/', (req, res) => {
+  res.json({ status: 'ok', message: 'LeadForge server running' });
+});
+
 // ── AUTH ROUTES ──
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
@@ -359,6 +370,34 @@ function cleanPhone(raw) {
   // Filter out literal garbage strings
   if (/^(undefined|null|none|nan|#ERROR!|#N\/A|#VALUE!|#REF!|#NAME\?|#DIV\/0!|#NULL!)$/i.test(s)) return '';
   return s;
+}
+
+function detectDomain(name, existingDomain) {
+  const n = (name || '').toLowerCase();
+
+  if (n.includes('hospital') || n.includes('clinic') ||
+    n.includes('medical') || n.includes('surgical') ||
+    n.includes('diagnostic') || n.includes('fortis') ||
+    n.includes('apollo') || n.includes('manipal') ||
+    n.includes('narayana'))
+    return 'hospital';
+
+  if (n.includes('gym') || n.includes('fitness') ||
+    n.includes('crossfit') || n.includes('workout') ||
+    n.includes('cult fit') || n.includes('bodybuilding'))
+    return 'gym';
+
+  if (n.includes('restaurant') || n.includes('cafe') ||
+    n.includes('dhaba') || n.includes('eatery') ||
+    n.includes('kitchen') || n.includes('bistro'))
+    return 'restaurant';
+
+  if (n.includes('software') || n.includes('technologies') ||
+    n.includes('solutions') || n.includes('systems') ||
+    n.includes('infosys'))
+    return 'it';
+
+  return existingDomain || 'school';
 }
 function calcBaseScore({ rating, reviews, phone, website, address }) {
   let score = 0;
@@ -463,6 +502,56 @@ app.delete('/api/domains/:name', requireAuth(['admin']), async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+app.get('/api/leads/brand-stats', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+       LOWER(SPLIT_PART(school_name, ' ', 1)) as brand_token,
+       LOWER(SPLIT_PART(school_name, ' ', 2)) as brand_token2,
+       COUNT(*) as location_count,
+       AVG(CAST(rating AS FLOAT)) as avg_rating,
+       SUM(COALESCE(reviews, 0)) as total_reviews,
+       domain
+      FROM leads
+      GROUP BY 
+       LOWER(SPLIT_PART(school_name, ' ', 1)),
+       LOWER(SPLIT_PART(school_name, ' ', 2)),
+       domain
+      ORDER BY location_count DESC;
+    `);
+
+    // A brand is classified as "Big Brand" if:
+    // - location_count >= 3 (appears 3+ times = chain)
+    // - OR avg_rating >= 4.7
+    // - OR total_reviews >= 500
+    const bigBrands = new Set();
+    result.rows.forEach(row => {
+      const isChain = parseInt(row.location_count) >= 3;
+      const isHighRated = parseFloat(row.avg_rating) >= 4.7;
+      const isBigVolume = parseInt(row.total_reviews) >= 500;
+
+      if (isChain || isHighRated || isBigVolume) {
+        if (row.brand_token) bigBrands.add(row.brand_token);
+        // Also add the combined first two words if it's a multi-word brand
+        if (row.brand_token && row.brand_token2) {
+          bigBrands.add(`${row.brand_token} ${row.brand_token2}`);
+        }
+      }
+    });
+
+    res.json({
+      bigBrands: Array.from(bigBrands),
+      threshold: {
+        minLocations: 3,
+        minRating: 4.7,
+        minReviews: 500
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/leads/mine', requireAuth(['salesperson']), async (req, res) => {
   try {
     const teamId = req.user.team_id;
@@ -475,14 +564,15 @@ app.get('/api/leads/mine', requireAuth(['salesperson']), async (req, res) => {
 });
 
 app.post('/api/leads', async (req, res) => {
-  const { school_name, address, phone, website, rating, reviews, source, status, assigned_id, notes, deal_value } = req.body;
+  const { school_name, address, phone, website, rating, reviews, source, status, assigned_id, notes, deal_value, domain } = req.body;
   try {
     const cleanedPhone = cleanPhone(phone);
+    const finalDomain = detectDomain(school_name, domain);
     const base = calcBaseScore({ rating, reviews, phone: cleanedPhone, website, address });
     const result = await pool.query(
-      `INSERT INTO leads (school_name, address, phone, website, rating, reviews, base_score, score, source, status, assigned_id, notes, deal_value)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
-      [school_name, address, cleanedPhone, website, rating || null, reviews || null, base, base, source || 'manual', status || 'new', assigned_id || null, notes || '', deal_value || 0]
+      `INSERT INTO leads (school_name, address, phone, website, rating, reviews, base_score, score, source, status, assigned_id, notes, deal_value, domain)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
+      [school_name, address, cleanedPhone, website, rating || null, reviews || null, base, base, source || 'manual', status || 'new', assigned_id || null, notes || '', deal_value || 0, finalDomain]
     );
     res.json(result.rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -591,7 +681,7 @@ app.post('/webhook/leads', async (req, res) => {
   try {
     const cleanedPhone = cleanPhone(phone);
     const base = calcBaseScore({ rating, reviews, phone: cleanedPhone, website, address });
-    
+
     // Auto-tag big vs small
     let size = 'small';
     if (parseInt(reviews) > 500) size = 'big';
@@ -599,12 +689,14 @@ app.post('/webhook/leads', async (req, res) => {
     const lowerName = (school_name || '').toLowerCase();
     if (bigNames.some(bn => lowerName.includes(bn))) size = 'big';
 
+    const finalDomain = detectDomain(school_name, domain || global.lastN8nDomain || 'school');
+
     const result = await pool.query(
       `INSERT INTO leads (school_name, address, phone, website, rating, reviews, base_score, score, source, status, domain, size)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'n8n','new',$9,$10)
        ON CONFLICT DO NOTHING
        RETURNING *`,
-      [school_name || 'Unknown', address || '', cleanedPhone, website || '', rating || null, reviews || null, base, base, domain || global.lastN8nDomain || 'school', size]
+      [school_name || 'Unknown', address || '', cleanedPhone, website || '', rating || null, reviews || null, base, base, finalDomain, size]
     );
     if (!result.rows.length) {
       return res.json({ success: true, skipped: true, message: 'Duplicate lead, skipped.' });
@@ -760,27 +852,40 @@ app.post('/api/reminders', async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
-app.get('/api/reminders/today', async (req, res) => {
+
+app.get('/api/reminders/today', async (req, res, next) => {
+  // Allow n8n bypass if coming via ngrok with explicit header (or you can add a secret key check)
+  if (req.headers['ngrok-skip-browser-warning'] === 'true') {
+    req.user = { role: 'admin' };
+    return next();
+  }
+  requireAuth(['admin', 'salesperson'])(req, res, next);
+}, async (req, res) => {
   try {
+    let where = `WHERE DATE(reminders.remind_at) <= CURRENT_DATE AND (reminders.status IS NULL OR reminders.status = 'pending')`;
+    let params = [];
+    if (req.user && req.user.role === 'salesperson') {
+      params.push(req.user.team_id);
+      where += ` AND leads.assigned_id = $${params.length}`;
+    }
     const result = await pool.query(`
-      SELECT 
-        reminders.*,
-        leads.school_name,
-        leads.phone,
-        assigned_team.email AS rep_email,
-        assigned_team.name AS rep_name,
-        creator_team.email AS created_by_email
-      FROM reminders
-      LEFT JOIN leads ON reminders.lead_id = leads.id
-      LEFT JOIN team assigned_team ON leads.assigned_id = assigned_team.id
-      LEFT JOIN team creator_team ON reminders.created_by = creator_team.name
-      WHERE DATE(reminders.remind_at) = CURRENT_DATE
-      AND reminders.status = 'pending'
-      ORDER BY reminders.remind_at ASC
-    `);
+      SELECT * FROM (
+        SELECT DISTINCT ON (leads.school_name, DATE_TRUNC('minute', reminders.remind_at), reminders.message)
+               reminders.*, leads.school_name, leads.phone,
+               team.email AS rep_email, team.name AS rep_name,
+               reminders.message AS note
+        FROM reminders
+        LEFT JOIN leads ON reminders.lead_id = leads.id
+        LEFT JOIN team ON leads.assigned_id = team.id
+        ${where}
+        ORDER BY leads.school_name, DATE_TRUNC('minute', reminders.remind_at), reminders.message, reminders.id ASC
+      ) t
+      ORDER BY remind_at ASC
+    `, params);
     res.json(result.rows);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
 app.get('/api/reminders/upcoming', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -952,7 +1057,12 @@ app.get('/api/stats', async (req, res) => {
       pool.query('SELECT priority, COUNT(*) FROM leads WHERE priority IS NOT NULL GROUP BY priority'),
       pool.query('SELECT AVG(score)::numeric(5,1) as avg_score FROM leads WHERE score > 0'),
       pool.query("SELECT COALESCE(domain, 'school') as domain, COUNT(*) FROM leads GROUP BY domain"),
-      pool.query("SELECT COUNT(*) FROM reminders WHERE DATE(remind_at) = CURRENT_DATE AND status = 'pending'")
+      pool.query(`
+        SELECT COUNT(*) FROM (
+          SELECT DISTINCT lead_id, DATE_TRUNC('minute', remind_at), message FROM reminders 
+          WHERE DATE(remind_at) <= CURRENT_DATE AND (status IS NULL OR status = 'pending')
+        ) t
+      `)
     ]);
     res.json({
       total: parseInt(total.rows[0].count),
