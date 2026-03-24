@@ -104,6 +104,15 @@ async function initDB() {
         created_by  TEXT NOT NULL DEFAULT 'Unknown',
         created_at  TIMESTAMPTZ DEFAULT NOW()
       );
+      CREATE TABLE IF NOT EXISTS kanbn_assignments (
+        id SERIAL PRIMARY KEY,
+        board_public_id TEXT NOT NULL,
+        board_name TEXT NOT NULL,
+        developer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        assigned_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        CONSTRAINT unique_board_dev UNIQUE (board_public_id, developer_id)
+      );
     `);
 
     // ── Score config table ──
@@ -325,18 +334,18 @@ app.put('/api/auth/update', requireAuth(), async (req, res) => {
 });
 
 app.post('/api/auth/register', requireAuth(['admin']), async (req, res) => {
-  const { name, email, password, phone, territory, color } = req.body;
+  const { name, email, password, phone, territory, color, role } = req.body;
   if (!name || !email || !password) return res.status(400).json({ error: 'Name, email, password required' });
   try {
     const hash = await bcrypt.hash(password, 10);
     const userResult = await pool.query(
-      `INSERT INTO users (name, email, password_hash, role, phone, territory) VALUES ($1,$2,$3,'salesperson',$4,$5) RETURNING *`,
-      [name, email.toLowerCase().trim(), hash, phone || '', territory || '']
+      `INSERT INTO users (name, email, password_hash, role, phone, territory) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+      [name, email.toLowerCase().trim(), hash, role || 'salesperson', phone || '', territory || '']
     );
     const newUser = userResult.rows[0];
     const teamResult = await pool.query(
-      `INSERT INTO team (name, role, email, phone, color, territory) VALUES ($1,'Sales Person',$2,$3,$4,$5) RETURNING *`,
-      [name, email.toLowerCase().trim(), phone || '', color || '#5b6af7', territory || '']
+      `INSERT INTO team (name, role, email, phone, color, territory) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+      [name, role === 'developer' ? 'Developer' : 'Sales Person', email.toLowerCase().trim(), phone || '', color || '#5b6af7', territory || '']
     );
     const teamMember = teamResult.rows[0];
     await pool.query('UPDATE users SET team_id=$1 WHERE id=$2', [teamMember.id, newUser.id]);
@@ -932,13 +941,14 @@ app.post('/api/trigger-all', async (req, res) => {
 // ── Stats summary ─────────────────────────────────────────────
 app.get('/api/stats', async (req, res) => {
   try {
-    const [total, byStatus, byPriority, avgScore, byDomain, remindersToday] = await Promise.all([
+    const [total, byStatus, byPriority, avgScore, byDomain, remindersToday, devAssignments] = await Promise.all([
       pool.query('SELECT COUNT(*) FROM leads'),
       pool.query('SELECT status, COUNT(*) FROM leads GROUP BY status'),
       pool.query('SELECT priority, COUNT(*) FROM leads WHERE priority IS NOT NULL GROUP BY priority'),
       pool.query('SELECT AVG(score)::numeric(5,1) as avg_score FROM leads WHERE score > 0'),
       pool.query("SELECT COALESCE(domain, 'school') as domain, COUNT(*) FROM leads GROUP BY domain"),
-      pool.query("SELECT COUNT(*) FROM reminders WHERE DATE(remind_at) = CURRENT_DATE AND status = 'pending'")
+      pool.query("SELECT COUNT(*) FROM reminders WHERE DATE(remind_at) = CURRENT_DATE AND status = 'pending'"),
+      pool.query("SELECT COUNT(*) FROM kanbn_assignments")
     ]);
     res.json({
       total: parseInt(total.rows[0].count),
@@ -946,7 +956,8 @@ app.get('/api/stats', async (req, res) => {
       by_priority: byPriority.rows,
       avg_score: avgScore.rows[0]?.avg_score || 0,
       by_domain: byDomain.rows,
-      reminders_today: parseInt(remindersToday.rows[0].count)
+      reminders_today: parseInt(remindersToday.rows[0].count),
+      dev_assignments: parseInt(devAssignments.rows[0].count)
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -998,6 +1009,239 @@ app.get('/api/fix-status', async (req, res) => {
     res.json({ success: true, message: 'All status fixed!', breakdown: result.rows });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+// ── KAN.BN INTEGRATION ──────────────────────────────────────
+// ── KAN.BN INTEGRATION ──────────────────────────────────────
+// ── KAN.BN INTEGRATION ──────────────────────────────────────
+const KANBN_BASE = process.env.KANBN_BASE_URL || 'http://localhost:3002/api/v1';
+const KANBN_KEY = process.env.KANBN_API_KEY;
+
+app.post('/api/kanbn/create-card', requireAuth(), async (req, res) => {
+  const { leadName, leadPhone, leadAddress, leadType, leadId } = req.body;
+  try {
+    // Step 1: Check if board already exists for this lead
+    const existingBoards = await fetch(
+      `${KANBN_BASE}/workspaces/${process.env.KANBN_WORKSPACE_ID}/boards`,
+      { headers: { 'x-api-key': KANBN_KEY } }
+    );
+    const boardsData = await existingBoards.json();
+    const boards = Array.isArray(boardsData) ? boardsData : [];
+
+    // Check if board with same lead name already exists
+    const existingBoard = boards.find(b => b.name === `🏆 ${leadName}`);
+
+    if (existingBoard) {
+      console.log('⚠️ Board already exists for:', leadName);
+      return res.json({ success: true, board: existingBoard, duplicate: true });
+    }
+
+    // Step 2: Create NEW board only if not exists
+    const boardRes = await fetch(
+      `${KANBN_BASE}/workspaces/${process.env.KANBN_WORKSPACE_ID}/boards`,
+      {
+        method: 'POST',
+        headers: { 'x-api-key': KANBN_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `🏆 ${leadName}`,
+          description: `📍 ${leadAddress || 'N/A'} | 📞 ${leadPhone || 'N/A'} | 🏷️ ${leadType || 'Lead'} | 🆔 ID: ${leadId || 'N/A'}`,
+          slug: `lead-${leadId}-${Date.now()}`,
+          lists: ['📋 Tasks', '🔄 In Progress', '✅ Completed'],
+          labels: []
+        })
+      }
+    );
+    const board = await boardRes.json();
+    if (!board || !board.publicId) throw new Error('Board creation failed: ' + JSON.stringify(board));
+
+    console.log('✅ Kan.bn board created for:', leadName);
+    res.json({ success: true, board });
+  } catch (err) {
+    console.error('❌ Kan.bn error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+// Delete Kan.bn board when lead moves out of Won
+// Delete Kan.bn board when lead moves out of Won
+app.post('/api/kanbn/delete-board', requireAuth(), async (req, res) => {
+  const { leadName } = req.body;
+  try {
+    // Step 1: Get all boards
+    const existingBoards = await fetch(
+      `${KANBN_BASE}/workspaces/${process.env.KANBN_WORKSPACE_ID}/boards`,
+      { headers: { 'x-api-key': KANBN_KEY } }
+    );
+    const boards = await existingBoards.json();
+    if (!Array.isArray(boards)) return res.json({ success: true, message: 'No boards found' });
+
+    // Step 2: Find ALL boards matching this lead (handle duplicates too)
+    const matchingBoards = boards.filter(b =>
+      b.name === `🏆 ${leadName}` || b.name.includes(leadName)
+    );
+
+    if (!matchingBoards.length) {
+      console.log('No board found for:', leadName);
+      return res.json({ success: true, message: 'No board found' });
+    }
+
+    // Step 3: Delete ALL matching boards
+    for (const board of matchingBoards) {
+      const deleteRes = await fetch(`${KANBN_BASE}/boards/${board.publicId}`, {
+        method: 'DELETE',
+        headers: { 'x-api-key': KANBN_KEY }
+      });
+      console.log(`🗑️ Deleted board: ${board.name} (${board.publicId})`);
+    }
+
+    res.json({ success: true, deleted: matchingBoards.length });
+  } catch (err) {
+    console.error('❌ Kan.bn delete error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+// Get all developers with their assigned boards for admin view
+app.get('/api/developers', requireAuth(['admin']), async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT u.id, u.name, u.email, u.role, 
+      (SELECT json_agg(board_name) FROM kanbn_assignments WHERE developer_id = u.id) as assigned_boards,
+      (SELECT COUNT(*) FROM kanbn_assignments WHERE developer_id = u.id) as boards_count
+      FROM users u 
+      WHERE u.role='developer' 
+      ORDER BY u.name ASC
+    `);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Assign board to developer
+app.post('/api/kanbn/assign-board', requireAuth(['admin']), async (req, res) => {
+  const { boardPublicId, boardName, developerId } = req.body;
+  try {
+    // 1. Get developer's email from LeadFlow DB
+    const devRes = await pool.query('SELECT email FROM users WHERE id=$1', [developerId]);
+    if (!devRes.rows.length) return res.status(404).json({ error: 'Developer not found' });
+    const devEmail = devRes.rows[0].email;
+
+    // 2. Look up developer's Kan.bn user ID by email
+    const wsMembersRes = await fetch(`${KANBN_BASE}/workspaces/${process.env.KANBN_WORKSPACE_ID}/members`, {
+      headers: { 'x-api-key': KANBN_KEY }
+    });
+    const members = await wsMembersRes.json();
+    const kanbnUser = members.find(m => m.user.email.toLowerCase() === devEmail.toLowerCase());
+    
+    if (!kanbnUser) {
+      return res.status(404).json({ error: `Developer email ${devEmail} not found in Kan.bn workspace. Ensure they have a Kan.bn account.` });
+    }
+    const kanbnUserId = kanbnUser.user.publicId;
+
+    // 3. Add them as member to the board in Kan.bn
+    await fetch(`${KANBN_BASE}/boards/${boardPublicId}/members`, {
+      method: 'PUT',
+      headers: { 'x-api-key': KANBN_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: kanbnUserId, role: 'member' })
+    });
+
+    // 4. Save assignment in PostgreSQL (LeadFlow db)
+    await pool.query(
+      `INSERT INTO kanbn_assignments (board_public_id, board_name, developer_id, assigned_by) 
+       VALUES ($1, $2, $3, $4) ON CONFLICT (board_public_id, developer_id) DO NOTHING`,
+      [boardPublicId, boardName, developerId, req.user.id]
+    );
+
+    // 5. Update users table with kanbn_user_id for future use
+    await pool.query('UPDATE users SET kanbn_user_id=$1 WHERE id=$2', [kanbnUserId, developerId]);
+
+    res.json({ success: true, kanbnUserId });
+  } catch (err) {
+    console.error('Board Assignment Error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Remove assignment
+app.delete('/api/kanbn/assign-board/:boardId/:developerId', requireAuth(['admin']), async (req, res) => {
+  try {
+    const result = await pool.query(
+      'DELETE FROM kanbn_assignments WHERE board_public_id=$1 AND developer_id=$2 RETURNING *',
+      [req.params.boardId, req.params.developerId]
+    );
+    res.json({ success: true, deleted: result.rowCount });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Get boards assigned to the logged-in developer
+app.get('/api/kanbn/assigned-boards', requireAuth(['developer']), async (req, res) => {
+  try {
+    const result = await pool.query('SELECT board_public_id, board_name FROM kanbn_assignments WHERE developer_id=$1', [req.user.id]);
+    const assignedIds = result.rows.map(r => r.board_public_id);
+    if (!assignedIds.length) return res.json([]);
+    
+    // fetch all boards from Kan.bn and filter
+    const boardsRes = await fetch(
+      `${KANBN_BASE}/workspaces/${process.env.KANBN_WORKSPACE_ID}/boards`,
+      { headers: { 'x-api-key': KANBN_KEY } }
+    );
+    const boards = await boardsRes.json();
+    if (!Array.isArray(boards)) return res.json([]);
+    
+    const myBoards = boards.filter(b => b.name.startsWith('🏆') && assignedIds.includes(b.publicId));
+    res.json(myBoards);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Get all boards for Won Projects
+app.get('/api/kanbn/my-boards', requireAuth(), async (req, res) => {
+  try {
+    const boardsRes = await fetch(
+      `${KANBN_BASE}/workspaces/${process.env.KANBN_WORKSPACE_ID}/boards`,
+      { headers: { 'x-api-key': KANBN_KEY } }
+    );
+    const boards = await boardsRes.json();
+    if (!Array.isArray(boards)) return res.json([]);
+
+    // Filter only lead boards (exclude CRM Pipeline, Test boards)
+    const leadBoards = boards.filter(b => b.name.startsWith('🏆'));
+    res.json(leadBoards);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// Assign board to developer
+
+
+// Remove board assignment from developer
+app.delete('/api/kanbn/assign-board/:boardId/:developerId', requireAuth(['admin']), async (req, res) => {
+  try {
+    await pool.query(
+      `DELETE FROM kanbn_assignments WHERE board_public_id=$1 AND developer_id=$2`,
+      [req.params.boardId, req.params.developerId]
+    );
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Get boards assigned to logged-in developer
+app.get('/api/kanbn/assigned-boards', requireAuth(), async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT board_public_id, board_name FROM kanbn_assignments WHERE developer_id=$1`,
+      [req.user.id]
+    );
+    if (!rows.length) return res.json([]);
+
+    // Fetch full board details from Kan.bn
+    const boardsRes = await fetch(
+      `${KANBN_BASE}/workspaces/${process.env.KANBN_WORKSPACE_ID}/boards`,
+      { headers: { 'x-api-key': KANBN_KEY } }
+    );
+    const allBoards = await boardsRes.json();
+    const assignedIds = rows.map(r => r.board_public_id);
+    const assignedBoards = Array.isArray(allBoards)
+      ? allBoards.filter(b => assignedIds.includes(b.publicId))
+      : [];
+    res.json(assignedBoards);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 
 // ── Health check ──────────────────────────────────────────────
 app.get('/health', (req, res) => {

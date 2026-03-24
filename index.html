@@ -52,9 +52,19 @@
       display: inline-block;
     }
 
-    .icon-sm { width: 14px; height: 14px; }
-    .icon-lg { width: 22px; height: 22px; }
-    .ni-ic svg { margin-right: 5px; }
+    .icon-sm {
+      width: 14px;
+      height: 14px;
+    }
+
+    .icon-lg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .ni-ic svg {
+      margin-right: 5px;
+    }
 
     body::before {
       content: '';
@@ -2739,43 +2749,71 @@
   <!-- ADMIN NAV -->
   <div class="adm-only" id="adm-nav">
     <div class="nl">Main</div>
-    <div class="ni active" id="nav-dash" onclick="showAdminPage('dashboard',this)"><span
-        class="ni-ic"><i data-lucide="layout-dashboard"></i></span>Dashboard</div>
+    <div class="ni active" id="nav-dash" onclick="showAdminPage('dashboard',this)"><span class="ni-ic"><i
+          data-lucide="layout-dashboard"></i></span>Dashboard</div>
     <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
       <div><span class="ni-ic"><i data-lucide="layers"></i></span>Leads</div>
       <i class="arrow"></i>
     </div>
     <div class="dropdown-content" id="leads-domains-list"></div>
 
-    <div class="ni" id="nav-pipeline" onclick="showAdminPage('pipeline',this)"><span class="ni-ic"><i data-lucide="map"></i></span>Pipeline
+    <div class="ni" id="nav-pipeline" onclick="showAdminPage('pipeline',this)"><span class="ni-ic"><i
+          data-lucide="map"></i></span>Pipeline
     </div>
     <div class="nl">Workspace</div>
-    <div class="ni" id="nav-team" onclick="showAdminPage('team',this)"><span class="ni-ic"><i data-lucide="users"></i></span>Team</div>
-    <div class="ni" id="nav-addsp" onclick="showAdminPage('addsp',this)"><span class="ni-ic"><i data-lucide="user-plus"></i></span>Add Sales Person
+    <div class="ni" id="nav-salesteam" onclick="showAdminPage('salesteam',this)"><span class="ni-ic"><i
+          data-lucide="users"></i></span>Sales Team</div>
+    <div class="ni" id="nav-devteam" onclick="showAdminPage('devteam',this)"><span class="ni-ic"><i
+          data-lucide="code"></i></span>Developer Team</div>
+    <div class="ni" id="nav-addsp" onclick="showAdminPage('addsp',this)"><span class="ni-ic"><i
+          data-lucide="user-plus"></i></span>Add Sales Person
     </div>
-    <div class="ni" id="nav-adminuser" onclick="showAdminPage('adminuser',this)"><span class="ni-ic"><i data-lucide="settings"></i></span>Admin
+    <div class="ni" id="nav-adminuser" onclick="showAdminPage('adminuser',this)"><span class="ni-ic"><i
+          data-lucide="settings"></i></span>Admin
       User</div>
     <div class="ni" onclick="openM('wh-modal')"><span class="ni-ic"><i data-lucide="link"></i></span>n8n Webhook</div>
-    <div class="ni" id="nav-score" onclick="showAdminPage('score',this)"><span class="ni-ic"><i data-lucide="zap"></i></span>Score Engine
+    <div class="ni" id="nav-score" onclick="showAdminPage('score',this)"><span class="ni-ic"><i
+          data-lucide="zap"></i></span>Score Engine
+    </div>
+    <div class="ni" id="nav-kanbn" onclick="showAdminPage('kanbn',this)">
+      <span class="ni-ic">🏆</span>Won Projects
+    </div>
+    <div class="ni" id="nav-adddev" onclick="showAdminPage('adddev',this)">
+      <span class="ni-ic">👨‍💻</span>Add Developer
     </div>
   </div>
 
   <!-- SALESPERSON NAV -->
   <div class="sp-only" id="sp-nav">
     <div class="nl">My Work</div>
-    <div class="ni active" id="nav-spdash" onclick="showSPPage('spdash',this)"><span class="ni-ic"><i data-lucide="layout-dashboard"></i></span>My
+    <div class="ni active" id="nav-spdash" onclick="showSPPage('spdash',this)"><span class="ni-ic"><i
+          data-lucide="layout-dashboard"></i></span>My
       Dashboard</div>
 
     <div class="ni dropdown-btn" onclick="toggleDropdown(this)">
-      <div><span class="ni-ic"><i data-lucide="clipboard-list"></i></span>My Leads <span class="ni-badge" id="my-leads-badge" style="display:none"></span>
+      <div><span class="ni-ic"><i data-lucide="clipboard-list"></i></span>My Leads <span class="ni-badge"
+          id="my-leads-badge" style="display:none"></span>
       </div>
       <i class="arrow"></i>
     </div>
     <div class="dropdown-content" id="sp-leads-domains-list"></div>
 
-    <div class="ni" id="nav-sppipeline" onclick="showSPPage('pipeline',this)"><span class="ni-ic"><i data-lucide="map"></i></span>My
+    <div class="ni" id="nav-sppipeline" onclick="showSPPage('pipeline',this)"><span class="ni-ic"><i
+          data-lucide="map"></i></span>My
       Pipeline</div>
   </div>
+
+  <!-- DEVELOPER NAV -->
+  <div class="sp-only" id="dev-nav" style="display:none">
+    <div class="nl">My Work</div>
+    <div class="ni active" id="nav-devkanbn" onclick="showDevPage('kanbn',this)">
+      <span class="ni-ic">🏆</span>Won Projects
+    </div>
+    <div class="ni" id="nav-devboard" onclick="showDevPage('boardviewer',this)">
+      <span class="ni-ic">👨‍💻</span>Assigned Cards
+    </div>
+  </div>
+
 
   <div id="sector-count-box"
     style="margin: 15px 10px; padding: 10px; background: rgba(91,106,247,0.05); border: 1px dashed rgba(91,106,247,0.2); border-radius: 8px; font-size: 11px; color: var(--tx3);">
@@ -2853,7 +2891,7 @@
     </div>
   </div>
 
-  <div
+  <div id="gen-leads-card"
     style="background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);padding:18px 22px;margin-bottom:20px;">
     <div style="font-family:'Clash Display',sans-serif;font-size:15px;font-weight:700;margin-bottom:14px;">⚡ Generate
       Leads for a Domain</div>
@@ -3214,6 +3252,44 @@
 </div>
 
 <!-- ASSIGN LEADS PAGE -->
+<!-- ADD DEVELOPER PAGE -->
+<div class="page-section" id="adddev-page">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Add Developer</div>
+      <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Register a new developer</div>
+    </div>
+  </div>
+  <div class="asp-card">
+    <div class="asp-title">New Developer Registration</div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">FIRST NAME</label><input class="fi" id="dev-fname" placeholder="Ravi"></div>
+      <div class="fg"><label class="fl">LAST NAME</label><input class="fi" id="dev-lname" placeholder="Kumar"></div>
+    </div>
+    <div class="fg"><label class="fl">EMAIL ADDRESS</label><input class="fi" id="dev-email" type="email"
+        placeholder="ravi@company.com"></div>
+    <div class="fg"><label class="fl">PHONE NUMBER</label><input class="fi" id="dev-phone"
+        placeholder="+91 98765 43210"></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">PASSWORD</label><input class="fi" id="dev-pass" type="password"
+          placeholder="••••••••"></div>
+      <div class="fg"><label class="fl">COLOR</label><select class="fs" id="dev-color">
+          <option value="#5b6af7">Blue</option>
+          <option value="#f25b7e">Pink</option>
+          <option value="#1de9a0">Green</option>
+          <option value="#f5a623">Orange</option>
+          <option value="#3ecfff">Cyan</option>
+        </select></div>
+    </div>
+    <div id="dev-err"
+      style="display:none;background:rgba(242,91,126,0.1);border:1px solid rgba(242,91,126,0.25);border-radius:8px;padding:9px 13px;font-size:12.5px;color:var(--a2);margin-bottom:12px;">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:6px;">
+      <button class="btn bg" onclick="showAdminPage('dashboard',document.getElementById('nav-dash'))">Cancel</button>
+      <button class="btn bp" id="dev-btn" onclick="registerDev()">Create Developer Account →</button>
+    </div>
+  </div>
+</div>
 <div class="page-section" id="assignleads-page">
   <div class="topbar">
     <div>
@@ -3297,6 +3373,30 @@
       ⚠️ <strong>Limitation:</strong> Only the school's public website is scanned. If a tool is used internally
       (separate app/portal not embedded in the website), it won't be detected. Gap = "not found on website" not
       "doesn't exist".
+    </div>
+  </div>
+</div>
+<!-- KAN.BN WON PROJECTS PAGE -->
+<!-- KAN.BN WON PROJECTS PAGE -->
+<div class="page-section" id="kanbn-page">
+  <div class="topbar">
+    <div>
+      <div class="page-title">🏆 Won Projects</div>
+      <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Won leads and their project tasks</div>
+    </div>
+    <div class="tb-right">
+      <button class="btn bg bsm" onclick="loadKanbnBoards()">🔄 Refresh</button>
+      <!-- Show full screen only for admin -->
+      <a id="kanbn-fullscreen-btn" href="http://localhost:3002" target="_blank" class="btn bg bsm"
+        style="text-decoration:none;">
+        🔗 Open Full Screen
+      </a>
+    </div>
+  </div>
+  <!-- BOARDS GRID -->
+  <div id="kanbn-boards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;">
+    <div style="padding:40px;text-align:center;color:var(--tx3);grid-column:1/-1;">
+      <span class="spin"></span> Loading projects...
     </div>
   </div>
 </div>
@@ -3463,13 +3563,18 @@
     <button class="lp-close" onclick="closeLeadPanel()">✕</button>
   </div>
   <div class="lp-tabs">
-    <div class="lp-tab active" id="lp-tab-log" onclick="switchLPTab('log')" style="display:none !important;"><i data-lucide="phone" class="icon-sm"></i> Log
+    <div class="lp-tab active" id="lp-tab-log" onclick="switchLPTab('log')" style="display:none !important;"><i
+        data-lucide="phone" class="icon-sm"></i> Log
       Call</div>
-    <div class="lp-tab" id="lp-tab-history" onclick="switchLPTab('history')" style="display:none !important;"><i data-lucide="clipboard-list" class="icon-sm"></i> Call
+    <div class="lp-tab" id="lp-tab-history" onclick="switchLPTab('history')" style="display:none !important;"><i
+        data-lucide="clipboard-list" class="icon-sm"></i> Call
       History</div>
-    <div class="lp-tab" id="lp-tab-notes" onclick="switchLPTab('notes')"><i data-lucide="sticky-note" class="icon-sm"></i> Notes</div>
-    <div class="lp-tab" id="lp-tab-reminders" onclick="switchLPTab('reminders')"><i data-lucide="bell" class="icon-sm"></i> Reminders</div>
-    <div class="lp-tab" id="lp-tab-pitch" onclick="switchLPTab('pitch')"><i data-lucide="bot" class="icon-sm"></i> AI Pitch</div>
+    <div class="lp-tab" id="lp-tab-notes" onclick="switchLPTab('notes')"><i data-lucide="sticky-note"
+        class="icon-sm"></i> Notes</div>
+    <div class="lp-tab" id="lp-tab-reminders" onclick="switchLPTab('reminders')"><i data-lucide="bell"
+        class="icon-sm"></i> Reminders</div>
+    <div class="lp-tab" id="lp-tab-pitch" onclick="switchLPTab('pitch')"><i data-lucide="bot" class="icon-sm"></i> AI
+      Pitch</div>
   </div>
   <div class="lp-body">
     <!-- PITCH PANE -->
@@ -3570,7 +3675,25 @@
   </div>
 </div>
 
+
 <div class="toast" id="toast"></div>
+
+<style>
+  #boardviewer-page.visible { display: flex !important; }
+</style>
+<div class="page-section" id="boardviewer-page" style="height: 100vh; flex-direction: column;">
+  <div class="topbar" style="padding: 20px 32px; background: var(--s1); border-bottom: 1px solid var(--bd); margin-bottom: 0;">
+    <div>
+      <div class="page-title">Assigned Cards</div>
+      <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Work on your assigned Kanban cards directly</div>
+    </div>
+  </div>
+  <div id="board-iframe-container" style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--tx3); flex-direction:column;">
+    <div style="font-size:32px;margin-bottom:12px;">🏆</div>
+    <div>Select a board from Won Projects to view it here.</div>
+  </div>
+  <iframe id="boardviewer-iframe" style="flex:1; border:none; display:none; width:100%; height:100%;" src=""></iframe>
+</div>
 
 <script>
   const API = window.location.origin + '/api';
@@ -3979,7 +4102,7 @@
     const init = user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     document.getElementById('u-av').textContent = init;
     document.getElementById('u-name').textContent = user.name;
-    document.getElementById('u-role').textContent = user.role === 'admin' ? 'Administrator' : 'Sales Person';
+    document.getElementById('u-role').textContent = user.role === 'admin' ? 'Administrator' : user.role === 'developer' ? 'Developer' : 'Sales Person';
     document.getElementById('main-sidebar').style.display = 'flex';
 
     await loadDomains();
@@ -3988,11 +4111,21 @@
     if (user.role === 'admin') {
       document.getElementById('adm-nav').style.display = 'block';
       document.getElementById('sp-nav').style.display = 'none';
+      document.getElementById('dev-nav').style.display = 'none';
       await loadAdminData();
       showAdminPage('dashboard', document.getElementById('nav-dash'));
+    } else if (user.role === 'developer') {
+      document.getElementById('adm-nav').style.display = 'none';
+      document.getElementById('sp-nav').style.display = 'none';
+      document.getElementById('dev-nav').style.display = 'block';
+      // Hide full screen button for developer
+      const fsBtn = document.getElementById('kanbn-fullscreen-btn');
+      if (fsBtn) fsBtn.style.display = 'none';
+      showDevPage('kanbn', document.getElementById('nav-devkanbn'));
     } else {
       document.getElementById('adm-nav').style.display = 'none';
       document.getElementById('sp-nav').style.display = 'block';
+      document.getElementById('dev-nav').style.display = 'none';
       await loadSPData();
       showSPPage('spdash', document.getElementById('nav-spdash'));
     }
@@ -4036,7 +4169,7 @@
       renderSidebarDomains();
     }
 
-    const isMainPage = page === 'dashboard' || page === 'team';
+    const isMainPage = page === 'dashboard' || page === 'salesteam' || page === 'devteam';
     document.getElementById('admin-main').style.display = isMainPage ? 'block' : 'none';
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
 
@@ -4053,6 +4186,12 @@
       document.getElementById('score-page').classList.add('visible');
       loadScoreSettings();
     }
+    else if (page === 'kanbn') {
+      document.getElementById('kanbn-page').classList.add('visible');
+    }
+    else if (page === 'adddev') {
+      document.getElementById('adddev-page').classList.add('visible');
+    }
     else if (page === 'leads') {
       document.getElementById('leads-page').classList.add('visible');
       currentDomain = param;
@@ -4066,7 +4205,8 @@
     }
 
     if (page === 'dashboard') document.getElementById('ptitle').textContent = 'Dashboard';
-    else if (page === 'team') document.getElementById('ptitle').textContent = 'Sales Team';
+    else if (page === 'salesteam') document.getElementById('ptitle').textContent = 'Sales Team';
+    else if (page === 'devteam') document.getElementById('ptitle').textContent = 'Developer Team';
 
     document.querySelectorAll('.ni:not(.dropdown-btn)').forEach(n => n.classList.remove('active'));
     if (el) el.classList.add('active');
@@ -4075,10 +4215,19 @@
     const stats = document.querySelector('.stats');
     const wbar = document.querySelector('.wbar');
     const acard = document.getElementById('adm-activity-card');
-    if (tsec) tsec.style.display = (page === 'team' || page === 'dashboard') ? '' : 'none';
-    if (stats) stats.style.display = page === 'dashboard' ? '' : 'none';
+    const genLeads = document.getElementById('gen-leads-card');
+    const sectOverview = document.getElementById('sectors-overview-card');
 
+    if (tsec) tsec.style.display = (page === 'salesteam' || page === 'devteam' || page === 'dashboard') ? '' : 'none';
+    if (stats) stats.style.display = page === 'dashboard' ? '' : 'none';
     if (acard) acard.style.display = page === 'dashboard' ? '' : 'none';
+    if (genLeads) genLeads.style.display = page === 'dashboard' ? '' : 'none';
+    if (sectOverview) sectOverview.style.display = page === 'dashboard' ? '' : 'none';
+
+    if (page === 'salesteam' || page === 'devteam') {
+       rTeam(page === 'devteam' ? 'Developer' : 'Sales Person');
+       if (tsec) tsec.querySelector('.stitle').textContent = page === 'devteam' ? 'Developer Team' : 'Sales Team';
+    }
 
     if (page === 'leads') {
       rLeads();
@@ -4445,10 +4594,9 @@
 
       document.getElementById('s3').textContent = stats.avg_score || '0.0';
 
-      const wonLeads = stats.by_status?.find(s => String(s.status).toLowerCase() === 'won')?.count;
-      const wonCount = parseInt(wonLeads) || 0;
-      const totalCount = parseInt(stats.total) || 0;
-      document.getElementById('s4').textContent = totalCount ? Math.round(wonCount / totalCount * 100) + '%' : '0%';
+      document.getElementById('s4').textContent = stats.dev_assignments || 0;
+      document.querySelector('.sc.c4 .sc-lbl').textContent = 'Assigned Boards';
+      document.querySelector('.sc.c4 .sc-sub').textContent = 'active projects';
       document.getElementById('s5').textContent = stats.reminders_today || 0;
 
       renderSidebarDomains();
@@ -4552,9 +4700,23 @@
       }).join('');
     }
   }
-  function rTeam() {
+  async function rTeam(filterRole = 'Sales Person') {
     const g = document.getElementById('team-grid');
-    g.innerHTML = team.map(m => {
+
+    let displayTeam = [];
+    if (filterRole === 'Developer') {
+      // Fetch fresh developer data with board counts from /developers endpoint
+      try {
+        const devData = await get('/developers', true);
+        // Normalize role casing so filter works regardless of DB casing
+        displayTeam = devData.map(d => ({ ...d, role: 'Developer' }));
+      } catch (e) { displayTeam = []; }
+    } else {
+      // Use the global team array (sales persons) – don't overwrite it
+      displayTeam = team.filter(m => (m.role || '').toLowerCase() === 'sales person');
+    }
+
+    g.innerHTML = displayTeam.map(m => {
       const cnt = leads.filter(l => l.assigned_id === m.id).length;
       const q = leads.filter(l => l.assigned_id === m.id && l.status === 'qualified').length;
       const cl = leads.filter(l => l.assigned_id === m.id && l.status === 'closed').length;
@@ -4562,23 +4724,37 @@
       return `<div style="position:relative; background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);padding:18px;">
         <button onclick="delTeam(${m.id})" style="position:absolute; top:12px; right:12px; background:none; border:none; cursor:pointer; opacity:0.3; font-size:14px;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3" title="Delete Team Member">🗑️</button>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-          <div style="width:44px;height:44px;border-radius:50%;background:${m.color}18;color:${m.color};border:2px solid ${m.color}30;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:14px;">${init}</div>
+          <div style="width:44px;height:44px;border-radius:50%;background:${m.color ? m.color+'18' : '#5b6af718'};color:${m.color || '#5b6af7'};border:2px solid ${m.color ? m.color+'30' : '#5b6af730'};display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:14px;">${init}</div>
           <div style="flex:1">
             <div style="font-weight:700;font-size:14px;">${m.name}</div>
             <div style="font-size:11.5px;color:var(--tx3);">${m.email}</div>
             <div style="font-size:11px;color:var(--tx3);">📍 ${m.territory || m.role}</div>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+        ${filterRole === 'Developer' ? `
+          <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:12px;">
+            <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-family:'Clash Display',sans-serif;font-size:28px;font-weight:700;color:var(--acc)">${parseInt(m.boards_count) || 0}</div>
+              <div style="font-size:10px;color:var(--tx3);margin-top:2px;">Assigned Boards</div>
+            </div>
+          </div>
+          <div style="margin-top:4px;">
+            <div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:8px;letter-spacing:0.5px;">Latest Projects</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              ${(m.assigned_boards || []).map(b => `<span style="background:rgba(91,106,247,0.1);color:var(--acc);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid rgba(91,106,247,0.2);">🏆 ${b.replace(/🏆\s*/g, '').trim()}</span>`).join('') || '<div style="color:var(--tx3);font-size:11.5px;font-style:italic;">No boards assigned yet</div>'}
+            </div>
+          </div>
+        ` : 
+        `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
           ${[['Leads', cnt, 'var(--acc)'], ['Qualified', q, 'var(--a3)'], ['Closed', cl, 'var(--a5)']].map(([l, v, c]) => `
             <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center;">
               <div style="font-family:'Clash Display',sans-serif;font-size:20px;font-weight:700;color:${c}">${v}</div>
               <div style="font-size:10px;color:var(--tx3);margin-top:2px;">${l}</div>
             </div>`).join('')}
         </div>
-        <button class="btn bp" style="width:100%;font-size:12px;" onclick="openAssignExisting(${m.id})">📋 Assign Leads</button>
+        <button class="btn bp" style="width:100%;font-size:12px;" onclick="openAssignExisting(${m.id})">📋 Assign Leads</button>`}
       </div>`;
-    }).join('') + `<div style="background:var(--s1);border:1.5px dashed var(--bd);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;cursor:pointer;gap:8px;" onclick="showAdminPage('addsp',document.getElementById('nav-addsp'))"><div style="font-size:28px;opacity:0.2">+</div><div style="font-size:12px;color:var(--tx3)">Add Sales Person</div></div>`;
+    }).join('') + `<div style="background:var(--s1);border:1.5px dashed var(--bd);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;cursor:pointer;gap:8px;" onclick="showAdminPage('${filterRole === 'Developer' ? 'adddev' : 'addsp'}', document.getElementById('${filterRole === 'Developer' ? 'nav-adddev' : 'nav-addsp'}'))"><div style="font-size:28px;opacity:0.2">+</div><div style="font-size:12px;color:var(--tx3)">Add ${filterRole}</div></div>`;
   }
   function popAssign() { const s = document.getElementById('f-assign'); if (!s) return; s.innerHTML = '<option value="">Unassigned</option>' + team.map(m => `<option value="${m.id}">${m.name}</option>`).join(''); }
   async function rActivity() {
@@ -4587,13 +4763,13 @@
     try {
       const logs = await get('/activity', true);
       if (!logs.length) { el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--tx3);font-size:13px;">No team activity yet.</div>'; return; }
-      const outcomeMap = { 
-        interested: '<i data-lucide="check-circle" class="icon-sm"></i> Interested', 
-        callback: '<i data-lucide="rotate-cw" class="icon-sm"></i> Call Back', 
-        not_interested: '<i data-lucide="x-circle" class="icon-sm"></i> Not Interested', 
-        no_answer: '<i data-lucide="phone-off" class="icon-sm"></i> No Answer', 
-        closed: '<i data-lucide="target" class="icon-sm"></i> Closed', 
-        voicemail: '<i data-lucide="mic" class="icon-sm"></i> Voicemail' 
+      const outcomeMap = {
+        interested: '<i data-lucide="check-circle" class="icon-sm"></i> Interested',
+        callback: '<i data-lucide="rotate-cw" class="icon-sm"></i> Call Back',
+        not_interested: '<i data-lucide="x-circle" class="icon-sm"></i> Not Interested',
+        no_answer: '<i data-lucide="phone-off" class="icon-sm"></i> No Answer',
+        closed: '<i data-lucide="target" class="icon-sm"></i> Closed',
+        voicemail: '<i data-lucide="mic" class="icon-sm"></i> Voicemail'
       };
       el.innerHTML = logs.map(l => {
         const dt = new Date(l.created_at);
@@ -4601,15 +4777,15 @@
         const delActivity = `<button onclick="deleteActivity('${l.type}', ${l.id}, ${l.lead_id})" style="margin-left:auto; background:none; border:none; cursor:pointer; opacity:0.3;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3" title="Delete Activity"><i data-lucide="trash-2" class="icon-sm"></i></button>`;
         const statusColors = { new: 'rgba(91,106,247,0.15)', contacted: 'rgba(62,207,255,0.15)', interested: 'rgba(245,166,35,0.15)', proposal: 'rgba(160,80,255,0.15)', won: 'rgba(29,233,160,0.15)', lost: 'rgba(242,91,126,0.15)', qualified: 'rgba(29,233,160,0.15)', closed: 'rgba(29,233,160,0.15)' };
         const statusTextColors = { new: 'var(--acc)', contacted: 'var(--a5)', interested: 'var(--a4)', proposal: 'var(--purple)', won: 'var(--a3)', lost: 'var(--a2)', qualified: 'var(--a3)', closed: 'var(--a3)' };
-        const statusEmoji = { 
-          new: '<i data-lucide="circle" class="icon-sm" style="fill:var(--acc)"></i>', 
-          contacted: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a5)"></i>', 
-          interested: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a4)"></i>', 
-          proposal: '<i data-lucide="circle" class="icon-sm" style="fill:var(--purple)"></i>', 
-          won: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a3)"></i>', 
-          lost: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a2)"></i>', 
-          qualified: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a3)"></i>', 
-          closed: '<i data-lucide="target" class="icon-sm"></i>' 
+        const statusEmoji = {
+          new: '<i data-lucide="circle" class="icon-sm" style="fill:var(--acc)"></i>',
+          contacted: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a5)"></i>',
+          interested: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a4)"></i>',
+          proposal: '<i data-lucide="circle" class="icon-sm" style="fill:var(--purple)"></i>',
+          won: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a3)"></i>',
+          lost: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a2)"></i>',
+          qualified: '<i data-lucide="circle" class="icon-sm" style="fill:var(--a3)"></i>',
+          closed: '<i data-lucide="target" class="icon-sm"></i>'
         };
         const status = l.lead_status || '';
         const statusBadge = status ? `<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:${statusColors[status] || 'rgba(255,255,255,0.06)'};color:${statusTextColors[status] || 'var(--tx2)'};">${statusEmoji[status] || '●'} ${status.charAt(0).toUpperCase() + status.slice(1)}</span>` : '';
@@ -4744,14 +4920,60 @@
     const bc = { new: 'bn', contacted: 'bc', interested: 'bi', proposal: 'bp', won: 'bw', lost: 'bl' };
     if (sel) sel.className = `badge ${bc[status] || 'bn'}`;
     try {
-      await patch(`/leads/${id}/status`, { status });
       const leadId = Number(id);
       const l = leads.find(l => l.id === leadId) || spLeads.find(l => l.id === leadId);
+
+      // ✅ Save OLD status BEFORE updating
+      const oldStatus = l ? l.status : null;
+
+      await patch(`/leads/${id}/status`, { status });
+
       if (l) l.status = status;
       renderAll();
       toast('Status updated', 'success');
+
+      // 🗑️ IF MOVED OUT OF WON → DELETE KAN.BN BOARD
+      if (status !== 'won' && oldStatus === 'won' && l) {
+        try {
+          await post('/kanbn/delete-board', {
+            leadName: l.school_name || 'Unknown'
+          }, true);
+          toast(`🗑️ Removed ${l.school_name} from Kan.bn`, 'success');
+        } catch (ke) {
+          console.error('Kan.bn delete error:', ke);
+        }
+      }
+
+      // 🏆 IF WON → CREATE KAN.BN BOARD
+      if (status === 'won' && l) {
+        try {
+          toast('🏆 Creating Kan.bn board...', 'success');
+          const result = await post('/kanbn/create-card', {
+            leadName: l.school_name || 'Unknown',
+            leadPhone: l.phone || '',
+            leadAddress: l.address || '',
+            leadType: l.domain || 'school',
+            leadId: l.id
+          }, true);
+          if (result && result.success) {
+            if (result.duplicate) {
+              toast(`⚠️ Board already exists for ${l.school_name}!`, 'success');
+            } else {
+              toast(`🎉 Kan.bn board created for ${l.school_name}!`, 'success');
+            }
+            setTimeout(() => {
+              if (confirm(`🏆 "${l.school_name}" is WON!\n\n✅ Board created in Kan.bn\n\nClick OK to open Won Projects.`)) {
+                showAdminPage('kanbn', document.getElementById('nav-kanbn'));
+              }
+            }, 800);
+          }
+        } catch (ke) {
+          console.error('Kan.bn sync error:', ke);
+        }
+      }
     } catch (e) { toast('Error: ' + e.message, 'error'); }
   }
+
 
   // ── TEAM CRUD ──
   function openAddTeam() { ['t-name', 't-role', 't-email', 't-phone'].forEach(id => document.getElementById(id).value = ''); openM('team-modal'); }
@@ -4929,7 +5151,225 @@
   document.querySelectorAll('.ov').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
   let tT;
   function toast(msg, type) { const t = document.getElementById('toast'); t.innerHTML = msg; reinitIcons(); t.className = `toast ${type} show`; clearTimeout(tT); tT = setTimeout(() => { t.className = 'toast'; }, 3200); }
+  // ── DEVELOPER FUNCTIONS ──
+  function showDevPage(page, el) {
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
+    if (page === 'kanbn') {
+      document.getElementById('kanbn-page').classList.add('visible');
+      loadKanbnBoards();
+      const iframe = document.querySelector('#kanbn-page iframe');
+      if (iframe) iframe.src = iframe.src;
+    } else if (page === 'boardviewer') {
+      document.getElementById('boardviewer-page').classList.add('visible');
+    }
+    document.querySelectorAll('.ni:not(.dropdown-btn)').forEach(n => n.classList.remove('active'));
+    if (el) el.classList.add('active');
+  }
 
+  function openBoardIframe(publicId, slug) {
+    showDevPage('boardviewer', document.getElementById('nav-devboard'));
+    const iframe = document.getElementById('boardviewer-iframe');
+    const container = document.getElementById('board-iframe-container');
+    
+    // Show loading spinner
+    container.innerHTML = `
+      <div style="text-align:center; color:var(--tx3);">
+        <div class="spin" style="width:40px;height:40px;margin:20px auto;border:3px solid var(--acc);border-top-color:transparent;border-radius:50%;"></div>
+        <div style="font-size:14px;font-weight:600;">Opening Kanban Board...</div>
+        <div style="font-size:12px;margin-top:4px;opacity:0.7;">This may take a moment to load</div>
+      </div>
+    `;
+    container.style.display = 'flex';
+    iframe.style.display = 'none';
+
+    // Using workspace-relative slug URLs which are reliable for Kan.bn routing
+    const targetSlug = slug || publicId; 
+    const workspaceId = 'zwepbr9mic8n'; 
+    iframe.src = `http://localhost:3002/${workspaceId}/${targetSlug}`;
+    
+    iframe.onload = () => {
+       container.style.display = 'none';
+       iframe.style.display = 'block';
+    };
+  }
+
+  async function registerDev() {
+    const fname = document.getElementById('dev-fname').value.trim();
+    const lname = document.getElementById('dev-lname').value.trim();
+    const email = document.getElementById('dev-email').value.trim();
+    const phone = document.getElementById('dev-phone').value.trim();
+    const pass = document.getElementById('dev-pass').value;
+    const color = document.getElementById('dev-color').value;
+    const err = document.getElementById('dev-err');
+    err.style.display = 'none';
+    if (!fname || !email || !pass) {
+      err.textContent = 'First name, email and password are required.';
+      err.style.display = 'block';
+      return;
+    }
+    const btn = document.getElementById('dev-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span> Creating...';
+    try {
+      await post('/auth/register', {
+        name: fname + ' ' + lname,
+        email,
+        password: pass,
+        phone,
+        territory: '',
+        color,
+        role: 'developer'
+      }, true);
+      toast('✅ Developer account created!', 'success');
+      ['dev-fname', 'dev-lname', 'dev-email', 'dev-phone', 'dev-pass'].forEach(id => document.getElementById(id).value = '');
+      showAdminPage('dashboard', document.getElementById('nav-dash'));
+    } catch (e) {
+      err.textContent = e.message.includes('409') || e.message.toLowerCase().includes('already') ? 'Email already registered.' : 'Error: ' + e.message;
+      err.style.display = 'block';
+    }
+    btn.disabled = false;
+    btn.innerHTML = 'Create Developer Account →';
+  }
+  // ── KAN.BN BOARDS VIEWER ──
+  async function loadKanbnBoards() {
+    const grid = document.getElementById('kanbn-boards-grid');
+    if (!grid) return;
+    grid.innerHTML = '<div style="padding:40px;text-align:center;color:var(--tx3);grid-column:1/-1;"><span class="spin"></span> Loading...</div>';
+
+    try {
+      const isAdmin = currentUser && currentUser.role === 'admin';
+      const isDeveloper = currentUser && currentUser.role === 'developer';
+
+      // Admin sees all boards, developer sees only assigned boards
+      let boards = [];
+      if (isDeveloper) {
+        boards = await get('/kanbn/assigned-boards', true);
+      } else {
+        boards = await get('/kanbn/my-boards', true);
+      }
+
+      // Load developers list for admin
+      let developers = [];
+      if (isAdmin) {
+        try { developers = await get('/developers', true); } catch (e) { }
+      }
+
+      if (!boards.length) {
+        grid.innerHTML = `<div style="padding:60px;text-align:center;color:var(--tx3);grid-column:1/-1;">
+          <div style="font-size:48px;margin-bottom:16px;">🏆</div>
+          <div style="font-size:16px;font-weight:700;color:var(--tx);margin-bottom:8px;">
+            ${isDeveloper ? 'No boards assigned to you yet.' : 'No Won Projects Yet'}
+          </div>
+          <div style="font-size:13px;">
+            ${isDeveloper ? 'Ask admin to assign boards to you.' : 'Move leads to Won in Pipeline to see them here.'}
+          </div>
+        </div>`;
+        return;
+      }
+
+      grid.innerHTML = boards.map(board => {
+        const lists = board.lists || [];
+        const devOptions = developers.map(d =>
+          `<option value="${d.id}">${d.name}</option>`
+        ).join('');
+
+        return `<div style="background:var(--s1);border:1.5px solid var(--bd);border-radius:16px;overflow:hidden;transition:all 0.2s;"
+          onmouseover="this.style.borderColor='rgba(29,233,160,0.4)'"
+          onmouseout="this.style.borderColor='var(--bd)'">
+
+          <!-- Board Header -->
+          <div style="padding:16px 18px;border-bottom:1px solid var(--bd);background:linear-gradient(135deg,rgba(29,233,160,0.06) 0%,transparent 80%);">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div style="font-size:15px;font-weight:700;line-height:1.2;">${board.name}</div>
+              ${isAdmin
+            ? `<a href="http://localhost:3002" target="_blank"
+                    style="font-size:11px;color:var(--acc);text-decoration:none;padding:3px 9px;border:1px solid rgba(91,106,247,0.3);border-radius:20px;">
+                    ✏️ Edit
+                  </a>`
+            : `<span style="font-size:10px;color:var(--a3);padding:3px 9px;border:1px solid rgba(29,233,160,0.3);border-radius:20px;">👁️ View Only</span>`
+          }
+            </div>
+            <div style="font-size:11px;color:var(--tx3);margin-top:4px;">${board.description || ''}</div>
+          </div>
+
+          <!-- Lists -->
+          <div style="padding:14px 18px;">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+              ${lists.map(list => `
+                <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center;">
+                  <div style="font-size:11px;font-weight:700;color:var(--tx2);">${list.name}</div>
+                </div>
+              `).join('')}
+            </div>
+
+            ${isAdmin && developers.length ? `
+            <!-- Assign Developer -->
+            <div style="background:var(--s2);border-radius:8px;padding:10px;margin-bottom:10px;">
+              <div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;margin-bottom:6px;">👨‍💻 Assign Developer</div>
+              <div style="display:flex;gap:6px;">
+                <select id="dev-sel-${board.publicId}" class="fi" style="flex:1;padding:6px 10px;font-size:12px;">
+                  <option value="">Select Developer...</option>
+                  ${devOptions}
+                </select>
+                <button onclick="assignBoardToDev('${board.publicId}', '${board.name.replace(/'/g, "\\'")}', document.getElementById('dev-sel-${board.publicId}').value)"
+                  style="background:var(--acc);border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;color:#fff;">
+                  Assign
+                </button>
+              </div>
+            </div>
+            ` : ''}
+
+            <!-- Action Buttons -->
+            <div style="display:flex;gap:8px;">
+              ${isAdmin ? `
+                <button onclick="window.open('http://localhost:3002','_blank')"
+                  style="flex:1;background:rgba(91,106,247,0.1);border:1.5px solid rgba(91,106,247,0.3);border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;color:var(--acc);">
+                  🔗 Open Board
+                </button>
+                <button onclick="deleteKanbnBoard('${board.publicId}','${board.name.replace(/'/g, "\\'")}')"
+                  style="background:rgba(242,91,126,0.1);border:1.5px solid rgba(242,91,126,0.3);border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;color:var(--a2);width:38px;">
+                  🗑️
+                </button>
+              ` : `
+                <button onclick="openBoardIframe('${board.publicId}', '${board.slug}')"
+                  style="flex:1;background:rgba(29,233,160,0.1);border:1.5px solid rgba(29,233,160,0.3);border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;color:var(--a3);">
+                  👨‍💻 Work in Board
+                </button>
+              `}
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+
+    } catch (e) {
+      grid.innerHTML = `<div style="padding:40px;text-align:center;color:var(--a2);grid-column:1/-1;">⚠️ Error: ${e.message}</div>`;
+    }
+  }
+
+  async function assignBoardToDev(boardPublicId, boardName, developerId) {
+    if (!developerId) return toast('Please select a developer first', 'error');
+    try {
+      await post('/kanbn/assign-board', { boardPublicId, boardName, developerId: parseInt(developerId) }, true);
+      toast('✅ Board assigned to developer!', 'success');
+    } catch (e) {
+      toast('Error: ' + e.message, 'error');
+    }
+  }
+
+  async function deleteKanbnBoard(publicId, name) {
+    if (!confirm(`Delete board "${name}"?`)) return;
+    try {
+      await fetch(`${window.location.origin}/api/kanbn/delete-board`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+        body: JSON.stringify({ leadName: name.replace('🏆 ', '') })
+      });
+      toast('🗑️ Board deleted!', 'success');
+      loadKanbnBoards();
+    } catch (e) {
+      toast('Error: ' + e.message, 'error');
+    }
+  }
   init();
 
   // ══════════════════════════════════════════════════════════
