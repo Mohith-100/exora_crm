@@ -1133,7 +1133,7 @@ app.get('/', (req, res) => {
 });
 
 // ── Start server ──────────────────────────────────────────────
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 const server = app.listen(PORT, () => {
   console.log(`\n🚀 LeadFlow backend running at http://localhost:${PORT}`);
   console.log(`🔗 n8n webhook     → POST http://localhost:${PORT}/webhook/leads`);
