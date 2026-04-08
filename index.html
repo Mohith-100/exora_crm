@@ -3010,6 +3010,13 @@
 
     /* MOBILE (max-width: 500px) */
     @media (max-width: 500px) {
+      .login-box {
+        padding: 40px 24px !important;
+      }
+      #login-wrap {
+        overflow-x: hidden;
+      }
+
       #main-sidebar {
         position: fixed !important;
         left: -320px !important;
@@ -4660,6 +4667,10 @@
     // Mobile: close sidebar
     if (window.innerWidth <= 480) toggleMSB(false);
 
+    const firstWord = val.split(' ')[0];
+    const label = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase().replace(/s$/, '');
+    const domainId = label.toLowerCase();
+
     // Icon Map (Lucide names)
     const iconMap = {
       hospital: 'hospital', gym: 'dumbbell', school: 'school', it: 'monitor', restaurant: 'utensils',
@@ -4676,18 +4687,6 @@
     try {
       // Run dedup first to clean up any messy data
       await post('/leads/dedup', {}, true).catch(err => console.log('Dedup pre-run err:', err));
-      // Extract label (first word) and normalize ID
-      const firstWord = val.split(' ')[0];
-      const label = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase().replace(/s$/, '');
-      const domainId = label.toLowerCase();
-
-      // Scroll to top
-      window.scrollTo(0, 0);
-      // Mobile: close sidebar
-
-
-      // Icon Map (Lucide names)
-
 
       // 1. Create domain in DB
       const res = await post('/domains', {
@@ -4712,7 +4711,7 @@
         domain: domainId
       }, true);
 
-      // 3. Trigger immediate Serper backup (optional, but good for speed)
+      // 3. Trigger immediate Serper backup
       post('/trigger-all', { query: val, domain: domainId }, true).catch(err => console.log('Serper backup err:', err));
 
       toast(`🚀 Generating leads for ${label}s... This may take ~45s.`, 'success');
@@ -4983,8 +4982,9 @@
     }
 
     try {
-      [leads, team] = await Promise.all([get('/leads'), get('/team')]);
+      [leads, team] = await Promise.all([get('/leads?domain=all'), get('/team')]);
       await renderAll();
+
     } catch (e) {
       console.error('Data load error:', e);
     }
@@ -4999,12 +4999,17 @@
     const isDash = (page === 'dashboard');
     document.getElementById('admin-main').style.display = isDash ? 'block' : 'none';
 
-    if (page === 'leads') {
-      if (param !== lastDomain) {
+    if (page === 'leads' || page === 'prospects') {
+      if (param !== lastDomain && page === 'leads') {
         currentSize = 'all';
         lastDomain = param;
+        currentDomain = param;
       }
-      currentDomain = param;
+      if (page === 'prospects') {
+        filt = param; // param is the status
+      } else {
+        filt = 'all';
+      }
       updateHeaderCount();
       syncFilterUI();
       rLeads();
@@ -5026,6 +5031,7 @@
     } else if (page === 'assignleads') {
       document.getElementById('assignleads-page').classList.add('visible');
     }
+
 
     if (page === 'dashboard') document.getElementById('ptitle').textContent = 'Dashboard';
     else if (page === 'team') document.getElementById('ptitle').textContent = 'Sales Team';
@@ -5314,17 +5320,23 @@
     if (page === 'spdash') {
       document.getElementById('spdash-page').classList.add('visible');
     }
-    else if (page === 'leads') {
-      currentDomain = param;
-      document.getElementById('sp-leads-page').classList.add('visible');
-      if (param !== lastDomain) {
+    else if (page === 'leads' || page === 'prospects') {
+      if (page === 'leads' && param !== lastDomain) {
         currentSize = 'all';
         lastDomain = param;
+        currentDomain = param;
       }
+      if (page === 'prospects') {
+        spFilt = param;
+      } else {
+        spFilt = 'all';
+      }
+      document.getElementById('sp-leads-page').classList.add('visible');
       updateHeaderCount();
       syncFilterUI();
       rMyLeads();
     }
+
     else if (page === 'pipeline') {
       document.getElementById('pipeline-page').classList.add('visible');
       pipeFilt = currentDomain;
@@ -5728,7 +5740,12 @@
   return leads.filter(l => {
 
     // 1. DOMAIN filter
-    const domainMatch = (l.domain || 'school') === currentDomain;
+    const domainMatch = (() => {
+      const leadDom = String(l.domain || 'school').toLowerCase().trim().replace(/s$/, '');
+      const curDom = String(currentDomain || 'school').toLowerCase().trim().replace(/s$/, '');
+      return leadDom === curDom;
+    })();
+
 
     // 2. STATUS filter
     const statusMatch = filt === 'all' 
@@ -5824,7 +5841,8 @@
       const init = m ? m.name.split(' ').map(n => n[0]).join('').slice(0, 2) : '?';
       const pStr = (l.phone && l.phone.trim() && l.phone !== 'undefined' && l.phone !== 'null') ? l.phone : '—';
       const assCell = (currentAssignment === 'assigned') ? `<td style="white-space:nowrap;"><div style="background:${m?.color}15; color:${m?.color}; border:1px solid ${m?.color}30; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700;">${m?.name || '—'}</div></td><td style="font-size:11px; color:var(--tx3);">${fd(l.assigned_at)}</td>` : '';
-      return `<tr><td><div class="sn">${l.school_name || '—'}</div><div class="sa">${l.address || ''}</div>${l.pitch ? `<div style="margin-top:6px;"><a class="wb-link" style="cursor:pointer;white-space:nowrap;" onclick="showPitch(${l.id})">💬 View Pitch</a></div>` : ''}</td><td><div style="font-size:12px;color:var(--tx2);white-space:nowrap;">${pStr}</div></td><td style="white-space:nowrap;">${websiteCell(l)}</td><td><div style="color:var(--a4);font-size:12.5px;">${l.rating || '—'} ⭐</div></td><td><div style="display:flex;align-items:center;gap:12px;"><div class="score-pill"><strong>${l.score || 0}</strong> /100</div><div style="font-size:14px;">${l.priority == '🔥 high' ? '🔥' : l.priority == '⚡ medium' ? '⚡' : '📋'}</div></div></td><td><select class="badge ${bc[curStatus] || 'bn'}" onchange="updStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;font-weight:700;">
+      return `<tr><td><div class="sn">${l.school_name || '—'}</div><div class="sa">${l.address || ''}</div><div style="margin-top:6px;">${l.pitch ? `<a class="wb-link" style="cursor:pointer;white-space:nowrap;" onclick="showPitch(${l.id})">💬 View Pitch</a>` : `<a class="wb-link" style="cursor:pointer;white-space:nowrap;color:var(--tx3);" onclick="spGeneratePitch(${l.id}, this)">⚡ Generate Pitch</a>`}</div></td><td><div style="font-size:12px;color:var(--tx2);white-space:nowrap;">${pStr}</div></td><td style="white-space:nowrap;">${websiteCell(l)}</td><td><div style="color:var(--a4);font-size:12.5px;">${l.rating || '—'} ⭐</div></td><td><div style="display:flex;align-items:center;gap:12px;"><div class="score-pill"><strong>${l.score || 0}</strong> /100</div><div style="font-size:14px;">${l.priority == '🔥 high' ? '🔥' : l.priority == '⚡ medium' ? '⚡' : '📋'}</div></div></td><td><select class="badge ${bc[curStatus] || 'bn'}" onchange="updStatus(${l.id},this.value,this)" style="background:none;border:none;cursor:pointer;color:inherit;font-weight:700;">
+
           <option value="new" ${curStatus === 'new' ? 'selected' : ''}>🔵 New</option>
           <option value="contacted" ${curStatus === 'contacted' ? 'selected' : ''}>🟠 Contacted</option>
           <option value="interested" ${curStatus === 'interested' ? 'selected' : ''}>🟡 Interested</option>

@@ -30,6 +30,13 @@ const GAP_DEFINITIONS = [
         key: 'crm',
         label: 'CRM / Lead Management',
         pitch: 'No professional CRM or automated enquiry system detected. Exora CRM can automate {target} capture, follow-ups, and convert more {type}—without any manual effort.',
+        pitches: {
+            school: 'Managing parent enquiries in registers is outdated. Exora CRM automates admission follow-ups and captures leads from your website automatically.',
+            hospital: 'Patient follow-ups are falling through the cracks. Exora CRM manages patient enquiries and treatment pipelines, ensuring better conversion and care.',
+            gym: 'Potential members are walking away. Exora CRM tracks every walk-in and enquiry, sending automated WhatsApp follow-ups to boost memberships.',
+            manufacturing: 'Manual deal tracking is slowing you down. Exora CRM digitises your entire B2B pipeline, ensuring no purchase order or enquiry is ever missed.',
+            salon: 'Client retention is key. Exora CRM tracks visit history and automated follow-ups for your {target}, ensuring they return for their next {type}.'
+        },
         techSigs: ['leadsquared.com', 'hubspot.com', 'salesforce.com', 'zoho.com', 'nopaperforms', 'extraedge', 'meritto.com', 'noesisenquiry', 'leadform', 'forms.gle', 'zenoti.com', 'mindbodyonline.com', 'booksy.com', 'fresha.com', 'treatwell.com', 'vagaro.com', 'shedul.com', 'phorest.com', 'gettimely.com', 'shortcuts.net'],
         keywords: ['crm login', 'enquiry portal', 'appointment booking', 'book now', 'online booking', 'salon login', 'stylist login', 'reserve a slot'],
         apiCats: ['crm', 'marketing-automation'],
@@ -39,6 +46,11 @@ const GAP_DEFINITIONS = [
         key: 'lms',
         label: 'Staff Training / LMS Portal',
         pitch: 'No LMS or online training platform found. Exora LMS enables professional training, documentation, and quizzes for your team—all in one place.',
+        pitches: {
+            school: 'Empower your teachers with a modern LMS. Exora LMS hosts curriculum, lesson plans, and training modules for your academic staff.',
+            manufacturing: 'Technical training is vital. Exora LMS digitises your standard operating procedures (SOPs) and safety training for factory workers.',
+            hospital: 'Keep your clinical staff updated. Exora LMS manages medical training, protocols, and compliance certifications centrally.'
+        },
         techSigs: ['moodle', 'canvas', 'blackboard', 'teachable', 'udemy', 'educomp', 'learnpress', 'tutorlms'],
         keywords: ['student portal', 'lms login'],
         apiCats: ['lms'],
@@ -48,6 +60,12 @@ const GAP_DEFINITIONS = [
         key: 'payment',
         label: 'Online Digital Payments',
         pitch: 'No online payment gateway detected. Exora Payments allows {target} to pay safely via UPI, cards, or net banking—reducing manual collections by 80%.',
+        pitches: {
+            school: 'Fee collection is a manual hassle. Exora Payments enables auto-reminders and instant receipt generation for parents via UPI and cards.',
+            gym: 'Membership renewals should be seamless. Exora Payments handles recurring billing and instant payment links for members.',
+            salon: 'Secure your bookings with advance payments. Exora Payments allows clients to pay a deposit during online booking, reducing no-shows.',
+            manufacturing: 'Digitise your accounts receivable. Exora Payments provides secure portals for your clients to pay invoices instantly, improving cash flow.'
+        },
         techSigs: ['razorpay.com', 'stripe.com', 'paytm.in', 'payu.in', 'instamojo.com', 'ccavenue.com', 'cashfree.com', 'secure.pay'],
         keywords: ['pay fee online', 'online fee portal'],
         apiCats: ['payment-processors'],
@@ -57,6 +75,12 @@ const GAP_DEFINITIONS = [
         key: 'admission',
         label: 'Digital Registration / Intake',
         pitch: 'No digital onboarding process found. Exora digitises the entire process—from application to document upload and fee payment, cutting paperwork completely.',
+        pitches: {
+            school: 'The admission season is overwhelming. Exora\'s Digital Admission Portal automates application forms, document uploads, and merit list processing.',
+            salon: 'Manual phone bookings are inefficient. Exora\'s Digital Booking Portal lets your clients schedule appointments 24/7 without disturbing your stylists.',
+            hospital: 'Reduce front-desk waiting times. Exora Digital Intake allows patients to pre-fill forms and upload medical history before they arrive.',
+            gym: 'Simplify member sign-ups. Exora Digital Onboarding handles waivers, agreements, and profiles in a paperless 2-minute flow.'
+        },
         techSigs: ['admission.nopaperforms', 'apply.meritto'],
         keywords: ['apply online', 'online admission portal', 'registration form', 'book appointment', 'become a member', 'new client form', 'patient portal'],
         apiCats: [],
@@ -66,6 +90,11 @@ const GAP_DEFINITIONS = [
         key: 'app',
         label: 'Mobile App / Client Portal',
         pitch: 'No mobile app or {target} portal detected. Exora Client App keeps your {target} updated with schedules, invoices, and notices—boosting satisfaction.',
+        pitches: {
+            school: 'Parents want real-time updates. The Exora Parent App provides instant notifications on attendance, homework, and fee status.',
+            gym: 'Engagement is key for retention. The Exora Member App keeps your {target} connected with workout plans, diet charts, and renewal alerts.',
+            hospital: 'Patient care doesn\'t end at the clinic. The Exora Patient App digitises prescriptions, reports, and follow-up reminders for better recovery.'
+        },
         techSigs: ['play.google.com/store/apps', 'apps.apple.com'],
         keywords: ['download our app', 'parent portal'],
         apiCats: [],
@@ -75,6 +104,11 @@ const GAP_DEFINITIONS = [
         key: 'attendance',
         label: 'Workforce ERP / Attendance',
         pitch: 'No digital attendance or ERP system detected. Exora ERP lets you mark attendance digitally, auto-notifying stakeholders and generating compliance reports.',
+        pitches: {
+            school: 'Teacher and student attendance takes too much time. Exora ERP automates daily marking and sends instant "Absent" alerts to parents.',
+            manufacturing: 'Workforce management is a bottleneck. Exora ERP handles shift rosters, attendance, and payroll for your entire factory floor.',
+            hospital: 'Staff coordination is critical for care. Exora workforce portal tracks shifts, rosters, and attendance for nursing and clinical staff.'
+        },
         techSigs: ['fedena', 'edunext', 'entab', 'myclassboard', 'schoolpad', 'edadmin'],
         keywords: ['erp login', 'school erp login', 'staff login', 'employee portal', 'hrms login', 'roster login'],
         apiCats: ['erp'],
@@ -84,6 +118,12 @@ const GAP_DEFINITIONS = [
         key: 'chatbot',
         label: 'WhatsApp AI Chatbot',
         pitch: 'No live chat or WhatsApp integration found. Exora AI Chatbot handles queries 24/7 on WhatsApp and your website, converting visitors into leads automatically.',
+        pitches: {
+            school: 'Front-desk gets flooded with routine queries. Exora AI Chatbot handles admission FAQs and fee status on WhatsApp, 24/7.',
+            hospital: 'Your staff is overwhelmed. Exora AI Chatbot handles patient appointments and routine queries on WhatsApp, freeing up your reception desk.',
+            gym: 'Inbound queries often go un-replied. Exora AI Chatbot answers membership pricing and facilities queries instantly, driving more conversions.',
+            restaurant: 'Customers want instant replies for table bookings. Exora AI Chatbot handles reservations and basic menu queries 24/7 on WhatsApp.'
+        },
         techSigs: ['tawk.to', 'tidio.co', 'zendesk.com', 'intercom.io', 'freshchat.com', 'drift.com', 'crisp.chat', 'whatsapp.com/send', 'wa.me'],
         keywords: [],
         apiCats: ['live-chat'],
@@ -319,17 +359,6 @@ async function generatePitch(lead, gaps, websiteStatus, finalScore, priority) {
     const pitchPoints = prioritizedGaps.slice(0, 5).map((g, i) => {
         let p = (g.pitches && (g.pitches[domain] || g.pitches[domainRaw] || g.pitches.default)) || g.pitch || '';
         
-        // --- Sector Context Injection ---
-        if (domain === 'manufacturing' && g.key === 'crm') {
-            p = "Manual deal tracking is slowing you down. Exora CRM digitises your entire B2B pipeline, ensuring no purchase order or enquiry is ever missed.";
-        } else if (domain === 'salon' && g.key === 'admission') {
-            p = "Manual phone bookings are inefficient. Exora's Digital Booking Portal lets your clients schedule appointments 24/7 without disturbing your stylists.";
-        } else if (domain === 'gym' && g.key === 'app') {
-            p = "Engagement is key for retention. The Exora Client App keeps your members connected with workout plans, diet charts, and renewal alerts.";
-        } else if (domain === 'hospital' && g.key === 'chatbot') {
-            p = "Your staff is overwhelmed with routine queries. Exora AI Chatbot handles patient appointments and FAQs on WhatsApp, freeing up your reception desk.";
-        }
-
         // Replace placeholders
         p = p.replace(/{target}/g, terms.target).replace(/{type}/g, terms.type);
         return `${i + 1}. ${p}`;
@@ -416,7 +445,7 @@ async function scoreLead(lead) {
                 ...g, 
                 boost: dbRule.points,
                 labels: dbRule.labels_json || {},
-                pitches: dbRule.pitches_json || {}
+                pitches: dbRule.pitches_json || g.pitches || {}
             };
         })
         .filter(Boolean);

@@ -860,23 +860,31 @@ app.get('/api/reminders/today', async (req, res, next) => {
     return next();
   }
   requireAuth(['admin', 'salesperson'])(req, res, next);
-}, async (req, res) => {
+},  async (req, res) => {
   try {
+    const isN8n = req.headers['ngrok-skip-browser-warning'] === 'true';
     let where = `WHERE DATE(reminders.remind_at) <= CURRENT_DATE AND (reminders.status IS NULL OR reminders.status = 'pending')`;
+    if (isN8n) {
+      where += ` AND reminders.remind_at <= NOW()`;
+    }
+
     let params = [];
     if (req.user && req.user.role === 'salesperson') {
       params.push(req.user.team_id);
       where += ` AND leads.assigned_id = $${params.length}`;
     }
+
     const result = await pool.query(`
       SELECT * FROM (
         SELECT DISTINCT ON (leads.school_name, DATE_TRUNC('minute', reminders.remind_at), reminders.message)
                reminders.*, leads.school_name, leads.phone,
-               team.email AS rep_email, team.name AS rep_name,
+               COALESCE(team.email, u.email) AS rep_email, 
+               COALESCE(team.name, u.name, reminders.created_by) AS rep_name,
                reminders.message AS note
         FROM reminders
         LEFT JOIN leads ON reminders.lead_id = leads.id
         LEFT JOIN team ON leads.assigned_id = team.id
+        LEFT JOIN users u ON LOWER(reminders.created_by) = LOWER(u.name)
         ${where}
         ORDER BY leads.school_name, DATE_TRUNC('minute', reminders.remind_at), reminders.message, reminders.id ASC
       ) t
