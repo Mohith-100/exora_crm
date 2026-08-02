@@ -13,14 +13,14 @@ start "Backend" cmd /k "cd C:\Users\Mohith P\Downloads\Crm && node server.js"
 timeout /t 5
 
 echo Starting LeadFlow App...
-start "Backend" cmd /k "cd C:\Users\Mohith P\Downloads\Crm\kanbn\apps\web &&set PORT=3002 && pnpm dev"
+start "Kanbn" cmd /k "cd C:\Users\Mohith P\Downloads\Crm\kanbn\apps\web && set PORT=3002 && pnpm dev"
 timeout /t 5
 
 echo Starting ngrok...
-start "ngrok" cmd /k "ngrok http --domain=esmeralda-nacred-lostly.ngrok-free.dev 3001"
+start "ngrok" cmd /k "ngrok http --domain=eustatically-squamous-jordyn.ngrok-free.dev 3001"
 
 echo.
 echo LeadFlow is running!
 echo App    → http://localhost:3001
-echo Public → https://esmeralda-nacred-lostly.ngrok-free.dev
+echo Public → https://eustatically-squamous-jordyn.ngrok-free.dev
 pause

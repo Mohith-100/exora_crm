@@ -2812,6 +2812,9 @@
     <div class="ni" id="nav-devboard" onclick="showDevPage('boardviewer',this)">
       <span class="ni-ic">👨‍💻</span>Assigned Cards
     </div>
+    <div class="ni" id="nav-devsettings" onclick="showDevPage('settings',this)">
+      <span class="ni-ic"><i data-lucide="settings"></i></span>Settings
+    </div>
   </div>
 
 
@@ -3401,6 +3404,38 @@
   </div>
 </div>
 
+<!-- DEVELOPER SETTINGS PAGE -->
+<div class="page-section" id="devsettings-page">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Profile Settings</div>
+      <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Update your developer profile and credentials</div>
+    </div>
+  </div>
+  <div class="asp-card">
+    <div class="asp-title">My Profile</div>
+    <div class="fg">
+      <label class="fl">FULL NAME</label>
+      <input class="fi" id="ds-name" placeholder="Full Name">
+    </div>
+    <div class="fg">
+      <label class="fl">EMAIL ADDRESS</label>
+      <input class="fi" id="ds-email" type="email" placeholder="email@example.com">
+    </div>
+    <div class="fg">
+      <label class="fl">NEW PASSWORD</label>
+      <input class="fi" id="ds-pass" type="password" placeholder="Leave blank to keep unchanged">
+    </div>
+    <div id="ds-err"
+      style="display:none;background:rgba(242,91,126,0.1);border:1px solid rgba(242,91,126,0.25);border-radius:8px;padding:9px 13px;font-size:12.5px;color:var(--a2);margin-bottom:12px;">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="btn bg" onclick="showDevPage('kanbn',document.getElementById('nav-devkanbn'))">Cancel</button>
+      <button class="btn bp" id="ds-btn" onclick="updateDevCredentials()">Save Profile →</button>
+    </div>
+  </div>
+</div>
+
 <!-- ADMIN USER SETTINGS PAGE -->
 <div class="page-section" id="adminuser-page">
   <div class="topbar">
@@ -3679,16 +3714,20 @@
 <div class="toast" id="toast"></div>
 
 <style>
-  #boardviewer-page.visible { display: flex !important; }
+  #boardviewer-page.visible {
+    display: flex !important;
+  }
 </style>
 <div class="page-section" id="boardviewer-page" style="height: 100vh; flex-direction: column;">
-  <div class="topbar" style="padding: 20px 32px; background: var(--s1); border-bottom: 1px solid var(--bd); margin-bottom: 0;">
+  <div class="topbar"
+    style="padding: 20px 32px; background: var(--s1); border-bottom: 1px solid var(--bd); margin-bottom: 0;">
     <div>
       <div class="page-title">Assigned Cards</div>
       <div style="font-size:12px;color:var(--tx3);margin-top:2px;">Work on your assigned Kanban cards directly</div>
     </div>
   </div>
-  <div id="board-iframe-container" style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--tx3); flex-direction:column;">
+  <div id="board-iframe-container"
+    style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--tx3); flex-direction:column;">
     <div style="font-size:32px;margin-bottom:12px;">🏆</div>
     <div>Select a board from Won Projects to view it here.</div>
   </div>
@@ -4188,6 +4227,7 @@
     }
     else if (page === 'kanbn') {
       document.getElementById('kanbn-page').classList.add('visible');
+      loadKanbnBoards();
     }
     else if (page === 'adddev') {
       document.getElementById('adddev-page').classList.add('visible');
@@ -4225,8 +4265,8 @@
     if (sectOverview) sectOverview.style.display = page === 'dashboard' ? '' : 'none';
 
     if (page === 'salesteam' || page === 'devteam') {
-       rTeam(page === 'devteam' ? 'Developer' : 'Sales Person');
-       if (tsec) tsec.querySelector('.stitle').textContent = page === 'devteam' ? 'Developer Team' : 'Sales Team';
+      rTeam(page === 'devteam' ? 'Developer' : 'Sales Person');
+      if (tsec) tsec.querySelector('.stitle').textContent = page === 'devteam' ? 'Developer Team' : 'Sales Team';
     }
 
     if (page === 'leads') {
@@ -4721,10 +4761,11 @@
       const q = leads.filter(l => l.assigned_id === m.id && l.status === 'qualified').length;
       const cl = leads.filter(l => l.assigned_id === m.id && l.status === 'closed').length;
       const init = m.name.split(' ').map(n => n[0]).join('').slice(0, 2);
+      const deleteId = m.team_id || m.id;
       return `<div style="position:relative; background:var(--s1);border:1.5px solid var(--bd);border-radius:var(--r);padding:18px;">
-        <button onclick="delTeam(${m.id})" style="position:absolute; top:12px; right:12px; background:none; border:none; cursor:pointer; opacity:0.3; font-size:14px;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3" title="Delete Team Member">🗑️</button>
+        <button onclick="delTeam(${deleteId})" style="position:absolute; top:12px; right:12px; background:none; border:none; cursor:pointer; opacity:0.3; font-size:14px;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3" title="Delete Team Member">🗑️</button>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-          <div style="width:44px;height:44px;border-radius:50%;background:${m.color ? m.color+'18' : '#5b6af718'};color:${m.color || '#5b6af7'};border:2px solid ${m.color ? m.color+'30' : '#5b6af730'};display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:14px;">${init}</div>
+          <div style="width:44px;height:44px;border-radius:50%;background:${m.color ? m.color + '18' : '#5b6af718'};color:${m.color || '#5b6af7'};border:2px solid ${m.color ? m.color + '30' : '#5b6af730'};display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:14px;">${init}</div>
           <div style="flex:1">
             <div style="font-weight:700;font-size:14px;">${m.name}</div>
             <div style="font-size:11.5px;color:var(--tx3);">${m.email}</div>
@@ -4744,8 +4785,8 @@
               ${(m.assigned_boards || []).map(b => `<span style="background:rgba(91,106,247,0.1);color:var(--acc);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid rgba(91,106,247,0.2);">🏆 ${b.replace(/🏆\s*/g, '').trim()}</span>`).join('') || '<div style="color:var(--tx3);font-size:11.5px;font-style:italic;">No boards assigned yet</div>'}
             </div>
           </div>
-        ` : 
-        `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+        ` :
+          `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
           ${[['Leads', cnt, 'var(--acc)'], ['Qualified', q, 'var(--a3)'], ['Closed', cl, 'var(--a5)']].map(([l, v, c]) => `
             <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center;">
               <div style="font-family:'Clash Display',sans-serif;font-size:20px;font-weight:700;color:${c}">${v}</div>
@@ -4823,7 +4864,12 @@
       await del(`/team/${id}`);
       team = team.filter(t => t.id !== id);
       leads.forEach(l => { if (l.assigned_id === id) l.assigned_id = null; });
-      rTeam();
+
+      // Refresh the current team view (Developer or Sales Person)
+      const currentLabel = document.getElementById('ptitle').textContent;
+      const isDevView = currentLabel === 'Developer Team';
+      rTeam(isDevView ? 'Developer' : 'Sales Person');
+
       toast('🗑️ Team member deleted.', 'success');
     } catch (e) { toast('Error: ' + e.message, 'error'); }
   }
@@ -5090,7 +5136,10 @@
   }
 
   function allowDrop(ev) { ev.preventDefault(); }
-  function drag(ev, id) { ev.dataTransfer.setData("leadId", id); }
+  function drag(ev, id) {
+    ev.dataTransfer.setData('leadId', id);
+    console.log('Lead ID being dragged:', id);
+  }
   function dragEnter(el) { el.classList.add('drag-over'); }
   function dragLeave(el) { el.classList.remove('drag-over'); }
   async function drop(ev, status) {
@@ -5106,156 +5155,161 @@
     }
   }
 
-  async function runPipeline() {
-    const q = document.getElementById('pipe-query').value.trim();
-    if (!q) return toast('Enter a search query', 'error');
-    const btn = document.getElementById('pipe-btn');
-    const log = document.getElementById('pipe-log');
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Running...';
-    log.style.display = 'block'; log.innerHTML = `⏳ Scraping Google for: <b>${q}</b>...`;
-    try {
-      const res = await post('/trigger-all', { query: q });
-      log.innerHTML += `<br><i data-lucide="check-circle" class="icon-sm"></i> Found & Scraped <b>${res.pipeline.scraped}</b> leads.`;
-      log.innerHTML += `<br><i data-lucide="clock" class="icon-sm"></i> Fetching websites, analyzing gaps & scoring...`;
-      log.innerHTML += `<br><i data-lucide="check-circle" class="icon-sm"></i> Analyzed & Scored <b>${res.pipeline.scored}</b> leads. AI Pitches generated.`;
-      log.innerHTML += `<br><i data-lucide="party-popper" class="icon-sm"></i> Pipeline Complete!`;
-      toast('<i data-lucide="party-popper" class="icon-sm"></i> Pipeline Completed Successfully!', 'success');
-      leads = await get('/leads'); renderAll();
-    } catch (e) { log.innerHTML += `<br><i data-lucide="x-circle" class="icon-sm"></i> Error: ` + e.message; }
-    btn.disabled = false; btn.innerHTML = '<i data-lucide="rocket"></i> Run Pipeline';
-  }
-
-  // ── N8N ──
-  async function runN8nWorkflow() { const btn = document.getElementById('run-btn'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Running...'; toast('<i data-lucide="zap" class="icon-sm"></i> Triggering n8n workflow...', 'success'); try { await post('/trigger-n8n', {}); toast('<i data-lucide="check-circle" class="icon-sm"></i> Workflow triggered! Loading new leads in 10s...', 'success'); setTimeout(async () => { leads = await get('/leads'); renderAll(); toast('<i data-lucide="party-popper" class="icon-sm"></i> New leads loaded from n8n!', 'success'); btn.disabled = false; btn.innerHTML = '<i data-lucide="zap"></i> Run n8n Workflow'; }, 10000); } catch (e) { toast('<i data-lucide="alert-triangle" class="icon-sm"></i> Error: ' + e.message, 'error'); btn.disabled = false; btn.innerHTML = '<i data-lucide="zap"></i> Run n8n Workflow'; } }
-
-  // ── UTILS ──
-  let pipeFilt = 'all';
-  function setF(f, el) {
-    if (document.getElementById('pipeline-page').classList.contains('visible')) {
-      pipeFilt = f;
-      document.querySelectorAll('#pipeline-page .sector-item').forEach(t => t.classList.remove('active'));
-      if (el) el.classList.add('active');
-      loadPipeline();
-      renderSidebarDomains(); // Update dropdown label/icon
-    } else {
-      filt = f;
-      document.querySelectorAll('#admin-main .ft').forEach(t => t.classList.remove('active'));
-      if (el) el.classList.add('active');
-      rLeads();
+    async function runPipeline() {
+      const q = document.getElementById('pipe-query').value.trim();
+      if (!q) return toast('Enter a search query', 'error');
+      const btn = document.getElementById('pipe-btn');
+      const log = document.getElementById('pipe-log');
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Running...';
+      log.style.display = 'block'; log.innerHTML = `⏳ Scraping Google for: <b>${q}</b>...`;
+      try {
+        const res = await post('/trigger-all', { query: q });
+        log.innerHTML += `<br><i data-lucide="check-circle" class="icon-sm"></i> Found & Scraped <b>${res.pipeline.scraped}</b> leads.`;
+        log.innerHTML += `<br><i data-lucide="clock" class="icon-sm"></i> Fetching websites, analyzing gaps & scoring...`;
+        log.innerHTML += `<br><i data-lucide="check-circle" class="icon-sm"></i> Analyzed & Scored <b>${res.pipeline.scored}</b> leads. AI Pitches generated.`;
+        log.innerHTML += `<br><i data-lucide="party-popper" class="icon-sm"></i> Pipeline Complete!`;
+        toast('<i data-lucide="party-popper" class="icon-sm"></i> Pipeline Completed Successfully!', 'success');
+        leads = await get('/leads'); renderAll();
+      } catch (e) { log.innerHTML += `<br><i data-lucide="x-circle" class="icon-sm"></i> Error: ` + e.message; }
+      btn.disabled = false; btn.innerHTML = '<i data-lucide="rocket"></i> Run Pipeline';
     }
-  }
-  function doSearch(q) { sq = q; rLeads(); }
-  function openM(id) { document.getElementById(id).classList.add('open'); }
-  function closeM(id) { document.getElementById(id).classList.remove('open'); }
-  function cpEl(id) { const el = document.getElementById(id); navigator.clipboard.writeText(el.value).then(() => toast('<i data-lucide="check" class="icon-sm"></i> Copied!', 'success')); }
-  document.querySelectorAll('.ov').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
-  let tT;
-  function toast(msg, type) { const t = document.getElementById('toast'); t.innerHTML = msg; reinitIcons(); t.className = `toast ${type} show`; clearTimeout(tT); tT = setTimeout(() => { t.className = 'toast'; }, 3200); }
-  // ── DEVELOPER FUNCTIONS ──
-  function showDevPage(page, el) {
-    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
-    if (page === 'kanbn') {
-      document.getElementById('kanbn-page').classList.add('visible');
-      loadKanbnBoards();
-      const iframe = document.querySelector('#kanbn-page iframe');
-      if (iframe) iframe.src = iframe.src;
-    } else if (page === 'boardviewer') {
-      document.getElementById('boardviewer-page').classList.add('visible');
-    }
-    document.querySelectorAll('.ni:not(.dropdown-btn)').forEach(n => n.classList.remove('active'));
-    if (el) el.classList.add('active');
-  }
 
-  function openBoardIframe(publicId, slug) {
-    showDevPage('boardviewer', document.getElementById('nav-devboard'));
-    const iframe = document.getElementById('boardviewer-iframe');
-    const container = document.getElementById('board-iframe-container');
-    
-    // Show loading spinner
-    container.innerHTML = `
+    // ── N8N ──
+    async function runN8nWorkflow() { const btn = document.getElementById('run-btn'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Running...'; toast('<i data-lucide="zap" class="icon-sm"></i> Triggering n8n workflow...', 'success'); try { await post('/trigger-n8n', {}); toast('<i data-lucide="check-circle" class="icon-sm"></i> Workflow triggered! Loading new leads in 10s...', 'success'); setTimeout(async () => { leads = await get('/leads'); renderAll(); toast('<i data-lucide="party-popper" class="icon-sm"></i> New leads loaded from n8n!', 'success'); btn.disabled = false; btn.innerHTML = '<i data-lucide="zap"></i> Run n8n Workflow'; }, 10000); } catch (e) { toast('<i data-lucide="alert-triangle" class="icon-sm"></i> Error: ' + e.message, 'error'); btn.disabled = false; btn.innerHTML = '<i data-lucide="zap"></i> Run n8n Workflow'; } }
+
+    // ── UTILS ──
+    let pipeFilt = 'all';
+    function setF(f, el) {
+      if (document.getElementById('pipeline-page').classList.contains('visible')) {
+        pipeFilt = f;
+        document.querySelectorAll('#pipeline-page .sector-item').forEach(t => t.classList.remove('active'));
+        if (el) el.classList.add('active');
+        loadPipeline();
+        renderSidebarDomains(); // Update dropdown label/icon
+      } else {
+        filt = f;
+        document.querySelectorAll('#admin-main .ft').forEach(t => t.classList.remove('active'));
+        if (el) el.classList.add('active');
+        rLeads();
+      }
+    }
+    function doSearch(q) { sq = q; rLeads(); }
+    function openM(id) { document.getElementById(id).classList.add('open'); }
+    function closeM(id) { document.getElementById(id).classList.remove('open'); }
+    function cpEl(id) { const el = document.getElementById(id); navigator.clipboard.writeText(el.value).then(() => toast('<i data-lucide="check" class="icon-sm"></i> Copied!', 'success')); }
+    document.querySelectorAll('.ov').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+    let tT;
+    function toast(msg, type) { const t = document.getElementById('toast'); t.innerHTML = msg; reinitIcons(); t.className = `toast ${type} show`; clearTimeout(tT); tT = setTimeout(() => { t.className = 'toast'; }, 3200); }
+    // ── DEVELOPER FUNCTIONS ──
+    function showDevPage(page, el) {
+      document.querySelectorAll('.page-section').forEach(s => s.classList.remove('visible'));
+      if (page === 'kanbn') {
+        document.getElementById('kanbn-page').classList.add('visible');
+        loadKanbnBoards();
+        const iframe = document.querySelector('#kanbn-page iframe');
+        if (iframe) iframe.src = iframe.src;
+      } else if (page === 'boardviewer') {
+        document.getElementById('boardviewer-page').classList.add('visible');
+      } else if (page === 'settings') {
+        document.getElementById('devsettings-page').classList.add('visible');
+        document.getElementById('ds-name').value = currentUser.name || '';
+        document.getElementById('ds-email').value = currentUser.email || '';
+        document.getElementById('ds-pass').value = '';
+      }
+      document.querySelectorAll('.ni:not(.dropdown-btn)').forEach(n => n.classList.remove('active'));
+      if (el) el.classList.add('active');
+    }
+
+    function openBoardIframe(publicId, slug) {
+      showDevPage('boardviewer', document.getElementById('nav-devboard'));
+      const iframe = document.getElementById('boardviewer-iframe');
+      const container = document.getElementById('board-iframe-container');
+
+      // Show loading spinner
+      container.innerHTML = `
       <div style="text-align:center; color:var(--tx3);">
         <div class="spin" style="width:40px;height:40px;margin:20px auto;border:3px solid var(--acc);border-top-color:transparent;border-radius:50%;"></div>
         <div style="font-size:14px;font-weight:600;">Opening Kanban Board...</div>
         <div style="font-size:12px;margin-top:4px;opacity:0.7;">This may take a moment to load</div>
       </div>
     `;
-    container.style.display = 'flex';
-    iframe.style.display = 'none';
+      container.style.display = 'flex';
+      iframe.style.display = 'none';
 
-    // Using workspace-relative slug URLs which are reliable for Kan.bn routing
-    const targetSlug = slug || publicId; 
-    const workspaceId = 'zwepbr9mic8n'; 
-    iframe.src = `http://localhost:3002/${workspaceId}/${targetSlug}`;
-    
-    iframe.onload = () => {
-       container.style.display = 'none';
-       iframe.style.display = 'block';
-    };
-  }
+      // Using workspace-relative slug URLs which are reliable for Kan.bn routing
+      const targetSlug = slug || publicId;
+      const workspaceId = 'zwepbr9mic8n';
+      iframe.src = `http://localhost:3002/${workspaceId}/${targetSlug}?embedded=true`;
 
-  async function registerDev() {
-    const fname = document.getElementById('dev-fname').value.trim();
-    const lname = document.getElementById('dev-lname').value.trim();
-    const email = document.getElementById('dev-email').value.trim();
-    const phone = document.getElementById('dev-phone').value.trim();
-    const pass = document.getElementById('dev-pass').value;
-    const color = document.getElementById('dev-color').value;
-    const err = document.getElementById('dev-err');
-    err.style.display = 'none';
-    if (!fname || !email || !pass) {
-      err.textContent = 'First name, email and password are required.';
-      err.style.display = 'block';
-      return;
+      iframe.onload = () => {
+        container.style.display = 'none';
+        iframe.style.display = 'block';
+      };
     }
-    const btn = document.getElementById('dev-btn');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span> Creating...';
-    try {
-      await post('/auth/register', {
-        name: fname + ' ' + lname,
-        email,
-        password: pass,
-        phone,
-        territory: '',
-        color,
-        role: 'developer'
-      }, true);
-      toast('✅ Developer account created!', 'success');
-      ['dev-fname', 'dev-lname', 'dev-email', 'dev-phone', 'dev-pass'].forEach(id => document.getElementById(id).value = '');
-      showAdminPage('dashboard', document.getElementById('nav-dash'));
-    } catch (e) {
-      err.textContent = e.message.includes('409') || e.message.toLowerCase().includes('already') ? 'Email already registered.' : 'Error: ' + e.message;
-      err.style.display = 'block';
+
+    async function registerDev() {
+      const fname = document.getElementById('dev-fname').value.trim();
+      const lname = document.getElementById('dev-lname').value.trim();
+      const email = document.getElementById('dev-email').value.trim();
+      const phone = document.getElementById('dev-phone').value.trim();
+      const pass = document.getElementById('dev-pass').value;
+      const color = document.getElementById('dev-color').value;
+      const err = document.getElementById('dev-err');
+      err.style.display = 'none';
+      if (!fname || !email || !pass) {
+        err.textContent = 'First name, email and password are required.';
+        err.style.display = 'block';
+        return;
+      }
+      const btn = document.getElementById('dev-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span> Creating...';
+      try {
+        await post('/auth/register', {
+          name: fname + ' ' + lname,
+          email,
+          password: pass,
+          phone,
+          territory: '',
+          color,
+          role: 'developer'
+        }, true);
+        toast('✅ Developer account created!', 'success');
+        ['dev-fname', 'dev-lname', 'dev-email', 'dev-phone', 'dev-pass'].forEach(id => document.getElementById(id).value = '');
+        showAdminPage('dashboard', document.getElementById('nav-dash'));
+      } catch (e) {
+        err.textContent = e.message.includes('409') || e.message.toLowerCase().includes('already') ? 'Email already registered.' : 'Error: ' + e.message;
+        err.style.display = 'block';
+      }
+      btn.disabled = false;
+      btn.innerHTML = 'Create Developer Account →';
     }
-    btn.disabled = false;
-    btn.innerHTML = 'Create Developer Account →';
-  }
-  // ── KAN.BN BOARDS VIEWER ──
-  async function loadKanbnBoards() {
-    const grid = document.getElementById('kanbn-boards-grid');
-    if (!grid) return;
-    grid.innerHTML = '<div style="padding:40px;text-align:center;color:var(--tx3);grid-column:1/-1;"><span class="spin"></span> Loading...</div>';
+    // ── KAN.BN BOARDS VIEWER ──
+    async function loadKanbnBoards() {
+      const grid = document.getElementById('kanbn-boards-grid');
+      if (!grid) return;
+      grid.innerHTML = '<div style="padding:40px;text-align:center;color:var(--tx3);grid-column:1/-1;"><span class="spin"></span> Loading...</div>';
 
-    try {
-      const isAdmin = currentUser && currentUser.role === 'admin';
-      const isDeveloper = currentUser && currentUser.role === 'developer';
+      try {
+        const isAdmin = currentUser && currentUser.role === 'admin';
+        const isDeveloper = currentUser && currentUser.role === 'developer';
 
-      // Admin sees all boards, developer sees only assigned boards
-      let boards = [];
-      if (isDeveloper) {
-        boards = await get('/kanbn/assigned-boards', true);
-      } else {
-        boards = await get('/kanbn/my-boards', true);
-      }
+        // Admin sees all boards, developer sees only assigned boards
+        let boards = [];
+        if (isDeveloper) {
+          boards = await get('/kanbn/assigned-boards', true);
+        } else {
+          boards = await get('/kanbn/my-boards', true);
+        }
 
-      // Load developers list for admin
-      let developers = [];
-      if (isAdmin) {
-        try { developers = await get('/developers', true); } catch (e) { }
-      }
+        // Load developers list for admin
+        let developers = [];
+        if (isAdmin) {
+          try { developers = await get('/developers', true); } catch (e) { }
+        }
 
-      if (!boards.length) {
-        grid.innerHTML = `<div style="padding:60px;text-align:center;color:var(--tx3);grid-column:1/-1;">
+        if (!boards.length) {
+          grid.innerHTML = `<div style="padding:60px;text-align:center;color:var(--tx3);grid-column:1/-1;">
           <div style="font-size:48px;margin-bottom:16px;">🏆</div>
           <div style="font-size:16px;font-weight:700;color:var(--tx);margin-bottom:8px;">
             ${isDeveloper ? 'No boards assigned to you yet.' : 'No Won Projects Yet'}
@@ -5264,16 +5318,16 @@
             ${isDeveloper ? 'Ask admin to assign boards to you.' : 'Move leads to Won in Pipeline to see them here.'}
           </div>
         </div>`;
-        return;
-      }
+          return;
+        }
 
-      grid.innerHTML = boards.map(board => {
-        const lists = board.lists || [];
-        const devOptions = developers.map(d =>
-          `<option value="${d.id}">${d.name}</option>`
-        ).join('');
+        grid.innerHTML = boards.map(board => {
+          const lists = board.lists || [];
+          const devOptions = developers.map(d =>
+            `<option value="${d.id}">${d.name}</option>`
+          ).join('');
 
-        return `<div style="background:var(--s1);border:1.5px solid var(--bd);border-radius:16px;overflow:hidden;transition:all 0.2s;"
+          return `<div style="background:var(--s1);border:1.5px solid var(--bd);border-radius:16px;overflow:hidden;transition:all 0.2s;"
           onmouseover="this.style.borderColor='rgba(29,233,160,0.4)'"
           onmouseout="this.style.borderColor='var(--bd)'">
 
@@ -5282,12 +5336,12 @@
             <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
               <div style="font-size:15px;font-weight:700;line-height:1.2;">${board.name}</div>
               ${isAdmin
-            ? `<a href="http://localhost:3002" target="_blank"
+              ? `<a href="http://localhost:3002" target="_blank"
                     style="font-size:11px;color:var(--acc);text-decoration:none;padding:3px 9px;border:1px solid rgba(91,106,247,0.3);border-radius:20px;">
                     ✏️ Edit
                   </a>`
-            : `<span style="font-size:10px;color:var(--a3);padding:3px 9px;border:1px solid rgba(29,233,160,0.3);border-radius:20px;">👁️ View Only</span>`
-          }
+              : `<span style="font-size:10px;color:var(--a3);padding:3px 9px;border:1px solid rgba(29,233,160,0.3);border-radius:20px;">👁️ View Only</span>`
+            }
             </div>
             <div style="font-size:11px;color:var(--tx3);margin-top:4px;">${board.description || ''}</div>
           </div>
@@ -5298,6 +5352,7 @@
               ${lists.map(list => `
                 <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center;">
                   <div style="font-size:11px;font-weight:700;color:var(--tx2);">${list.name}</div>
+                  <div style="font-size:14px;font-weight:800;color:var(--acc);margin-top:2px;">${list.card_count || 0}</div>
                 </div>
               `).join('')}
             </div>
@@ -5339,539 +5394,586 @@
             </div>
           </div>
         </div>`;
-      }).join('');
+        }).join('');
 
-    } catch (e) {
-      grid.innerHTML = `<div style="padding:40px;text-align:center;color:var(--a2);grid-column:1/-1;">⚠️ Error: ${e.message}</div>`;
-    }
-  }
-
-  async function assignBoardToDev(boardPublicId, boardName, developerId) {
-    if (!developerId) return toast('Please select a developer first', 'error');
-    try {
-      await post('/kanbn/assign-board', { boardPublicId, boardName, developerId: parseInt(developerId) }, true);
-      toast('✅ Board assigned to developer!', 'success');
-    } catch (e) {
-      toast('Error: ' + e.message, 'error');
-    }
-  }
-
-  async function deleteKanbnBoard(publicId, name) {
-    if (!confirm(`Delete board "${name}"?`)) return;
-    try {
-      await fetch(`${window.location.origin}/api/kanbn/delete-board`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
-        body: JSON.stringify({ leadName: name.replace('🏆 ', '') })
-      });
-      toast('🗑️ Board deleted!', 'success');
-      loadKanbnBoards();
-    } catch (e) {
-      toast('Error: ' + e.message, 'error');
-    }
-  }
-  init();
-
-  // ══════════════════════════════════════════════════════════
-  // SCORE ENGINE SETTINGS
-  // ══════════════════════════════════════════════════════════
-  async function loadScoreSettings() {
-    try {
-      const rows = await fetch(API + '/score-config').then(r => r.json());
-      renderConfigList('base-config-list', rows.filter(r => r.category === 'base'));
-      renderConfigList('gap-config-list', rows.filter(r => r.category === 'gap'));
-    } catch (e) { toast('Failed to load score config: ' + e.message, 'error'); }
-  }
-
-
-
-  function renderConfigList(containerId, rows) {
-    const el = document.getElementById(containerId);
-    if (!el) return;
-    el.innerHTML = rows.map(function (r) {
-      let label = r.label;
-      if (r.labels_json) {
-        const dom = (currentDomain === 'all' || !currentDomain) ? 'default' : currentDomain;
-        label = r.labels_json[dom] || r.labels_json.default || r.label;
+      } catch (e) {
+        grid.innerHTML = `<div style="padding:40px;text-align:center;color:var(--a2);grid-column:1/-1;">⚠️ Error: ${e.message}</div>`;
       }
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(26,26,53,0.6);gap:10px;">'
-        + '<div style="flex:1;min-width:0;">'
-        + '<div style="font-size:12.5px;font-weight:600;color:var(--tx);">' + label + '</div>'
-        + '</div>'
-        + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
-        + '<input type="number" min="0" max="50" value="' + r.points + '" id="cfg-pts-' + r.id + '" style="width:54px;background:var(--s2);border:1.5px solid var(--bd);border-radius:6px;padding:5px 7px;color:var(--tx);font-size:12px;text-align:center;outline:none;" onchange="saveScoreRule(' + r.id + ')" title="Points">'
-        + '<span style="font-size:10px;color:var(--tx3);">pts</span>'
-        + '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11.5px;color:var(--tx2);">'
-        + '<input type="checkbox" id="cfg-en-' + r.id + '" ' + (r.enabled ? 'checked' : '') + ' onchange="saveScoreRule(' + r.id + ')" style="accent-color:var(--acc);width:14px;height:14px;">'
-        + 'On</label>'
-        + '</div>'
-        + '</div>';
-    }).join('');
-  }
+    }
 
-  async function saveScoreRule(id) {
-    const ptsEl = document.getElementById('cfg-pts-' + id);
-    const enEl = document.getElementById('cfg-en-' + id);
-    if (!ptsEl || !enEl) return;
-    try {
-      await fetch(API + '/score-config/' + id, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ points: parseInt(ptsEl.value), enabled: enEl.checked })
+    async function updateDevCredentials() {
+      const name = document.getElementById('ds-name').value.trim();
+      const email = document.getElementById('ds-email').value.trim();
+      const pass = document.getElementById('ds-pass').value;
+      const err = document.getElementById('ds-err');
+      err.style.display = 'none';
+
+      if (!name || !email) {
+        err.textContent = 'Name and email are required.';
+        err.style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('ds-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span> Saving...';
+
+      try {
+        const payload = { name, email };
+        if (pass) payload.password = pass;
+
+        const res = await fetch(API + '/auth/update', {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to update credentials');
+
+        toast('✅ Profile updated successfully!', 'success');
+        saveAuth(data.token, data.user);
+
+        // Update sidebar UI
+        const init = data.user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+        document.getElementById('u-av').textContent = init;
+        document.getElementById('u-name').textContent = data.user.name;
+
+        showDevPage('kanbn', document.getElementById('nav-devkanbn'));
+      } catch (e) {
+        err.textContent = 'Error: ' + e.message;
+        err.style.display = 'block';
+      }
+      btn.disabled = false;
+      btn.innerHTML = 'Save Profile →';
+    }
+
+    async function assignBoardToDev(boardPublicId, boardName, developerId) {
+      if (!developerId) return toast('Please select a developer first', 'error');
+      try {
+        await post('/kanbn/assign-board', { boardPublicId, boardName, developerId: parseInt(developerId) }, true);
+        toast('✅ Board assigned to developer!', 'success');
+      } catch (e) {
+        toast('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function deleteKanbnBoard(publicId, name) {
+      if (!confirm(`Delete board "${name}"?`)) return;
+      try {
+        await fetch(`${window.location.origin}/api/kanbn/delete-board`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+          body: JSON.stringify({ leadName: name.replace('🏆 ', '') })
+        });
+        toast('🗑️ Board deleted!', 'success');
+        loadKanbnBoards();
+      } catch (e) {
+        toast('Error: ' + e.message, 'error');
+      }
+    }
+    init();
+
+    // ══════════════════════════════════════════════════════════
+    // SCORE ENGINE SETTINGS
+    // ══════════════════════════════════════════════════════════
+    async function loadScoreSettings() {
+      try {
+        const rows = await fetch(API + '/score-config').then(r => r.json());
+        renderConfigList('base-config-list', rows.filter(r => r.category === 'base'));
+        renderConfigList('gap-config-list', rows.filter(r => r.category === 'gap'));
+      } catch (e) { toast('Failed to load score config: ' + e.message, 'error'); }
+    }
+
+
+
+    function renderConfigList(containerId, rows) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      el.innerHTML = rows.map(function (r) {
+        let label = r.label;
+        if (r.labels_json) {
+          const dom = (currentDomain === 'all' || !currentDomain) ? 'default' : currentDomain;
+          label = r.labels_json[dom] || r.labels_json.default || r.label;
+        }
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(26,26,53,0.6);gap:10px;">'
+          + '<div style="flex:1;min-width:0;">'
+          + '<div style="font-size:12.5px;font-weight:600;color:var(--tx);">' + label + '</div>'
+          + '</div>'
+          + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
+          + '<input type="number" min="0" max="50" value="' + r.points + '" id="cfg-pts-' + r.id + '" style="width:54px;background:var(--s2);border:1.5px solid var(--bd);border-radius:6px;padding:5px 7px;color:var(--tx);font-size:12px;text-align:center;outline:none;" onchange="saveScoreRule(' + r.id + ')" title="Points">'
+          + '<span style="font-size:10px;color:var(--tx3);">pts</span>'
+          + '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11.5px;color:var(--tx2);">'
+          + '<input type="checkbox" id="cfg-en-' + r.id + '" ' + (r.enabled ? 'checked' : '') + ' onchange="saveScoreRule(' + r.id + ')" style="accent-color:var(--acc);width:14px;height:14px;">'
+          + 'On</label>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+    }
+
+    async function saveScoreRule(id) {
+      const ptsEl = document.getElementById('cfg-pts-' + id);
+      const enEl = document.getElementById('cfg-en-' + id);
+      if (!ptsEl || !enEl) return;
+      try {
+        await fetch(API + '/score-config/' + id, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ points: parseInt(ptsEl.value), enabled: enEl.checked })
+        });
+        toast('✅ Rule saved!', 'success');
+      } catch (e) { toast('Error saving rule: ' + e.message, 'error'); }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    let currentPanelLeadId = null;
+
+    function openLeadPanel(leadId) {
+      const l = leads.find(x => x.id === leadId) || spLeads.find(x => x.id === leadId);
+      if (!l) return;
+      currentPanelLeadId = leadId;
+      document.getElementById('lp-school-name').textContent = l.school_name || 'Unknown School';
+      const badge = { new: '🔵 New', contacted: '🟢 Contacted', qualified: '✅ Qualified', closed: '🔴 Closed' };
+      const metaParts = [];
+      if (l.phone && l.phone !== 'undefined' && l.phone !== 'null') metaParts.push('📞 ' + l.phone);
+      if (l.rating) metaParts.push('⭐ ' + l.rating);
+      metaParts.push('<span style="background:rgba(91,106,247,0.12);color:var(--acc);padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">' + (badge[l.status] || l.status) + '</span>');
+      document.getElementById('lp-school-meta').innerHTML = metaParts.join(' &nbsp;&middot;&nbsp; ');
+      if (currentUser && currentUser.role === 'admin') {
+        switchLPTab('notes');
+      } else {
+        switchLPTab('notes');
+      }
+      const stEl = document.getElementById('lp-status-select');
+      if (stEl) {
+        stEl.value = l.status || 'new';
+        const bc = { new: 'bn', contacted: 'bc', interested: 'bi', proposal: 'bp', won: 'bw', lost: 'bl' };
+        stEl.className = `badge ${bc[l.status] || 'bn'}`;
+      }
+      document.getElementById('lp-overlay').classList.add('open');
+      document.getElementById('lead-panel').classList.add('open');
+      loadCallHistory();
+      loadNotes();
+      loadReminders();
+    }
+
+    function closeLeadPanel() {
+      document.getElementById('lp-overlay').classList.remove('open');
+      document.getElementById('lead-panel').classList.remove('open');
+      currentPanelLeadId = null;
+    }
+
+    function switchLPTab(tab) {
+      ['log', 'history', 'notes', 'reminders', 'pitch'].forEach(t => {
+        const tabEl = document.getElementById('lp-tab-' + t);
+        const paneEl = document.getElementById('lp-pane-' + t);
+        if (tabEl) tabEl.classList.toggle('active', t === tab);
+        if (paneEl) paneEl.classList.toggle('active', t === tab);
       });
-      toast('✅ Rule saved!', 'success');
-    } catch (e) { toast('Error saving rule: ' + e.message, 'error'); }
-  }
-
-  // ═══════════════════════════════════════════════════════════
-  let currentPanelLeadId = null;
-
-  function openLeadPanel(leadId) {
-    const l = leads.find(x => x.id === leadId) || spLeads.find(x => x.id === leadId);
-    if (!l) return;
-    currentPanelLeadId = leadId;
-    document.getElementById('lp-school-name').textContent = l.school_name || 'Unknown School';
-    const badge = { new: '🔵 New', contacted: '🟢 Contacted', qualified: '✅ Qualified', closed: '🔴 Closed' };
-    const metaParts = [];
-    if (l.phone && l.phone !== 'undefined' && l.phone !== 'null') metaParts.push('📞 ' + l.phone);
-    if (l.rating) metaParts.push('⭐ ' + l.rating);
-    metaParts.push('<span style="background:rgba(91,106,247,0.12);color:var(--acc);padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">' + (badge[l.status] || l.status) + '</span>');
-    document.getElementById('lp-school-meta').innerHTML = metaParts.join(' &nbsp;&middot;&nbsp; ');
-    if (currentUser && currentUser.role === 'admin') {
-      switchLPTab('notes');
-    } else {
-      switchLPTab('notes');
+      if (tab === 'pitch') loadPitchPanel();
     }
-    const stEl = document.getElementById('lp-status-select');
-    if (stEl) {
-      stEl.value = l.status || 'new';
-      const bc = { new: 'bn', contacted: 'bc', interested: 'bi', proposal: 'bp', won: 'bw', lost: 'bl' };
-      stEl.className = `badge ${bc[l.status] || 'bn'}`;
-    }
-    document.getElementById('lp-overlay').classList.add('open');
-    document.getElementById('lead-panel').classList.add('open');
-    loadCallHistory();
-    loadNotes();
-    loadReminders();
-  }
 
-  function closeLeadPanel() {
-    document.getElementById('lp-overlay').classList.remove('open');
-    document.getElementById('lead-panel').classList.remove('open');
-    currentPanelLeadId = null;
-  }
-
-  function switchLPTab(tab) {
-    ['log', 'history', 'notes', 'reminders', 'pitch'].forEach(t => {
-      const tabEl = document.getElementById('lp-tab-' + t);
-      const paneEl = document.getElementById('lp-pane-' + t);
-      if (tabEl) tabEl.classList.toggle('active', t === tab);
-      if (paneEl) paneEl.classList.toggle('active', t === tab);
-    });
-    if (tab === 'pitch') loadPitchPanel();
-  }
-
-  function loadPitchPanel() {
-    const container = document.getElementById('lp-pitch-content');
-    if (!container) return;
-    const lead = (leads.find(x => x.id === currentPanelLeadId) || spLeads.find(x => x.id === currentPanelLeadId));
-    if (!lead) { container.innerHTML = '<div class="lp-empty">⚠️ Lead data not found.</div>'; return; }
-    if (lead.pitch) {
-      container.innerHTML = `<div style="white-space:pre-wrap;font-family:monospace;font-size:12px;color:var(--tx2);background:var(--s2);padding:16px;border-radius:8px;line-height:1.7;">${lead.pitch}</div>`;
-    } else {
-      container.innerHTML = `<div class="lp-empty" style="text-align:center;padding:30px 20px;">
+    function loadPitchPanel() {
+      const container = document.getElementById('lp-pitch-content');
+      if (!container) return;
+      const lead = (leads.find(x => x.id === currentPanelLeadId) || spLeads.find(x => x.id === currentPanelLeadId));
+      if (!lead) { container.innerHTML = '<div class="lp-empty">⚠️ Lead data not found.</div>'; return; }
+      if (lead.pitch) {
+        container.innerHTML = `<div style="white-space:pre-wrap;font-family:monospace;font-size:12px;color:var(--tx2);background:var(--s2);padding:16px;border-radius:8px;line-height:1.7;">${lead.pitch}</div>`;
+      } else {
+        container.innerHTML = `<div class="lp-empty" style="text-align:center;padding:30px 20px;">
         <div style="font-size:36px;margin-bottom:14px;">🤖</div>
         <div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:8px;">No AI Pitch Generated Yet</div>
         <div style="font-size:12px;color:var(--tx3);margin-bottom:20px;">Generate an AI sales pitch for this lead based on their website analysis and gap detection.</div>
         <button class="btn bp" id="gen-pitch-btn" onclick="spGeneratePitch(${lead.id}, this)">⚡ Generate AI Pitch</button>
       </div>`;
-    }
-  }
-
-  async function loadCallHistory() {
-    const container = document.getElementById('lp-call-list');
-    container.innerHTML = '<div class="lp-loading"><span class="spin"></span>&nbsp; Loading...</div>';
-    try {
-      const calls = await fetch(API + '/leads/' + currentPanelLeadId + '/calls').then(r => r.json());
-      if (!calls.length) {
-        container.innerHTML = '<div class="lp-empty"><div class="em-icon">📵</div>No calls logged yet.<br>Use the "Log Call" tab to record your first call.</div>';
-        return;
       }
-      const outcomeMap = {
-        interested: { cls: 'out-interested', label: '✅ Interested' },
-        callback: { cls: 'out-callback', label: '🔄 Call Back' },
-        not_interested: { cls: 'out-not_interested', label: '❌ Not Interested' },
-        no_answer: { cls: 'out-no_answer', label: '📵 No Answer' },
-        closed: { cls: 'out-closed', label: '🎯 Closed' },
-        voicemail: { cls: 'out-voicemail', label: '📼 Voicemail' },
-      };
-      container.innerHTML = calls.map(function (c) {
-        const om = outcomeMap[c.outcome] || { cls: 'out-no_answer', label: c.outcome };
-        const dt = new Date(c.called_at);
-        const dtStr = dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        const followup = c.next_followup ? '<div class="call-followup">📅 Follow-up: <strong>' + new Date(c.next_followup).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + '</strong></div>' : '';
-        const notesHtml = c.notes ? '<div class="call-notes-txt">' + c.notes + '</div>' : '';
-        const calledBy = (c.called_by && c.called_by !== 'undefined' && c.called_by !== 'null') ? c.called_by : 'Unknown';
-        return '<div class="call-card"><div class="call-card-top"><span class="call-outcome-badge ' + om.cls + '">' + om.label + '</span><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:10.5px;color:var(--tx3)">' + dtStr + '</span><button onclick="deleteCall(' + c.id + ')" title="Delete call log" style="width:22px;height:22px;border-radius:5px;border:1.5px solid rgba(242,91,126,0.25);background:rgba(242,91,126,0.07);color:var(--a2);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;" onmouseover="this.style.background=\'rgba(242,91,126,0.18)\'" onmouseout="this.style.background=\'rgba(242,91,126,0.07)\'">🗑</button></div></div><div class="call-meta"><span>👤 ' + calledBy + '</span>' + (c.duration ? '<span>⏱ ' + c.duration + ' min</span>' : '') + '</div>' + notesHtml + followup + '</div>';
-
-      }).join('');
-    } catch (e) {
-      container.innerHTML = '<div class="lp-empty">⚠️ Failed to load call history.</div>';
     }
-  }
 
-  async function deleteCall(callId) {
-    if (!currentPanelLeadId) return;
-    if (!confirm('Delete this call log? This cannot be undone.')) return;
-    try {
-      const res = await fetch(API + '/leads/' + currentPanelLeadId + '/calls/' + callId, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Delete failed');
-      toast('🗑️ Call log deleted.', '');
-      await loadCallHistory();
-    } catch (e) { toast('Error: ' + e.message, 'error'); }
-  }
+    async function loadCallHistory() {
+      const container = document.getElementById('lp-call-list');
+      container.innerHTML = '<div class="lp-loading"><span class="spin"></span>&nbsp; Loading...</div>';
+      try {
+        const calls = await fetch(API + '/leads/' + currentPanelLeadId + '/calls').then(r => r.json());
+        if (!calls.length) {
+          container.innerHTML = '<div class="lp-empty"><div class="em-icon">📵</div>No calls logged yet.<br>Use the "Log Call" tab to record your first call.</div>';
+          return;
+        }
+        const outcomeMap = {
+          interested: { cls: 'out-interested', label: '✅ Interested' },
+          callback: { cls: 'out-callback', label: '🔄 Call Back' },
+          not_interested: { cls: 'out-not_interested', label: '❌ Not Interested' },
+          no_answer: { cls: 'out-no_answer', label: '📵 No Answer' },
+          closed: { cls: 'out-closed', label: '🎯 Closed' },
+          voicemail: { cls: 'out-voicemail', label: '📼 Voicemail' },
+        };
+        container.innerHTML = calls.map(function (c) {
+          const om = outcomeMap[c.outcome] || { cls: 'out-no_answer', label: c.outcome };
+          const dt = new Date(c.called_at);
+          const dtStr = dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+          const followup = c.next_followup ? '<div class="call-followup">📅 Follow-up: <strong>' + new Date(c.next_followup).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + '</strong></div>' : '';
+          const notesHtml = c.notes ? '<div class="call-notes-txt">' + c.notes + '</div>' : '';
+          const calledBy = (c.called_by && c.called_by !== 'undefined' && c.called_by !== 'null') ? c.called_by : 'Unknown';
+          return '<div class="call-card"><div class="call-card-top"><span class="call-outcome-badge ' + om.cls + '">' + om.label + '</span><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:10.5px;color:var(--tx3)">' + dtStr + '</span><button onclick="deleteCall(' + c.id + ')" title="Delete call log" style="width:22px;height:22px;border-radius:5px;border:1.5px solid rgba(242,91,126,0.25);background:rgba(242,91,126,0.07);color:var(--a2);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;" onmouseover="this.style.background=\'rgba(242,91,126,0.18)\'" onmouseout="this.style.background=\'rgba(242,91,126,0.07)\'">🗑</button></div></div><div class="call-meta"><span>👤 ' + calledBy + '</span>' + (c.duration ? '<span>⏱ ' + c.duration + ' min</span>' : '') + '</div>' + notesHtml + followup + '</div>';
 
-  async function logCall() {
-    if (!currentPanelLeadId) return;
-    const outcome = document.getElementById('lp-outcome').value;
-    const duration = parseInt(document.getElementById('lp-duration').value) || 0;
-    const notes = document.getElementById('lp-call-notes').value.trim();
-    const followup = document.getElementById('lp-followup').value || null;
-    const called_by = (currentUser && currentUser.name) || 'Unknown';
-    const btn = document.getElementById('lp-log-btn');
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span>&nbsp; Saving...';
-    try {
-      await fetch(API + '/leads/' + currentPanelLeadId + '/calls', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ called_by, outcome, duration, notes, next_followup: followup })
-      });
-      document.getElementById('lp-outcome').value = 'no_answer';
-      document.getElementById('lp-duration').value = '';
-      document.getElementById('lp-call-notes').value = '';
-      document.getElementById('lp-followup').value = '';
-      toast('<i data-lucide="check-circle" class="icon-sm"></i> Call logged successfully!', 'success');
-      await loadCallHistory();
-      switchLPTab('history');
-    } catch (e) { toast('Error logging call: ' + e.message, 'error'); }
-    btn.disabled = false; btn.innerHTML = '<i data-lucide="phone"></i> Save Call Log';
-  }
-
-  async function loadNotes() {
-    const container = document.getElementById('lp-notes-list');
-    container.innerHTML = '<div class="lp-loading"><span class="spin"></span>&nbsp; Loading...</div>';
-    try {
-      const notes = await fetch(API + '/leads/' + currentPanelLeadId + '/notes').then(r => r.json());
-      if (!notes.length) {
-        container.innerHTML = '<div class="lp-empty"><div class="em-icon">📝</div>No notes yet. Add your first note above.</div>';
-        return;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="lp-empty">⚠️ Failed to load call history.</div>';
       }
-      container.innerHTML = notes.map(function (n) {
-        const dt = new Date(n.created_at);
-        const dtStr = dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        return '<div class="note-card"><div class="note-card-header"><span class="note-author">✍️ ' + n.added_by + '</span><span class="note-time">' + dtStr + '</span></div><div class="note-text">' + n.note + '</div></div>';
-      }).join('');
-    } catch (e) {
-      container.innerHTML = '<div class="lp-empty"><i data-lucide="alert-circle"></i> Failed to load notes.</div>';
     }
-  }
 
-  async function addNote() {
-    if (!currentPanelLeadId) return;
-    const noteText = document.getElementById('lp-note-text').value.trim();
-    if (!noteText) { toast('Please write a note before saving.', 'error'); return; }
-    const added_by = (currentUser && currentUser.name) || 'Unknown';
-    const btn = document.getElementById('lp-note-btn');
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span>&nbsp; Saving...';
-    try {
-      await fetch(API + '/leads/' + currentPanelLeadId + '/notes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ added_by, note: noteText })
-      });
-      document.getElementById('lp-note-text').value = '';
-      toast('<i data-lucide="sticky-note" class="icon-sm"></i> Note added!', 'success');
-      await loadNotes();
-    } catch (e) { toast('Error saving note: ' + e.message, 'error'); }
-    btn.disabled = false; btn.innerHTML = '<i data-lucide="sticky-note"></i> Save Note';
-  }
+    async function deleteCall(callId) {
+      if (!currentPanelLeadId) return;
+      if (!confirm('Delete this call log? This cannot be undone.')) return;
+      try {
+        const res = await fetch(API + '/leads/' + currentPanelLeadId + '/calls/' + callId, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Delete failed');
+        toast('🗑️ Call log deleted.', '');
+        await loadCallHistory();
+      } catch (e) { toast('Error: ' + e.message, 'error'); }
+    }
 
-  async function loadReminders() {
-    const container = document.getElementById('lp-remind-list');
-    if (!container) return;
-    container.innerHTML = '<div class="lp-loading"><span class="spin"></span>&nbsp; Loading...</div>';
-    try {
-      const reminders = await fetch(API + '/leads/' + currentPanelLeadId + '/reminders').then(r => r.json());
-      if (!reminders.length) {
-        container.innerHTML = '<div class="lp-empty"><div class="em-icon">🔔</div>No reminders set for this lead.</div>';
-        return;
+    async function logCall() {
+      if (!currentPanelLeadId) return;
+      const outcome = document.getElementById('lp-outcome').value;
+      const duration = parseInt(document.getElementById('lp-duration').value) || 0;
+      const notes = document.getElementById('lp-call-notes').value.trim();
+      const followup = document.getElementById('lp-followup').value || null;
+      const called_by = (currentUser && currentUser.name) || 'Unknown';
+      const btn = document.getElementById('lp-log-btn');
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span>&nbsp; Saving...';
+      try {
+        await fetch(API + '/leads/' + currentPanelLeadId + '/calls', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ called_by, outcome, duration, notes, next_followup: followup })
+        });
+        document.getElementById('lp-outcome').value = 'no_answer';
+        document.getElementById('lp-duration').value = '';
+        document.getElementById('lp-call-notes').value = '';
+        document.getElementById('lp-followup').value = '';
+        toast('<i data-lucide="check-circle" class="icon-sm"></i> Call logged successfully!', 'success');
+        await loadCallHistory();
+        switchLPTab('history');
+      } catch (e) { toast('Error logging call: ' + e.message, 'error'); }
+      btn.disabled = false; btn.innerHTML = '<i data-lucide="phone"></i> Save Call Log';
+    }
+
+    async function loadNotes() {
+      const container = document.getElementById('lp-notes-list');
+      container.innerHTML = '<div class="lp-loading"><span class="spin"></span>&nbsp; Loading...</div>';
+      try {
+        const notes = await fetch(API + '/leads/' + currentPanelLeadId + '/notes').then(r => r.json());
+        if (!notes.length) {
+          container.innerHTML = '<div class="lp-empty"><div class="em-icon">📝</div>No notes yet. Add your first note above.</div>';
+          return;
+        }
+        container.innerHTML = notes.map(function (n) {
+          const dt = new Date(n.created_at);
+          const dtStr = dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+          return '<div class="note-card"><div class="note-card-header"><span class="note-author">✍️ ' + n.added_by + '</span><span class="note-time">' + dtStr + '</span></div><div class="note-text">' + n.note + '</div></div>';
+        }).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="lp-empty"><i data-lucide="alert-circle"></i> Failed to load notes.</div>';
       }
-      container.innerHTML = reminders.map(function (r) {
-        const dt = new Date(r.remind_at);
-        const dtStr = dt.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        const isPending = r.status === 'pending';
-        const statusBadge = isPending ? '<span class="badge yellow">Pending</span>' : '<span class="badge gray">' + r.status + '</span>';
+    }
 
-        let actions = '';
-        if (isPending) {
-          actions = '<div style="display:flex;gap:5px;margin-top:8px;">'
-            + '<button onclick="updateRemStatus(' + r.id + ',\'done\')" class="btn-xs btn-success">Complete</button>'
-            + '<button onclick="updateRemStatus(' + r.id + ',\'dismissed\')" class="btn-xs btn-outline">Dismiss</button>'
+    async function addNote() {
+      if (!currentPanelLeadId) return;
+      const noteText = document.getElementById('lp-note-text').value.trim();
+      if (!noteText) { toast('Please write a note before saving.', 'error'); return; }
+      const added_by = (currentUser && currentUser.name) || 'Unknown';
+      const btn = document.getElementById('lp-note-btn');
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span>&nbsp; Saving...';
+      try {
+        await fetch(API + '/leads/' + currentPanelLeadId + '/notes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ added_by, note: noteText })
+        });
+        document.getElementById('lp-note-text').value = '';
+        toast('<i data-lucide="sticky-note" class="icon-sm"></i> Note added!', 'success');
+        await loadNotes();
+      } catch (e) { toast('Error saving note: ' + e.message, 'error'); }
+      btn.disabled = false; btn.innerHTML = '<i data-lucide="sticky-note"></i> Save Note';
+    }
+
+    async function loadReminders() {
+      const container = document.getElementById('lp-remind-list');
+      if (!container) return;
+      container.innerHTML = '<div class="lp-loading"><span class="spin"></span>&nbsp; Loading...</div>';
+      try {
+        const reminders = await fetch(API + '/leads/' + currentPanelLeadId + '/reminders').then(r => r.json());
+        if (!reminders.length) {
+          container.innerHTML = '<div class="lp-empty"><div class="em-icon">🔔</div>No reminders set for this lead.</div>';
+          return;
+        }
+        container.innerHTML = reminders.map(function (r) {
+          const dt = new Date(r.remind_at);
+          const dtStr = dt.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+          const isPending = r.status === 'pending';
+          const statusBadge = isPending ? '<span class="badge yellow">Pending</span>' : '<span class="badge gray">' + r.status + '</span>';
+
+          let actions = '';
+          if (isPending) {
+            actions = '<div style="display:flex;gap:5px;margin-top:8px;">'
+              + '<button onclick="updateRemStatus(' + r.id + ',\'done\')" class="btn-xs btn-success">Complete</button>'
+              + '<button onclick="updateRemStatus(' + r.id + ',\'dismissed\')" class="btn-xs btn-outline">Dismiss</button>'
+              + '</div>';
+          }
+
+          return '<div class="call-card" style="border-left:3px solid ' + (isPending ? '#f7b924' : '#6c757d') + ';">'
+            + '<div class="call-card-top"><span style="font-size:12px;font-weight:700;color:var(--tx)">⏰ ' + dtStr + '</span>' + statusBadge + '</div>'
+            + '<div style="font-size:13px;color:var(--tx2);margin-top:5px;">' + (r.message || 'No description') + '</div>'
+            + '<div style="font-size:10px;color:var(--tx3);margin-top:5px;">Set by: ' + r.created_by + '</div>'
+            + actions
             + '</div>';
+        }).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="lp-empty"><i data-lucide="alert-circle"></i> Failed to load reminders.</div>';
+      }
+    }
+
+    async function saveReminder() {
+      if (!currentPanelLeadId) return;
+      const timeInput = document.getElementById('lp-remind-time').value;
+      const message = document.getElementById('lp-remind-note').value.trim();
+      if (!timeInput) { toast('Please select a date and time.', 'error'); return; }
+
+      const btn = document.getElementById('lp-remind-btn');
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span>&nbsp; Saving...';
+      try {
+        await fetch(API + '/reminders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lead_id: currentPanelLeadId,
+            remind_at: new Date(timeInput).toISOString(),
+            message,
+            created_by: (currentUser && currentUser.name) || 'Unknown'
+          })
+        });
+        document.getElementById('lp-remind-time').value = '';
+        document.getElementById('lp-remind-note').value = '';
+        toast('<i data-lucide="bell" class="icon-sm"></i> Reminder set!', 'success');
+        await loadReminders();
+      } catch (e) { toast('Error saving reminder: ' + e.message, 'error'); }
+      btn.disabled = false; btn.innerHTML = '<i data-lucide="bell"></i> Save Reminder';
+    }
+
+    async function updateRemStatus(id, status) {
+      try {
+        await fetch(API + '/reminders/' + id, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        toast('<i data-lucide="check-circle" class="icon-sm"></i> Status updated', 'success');
+        await loadReminders();
+        checkTodayReminders();
+        renderAll();
+      } catch (e) { toast('Error: ' + e.message, 'error'); }
+    }
+
+    function toggleRemindersPanel() {
+      const panel = document.getElementById('rem-panel');
+      const overlay = document.getElementById('rem-overlay');
+      const isOpen = panel.classList.contains('open');
+      if (isOpen) {
+        panel.classList.remove('open');
+        overlay.classList.remove('open');
+      } else {
+        panel.classList.add('open');
+        overlay.classList.add('open');
+        loadTodayReminders();
+      }
+    }
+
+    async function checkTodayReminders() {
+      try {
+        const rows = await fetch(API + '/reminders/today').then(r => r.json());
+        const dots = ['bell-dot', 'sp-bell-dot', 'sp-prospects-bell-dot'];
+        dots.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.classList.toggle('active', rows.length > 0);
+            el.textContent = rows.length > 0 ? rows.length : '';
+          }
+        });
+      } catch (e) { }
+    }
+
+    async function loadTodayReminders() {
+      const container = document.getElementById('today-rem-list');
+      container.innerHTML = '<div class="lp-loading"><span class="spin"></span>&nbsp; Loading...</div>';
+      try {
+        const rows = await fetch(API + '/reminders/today').then(r => r.json());
+        if (!rows.length) {
+          container.innerHTML = '<div class="lp-empty">☕ No pending reminders for today.</div>';
+          return;
+        }
+        container.innerHTML = rows.map(function (r) {
+          const dt = new Date(r.remind_at);
+          const timeStr = dt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+          return '<div class="call-card" style="border-left:3px solid #f7b924;">'
+            + '<div class="call-card-top"><span style="font-size:12px;font-weight:700;color:var(--tx)">⏰ ' + timeStr + '</span></div>'
+            + '<div style="font-size:14px;font-weight:700;color:var(--acc);margin-top:5px;cursor:pointer;" onclick="toggleRemindersPanel(); openLeadPanel(' + r.lead_id + ');">' + r.school_name + '</div>'
+            + '<div style="font-size:13px;color:var(--tx2);margin-top:5px;">' + (r.message || 'No description') + '</div>'
+            + '<div style="display:flex;gap:5px;margin-top:10px;">'
+            + '<button onclick="updateRemStatus(' + r.id + ',\'done\'); loadTodayReminders();" class="btn-xs btn-success">Done</button>'
+            + '<button onclick="updateRemStatus(' + r.id + ',\'dismissed\'); loadTodayReminders();" class="btn-xs btn-outline">Dismiss</button>'
+            + '</div>'
+            + '</div>';
+        }).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="lp-empty">⚠️ Failed to load reminders.</div>';
+      }
+    }
+
+    // Initial check
+    setTimeout(checkTodayReminders, 2000);
+    setInterval(checkTodayReminders, 60000); // Check every minute
+
+    // Auto-refresh admin dashboard activity & stats every 10s
+    setInterval(async () => {
+      if (typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'admin') {
+        const adminMain = document.getElementById('admin-main');
+        if (adminMain && adminMain.style.display !== 'none') {
+          await rActivity();
+          await rStats();
+        }
+      }
+    }, 10000);
+
+    // ── VORTEX ENGINE ──
+    function createVortex(canvas, opts = {}) {
+      const ctx = canvas.getContext('2d');
+      let t = 0;
+      const NUM = opts.rays || 22;
+      const scaleBase = opts.scale || 1;
+      let raf;
+
+      function resize() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      function drawFrame() {
+        const W = canvas.width, H = canvas.height;
+        if (!W || !H) return;
+        const cx = W / 2, cy = H / 2;
+        ctx.clearRect(0, 0, W, H);
+
+        const scale = scaleBase * (Math.min(W, H) / 600);
+
+        // outer glow
+        const pg = ctx.createRadialGradient(cx, cy, 0, cx, cy, 200 * scale);
+        pg.addColorStop(0, 'rgba(140,50,220,0.18)');
+        pg.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.beginPath(); ctx.arc(cx, cy, 200 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = pg; ctx.fill();
+
+        // rays
+        for (let i = 0; i < NUM; i++) {
+          const angle = (i / NUM) * Math.PI * 2;
+          const phase = (i / NUM) * Math.PI * 2;
+          const innerR = 52 * scale;
+          const outerR = (115 + Math.sin(phase + t * 1.3) * 14) * scale;
+          const steps = 28;
+          const alpha = 0.7 + 0.3 * Math.sin(phase + t);
+
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(angle + t * 0.38);
+          ctx.beginPath();
+          for (let j = 0; j <= steps; j++) {
+            const frac = j / steps;
+            const r = innerR + (outerR - innerR) * frac;
+            const wave = Math.sin(frac * Math.PI * 3.5 + t * 2.1 + phase) * 9 * scale * frac;
+            const x = wave;
+            const y = -r;
+            if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          const gr = ctx.createLinearGradient(0, -outerR, 0, -innerR);
+          gr.addColorStop(0, `rgba(180,80,255,0)`);
+          gr.addColorStop(0.3, `rgba(185,90,255,${alpha * 0.9})`);
+          gr.addColorStop(1, `rgba(155,55,235,${alpha})`);
+          ctx.strokeStyle = gr;
+          ctx.lineWidth = 5.5 * scale;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+          ctx.restore();
         }
 
-        return '<div class="call-card" style="border-left:3px solid ' + (isPending ? '#f7b924' : '#6c757d') + ';">'
-          + '<div class="call-card-top"><span style="font-size:12px;font-weight:700;color:var(--tx)">⏰ ' + dtStr + '</span>' + statusBadge + '</div>'
-          + '<div style="font-size:13px;color:var(--tx2);margin-top:5px;">' + (r.message || 'No description') + '</div>'
-          + '<div style="font-size:10px;color:var(--tx3);margin-top:5px;">Set by: ' + r.created_by + '</div>'
-          + actions
-          + '</div>';
-      }).join('');
-    } catch (e) {
-      container.innerHTML = '<div class="lp-empty"><i data-lucide="alert-circle"></i> Failed to load reminders.</div>';
-    }
-  }
+        // core
+        const pulse = 1 + 0.07 * Math.sin(t * 2.5);
+        const coreR = 38 * scale * pulse;
+        ctx.beginPath(); ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+        ctx.fillStyle = '#07050f'; ctx.fill();
+        ctx.strokeStyle = 'rgba(180,80,255,0.35)';
+        ctx.lineWidth = 1.5; ctx.stroke();
 
-  async function saveReminder() {
-    if (!currentPanelLeadId) return;
-    const timeInput = document.getElementById('lp-remind-time').value;
-    const message = document.getElementById('lp-remind-note').value.trim();
-    if (!timeInput) { toast('Please select a date and time.', 'error'); return; }
-
-    const btn = document.getElementById('lp-remind-btn');
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span>&nbsp; Saving...';
-    try {
-      await fetch(API + '/reminders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lead_id: currentPanelLeadId,
-          remind_at: new Date(timeInput).toISOString(),
-          message,
-          created_by: (currentUser && currentUser.name) || 'Unknown'
-        })
-      });
-      document.getElementById('lp-remind-time').value = '';
-      document.getElementById('lp-remind-note').value = '';
-      toast('<i data-lucide="bell" class="icon-sm"></i> Reminder set!', 'success');
-      await loadReminders();
-    } catch (e) { toast('Error saving reminder: ' + e.message, 'error'); }
-    btn.disabled = false; btn.innerHTML = '<i data-lucide="bell"></i> Save Reminder';
-  }
-
-  async function updateRemStatus(id, status) {
-    try {
-      await fetch(API + '/reminders/' + id, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      toast('<i data-lucide="check-circle" class="icon-sm"></i> Status updated', 'success');
-      await loadReminders();
-      checkTodayReminders();
-      renderAll();
-    } catch (e) { toast('Error: ' + e.message, 'error'); }
-  }
-
-  function toggleRemindersPanel() {
-    const panel = document.getElementById('rem-panel');
-    const overlay = document.getElementById('rem-overlay');
-    const isOpen = panel.classList.contains('open');
-    if (isOpen) {
-      panel.classList.remove('open');
-      overlay.classList.remove('open');
-    } else {
-      panel.classList.add('open');
-      overlay.classList.add('open');
-      loadTodayReminders();
-    }
-  }
-
-  async function checkTodayReminders() {
-    try {
-      const rows = await fetch(API + '/reminders/today').then(r => r.json());
-      const dots = ['bell-dot', 'sp-bell-dot', 'sp-prospects-bell-dot'];
-      dots.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.classList.toggle('active', rows.length > 0);
-          el.textContent = rows.length > 0 ? rows.length : '';
+        // particles
+        for (let i = 0; i < 20; i++) {
+          const a = (i / 20) * Math.PI * 2 + t * 0.25;
+          const orbit = (148 + Math.sin(t * 0.9 + i) * 12) * scale;
+          const px = cx + Math.cos(a) * orbit;
+          const py = cy + Math.sin(a) * orbit;
+          const al = 0.3 + 0.4 * Math.abs(Math.sin(t + i));
+          ctx.beginPath(); ctx.arc(px, py, 1.5 * scale, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(210,140,255,${al})`; ctx.fill();
         }
+
+        t += 0.016;
+        raf = requestAnimationFrame(drawFrame);
+      }
+      drawFrame();
+      return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
+    }
+
+    // ── LANDING CONTROLS ──
+    let heroStop = createVortex(document.getElementById('hero-canvas'), { scale: 1.5 });
+    let signupStop = null;
+
+    function openMenu(section) {
+      const m = document.getElementById('mega-menu');
+      const grid = m.querySelector('.menu-grid');
+      const cards = grid.querySelectorAll('.menu-card');
+      let visibleCount = 0;
+      cards.forEach(c => {
+        const isVisible = (!section || c.id === 'menu-' + section);
+        c.style.display = isVisible ? 'flex' : 'none';
+        if (isVisible) visibleCount++;
       });
-    } catch (e) { }
-  }
-
-  async function loadTodayReminders() {
-    const container = document.getElementById('today-rem-list');
-    container.innerHTML = '<div class="lp-loading"><span class="spin"></span>&nbsp; Loading...</div>';
-    try {
-      const rows = await fetch(API + '/reminders/today').then(r => r.json());
-      if (!rows.length) {
-        container.innerHTML = '<div class="lp-empty">☕ No pending reminders for today.</div>';
-        return;
-      }
-      container.innerHTML = rows.map(function (r) {
-        const dt = new Date(r.remind_at);
-        const timeStr = dt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-        return '<div class="call-card" style="border-left:3px solid #f7b924;">'
-          + '<div class="call-card-top"><span style="font-size:12px;font-weight:700;color:var(--tx)">⏰ ' + timeStr + '</span></div>'
-          + '<div style="font-size:14px;font-weight:700;color:var(--acc);margin-top:5px;cursor:pointer;" onclick="toggleRemindersPanel(); openLeadPanel(' + r.lead_id + ');">' + r.school_name + '</div>'
-          + '<div style="font-size:13px;color:var(--tx2);margin-top:5px;">' + (r.message || 'No description') + '</div>'
-          + '<div style="display:flex;gap:5px;margin-top:10px;">'
-          + '<button onclick="updateRemStatus(' + r.id + ',\'done\'); loadTodayReminders();" class="btn-xs btn-success">Done</button>'
-          + '<button onclick="updateRemStatus(' + r.id + ',\'dismissed\'); loadTodayReminders();" class="btn-xs btn-outline">Dismiss</button>'
-          + '</div>'
-          + '</div>';
-      }).join('');
-    } catch (e) {
-      container.innerHTML = '<div class="lp-empty">⚠️ Failed to load reminders.</div>';
+      grid.style.gridTemplateColumns = (visibleCount === 1) ? '1fr' : 'repeat(3, 1fr)';
+      grid.style.maxWidth = (visibleCount === 1) ? '400px' : '1000px';
+      m.style.display = 'flex';
+      requestAnimationFrame(() => m.classList.add('open'));
     }
-  }
+    function closeMenu() { const m = document.getElementById('mega-menu'); m.classList.remove('open'); setTimeout(() => { if (!m.classList.contains('open')) m.style.display = 'none'; }, 300); }
 
-  // Initial check
-  setTimeout(checkTodayReminders, 2000);
-  setInterval(checkTodayReminders, 60000); // Check every minute
-
-  // Auto-refresh admin dashboard activity & stats every 10s
-  setInterval(async () => {
-    if (typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'admin') {
-      const adminMain = document.getElementById('admin-main');
-      if (adminMain && adminMain.style.display !== 'none') {
-        await rActivity();
-        await rStats();
-      }
+    function openSignup() {
+      const sp = document.getElementById('login-wrap');
+      sp.style.display = 'flex';
+      requestAnimationFrame(() => sp.style.opacity = '1');
+      if (!signupStop) signupStop = createVortex(document.getElementById('signup-canvas'), { scale: 1.8, rays: 26 });
     }
-  }, 10000);
-
-  // ── VORTEX ENGINE ──
-  function createVortex(canvas, opts = {}) {
-    const ctx = canvas.getContext('2d');
-    let t = 0;
-    const NUM = opts.rays || 22;
-    const scaleBase = opts.scale || 1;
-    let raf;
-
-    function resize() {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+    function closeSignup() {
+      const sp = document.getElementById('login-wrap');
+      sp.style.opacity = '0';
+      setTimeout(() => { sp.style.display = 'none'; }, 400);
     }
-    resize();
-    window.addEventListener('resize', resize);
-
-    function drawFrame() {
-      const W = canvas.width, H = canvas.height;
-      if (!W || !H) return;
-      const cx = W / 2, cy = H / 2;
-      ctx.clearRect(0, 0, W, H);
-
-      const scale = scaleBase * (Math.min(W, H) / 600);
-
-      // outer glow
-      const pg = ctx.createRadialGradient(cx, cy, 0, cx, cy, 200 * scale);
-      pg.addColorStop(0, 'rgba(140,50,220,0.18)');
-      pg.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.beginPath(); ctx.arc(cx, cy, 200 * scale, 0, Math.PI * 2);
-      ctx.fillStyle = pg; ctx.fill();
-
-      // rays
-      for (let i = 0; i < NUM; i++) {
-        const angle = (i / NUM) * Math.PI * 2;
-        const phase = (i / NUM) * Math.PI * 2;
-        const innerR = 52 * scale;
-        const outerR = (115 + Math.sin(phase + t * 1.3) * 14) * scale;
-        const steps = 28;
-        const alpha = 0.7 + 0.3 * Math.sin(phase + t);
-
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(angle + t * 0.38);
-        ctx.beginPath();
-        for (let j = 0; j <= steps; j++) {
-          const frac = j / steps;
-          const r = innerR + (outerR - innerR) * frac;
-          const wave = Math.sin(frac * Math.PI * 3.5 + t * 2.1 + phase) * 9 * scale * frac;
-          const x = wave;
-          const y = -r;
-          if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        const gr = ctx.createLinearGradient(0, -outerR, 0, -innerR);
-        gr.addColorStop(0, `rgba(180,80,255,0)`);
-        gr.addColorStop(0.3, `rgba(185,90,255,${alpha * 0.9})`);
-        gr.addColorStop(1, `rgba(155,55,235,${alpha})`);
-        ctx.strokeStyle = gr;
-        ctx.lineWidth = 5.5 * scale;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-        ctx.restore();
+    // Close dropdowns on outside click
+    window.addEventListener('click', e => {
+      if (!e.target.closest('.sector-dropdown')) {
+        document.querySelectorAll('.sector-drop-content').forEach(d => d.classList.remove('open'));
       }
-
-      // core
-      const pulse = 1 + 0.07 * Math.sin(t * 2.5);
-      const coreR = 38 * scale * pulse;
-      ctx.beginPath(); ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
-      ctx.fillStyle = '#07050f'; ctx.fill();
-      ctx.strokeStyle = 'rgba(180,80,255,0.35)';
-      ctx.lineWidth = 1.5; ctx.stroke();
-
-      // particles
-      for (let i = 0; i < 20; i++) {
-        const a = (i / 20) * Math.PI * 2 + t * 0.25;
-        const orbit = (148 + Math.sin(t * 0.9 + i) * 12) * scale;
-        const px = cx + Math.cos(a) * orbit;
-        const py = cy + Math.sin(a) * orbit;
-        const al = 0.3 + 0.4 * Math.abs(Math.sin(t + i));
-        ctx.beginPath(); ctx.arc(px, py, 1.5 * scale, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(210,140,255,${al})`; ctx.fill();
+      if (!e.target.closest('.dropdown-btn') && !e.target.closest('.dropdown-content')) {
+        document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
       }
-
-      t += 0.016;
-      raf = requestAnimationFrame(drawFrame);
-    }
-    drawFrame();
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
-  }
-
-  // ── LANDING CONTROLS ──
-  let heroStop = createVortex(document.getElementById('hero-canvas'), { scale: 1.5 });
-  let signupStop = null;
-
-  function openMenu(section) {
-    const m = document.getElementById('mega-menu');
-    const grid = m.querySelector('.menu-grid');
-    const cards = grid.querySelectorAll('.menu-card');
-    let visibleCount = 0;
-    cards.forEach(c => {
-      const isVisible = (!section || c.id === 'menu-' + section);
-      c.style.display = isVisible ? 'flex' : 'none';
-      if (isVisible) visibleCount++;
     });
-    grid.style.gridTemplateColumns = (visibleCount === 1) ? '1fr' : 'repeat(3, 1fr)';
-    grid.style.maxWidth = (visibleCount === 1) ? '400px' : '1000px';
-    m.style.display = 'flex';
-    requestAnimationFrame(() => m.classList.add('open'));
-  }
-  function closeMenu() { const m = document.getElementById('mega-menu'); m.classList.remove('open'); setTimeout(() => { if (!m.classList.contains('open')) m.style.display = 'none'; }, 300); }
-
-  function openSignup() {
-    const sp = document.getElementById('login-wrap');
-    sp.style.display = 'flex';
-    requestAnimationFrame(() => sp.style.opacity = '1');
-    if (!signupStop) signupStop = createVortex(document.getElementById('signup-canvas'), { scale: 1.8, rays: 26 });
-  }
-  function closeSignup() {
-    const sp = document.getElementById('login-wrap');
-    sp.style.opacity = '0';
-    setTimeout(() => { sp.style.display = 'none'; }, 400);
-  }
-  // Close dropdowns on outside click
-  window.addEventListener('click', e => {
-    if (!e.target.closest('.sector-dropdown')) {
-      document.querySelectorAll('.sector-drop-content').forEach(d => d.classList.remove('open'));
-    }
-    if (!e.target.closest('.dropdown-btn') && !e.target.closest('.dropdown-content')) {
-      document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
-    }
-  });
 </script>
 
 </body>
